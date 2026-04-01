@@ -102,8 +102,19 @@ class Product extends Model
 
     public function getImageUrlAttribute(): string
     {
-        if (!$this->image) return asset('assets/img/placeholder.png');
-        if (str_starts_with($this->image, 'products/')) return asset('storage/' . $this->image);
+        if (empty($this->image)) {
+            return asset('assets/img/placeholder.png');
+        }
+
+        if (str_starts_with($this->image, 'http')) {
+            return $this->image;
+        }
+
+        if (str_starts_with($this->image, 'products/')) {
+            return asset('storage/' . $this->image);
+        }
+
+        // Default path in public/assets/img/products/
         return asset('assets/img/products/' . $this->image);
     }
 

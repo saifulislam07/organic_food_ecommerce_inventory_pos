@@ -24,10 +24,22 @@ class CheckoutController extends Controller
 
         $items = $this->cart->getItems();
         $subtotal = $this->cart->getSubtotal();
-        $delivery = $this->cart->getDeliveryCharge();
-        $total = $this->cart->getTotal();
+        
+        $shippingFeeInside = (float) \App\Models\Setting::get('shipping_fee_inside', 60);
+        $shippingFeeOutside = (float) \App\Models\Setting::get('shipping_fee_outside', 120);
+        $threshold = (float) \App\Models\Setting::get('free_delivery_threshold', 2000);
+        
+        $userAddresses = auth()->check() ? auth()->user()->addresses : collect([]);
+        $defaultAddress = $userAddresses->where('is_default', true)->first() ?? $userAddresses->first();
 
-        return view('checkout.index', compact('items', 'subtotal', 'delivery', 'total'));
+        $delivery = $this->cart->getDeliveryCharge($defaultAddress->area ?? 'dhaka_inside');
+        $total = $this->cart->getTotal($defaultAddress->area ?? 'dhaka_inside');
+
+        return view('checkout.index', compact(
+            'items', 'subtotal', 'delivery', 'total', 
+            'shippingFeeInside', 'shippingFeeOutside', 'threshold',
+            'userAddresses', 'defaultAddress'
+        ));
     }
 
     public function store(Request $request)
@@ -40,16 +52,28 @@ class CheckoutController extends Controller
             'delivery_type' => 'required|in:home,pickup',
             'pickup_point' => 'required_if:delivery_type,pickup|nullable|string|max:255',
             'notes' => 'nullable|string',
+            'save_address' => 'nullable|string', // Checkbox comes as string 'on'
         ]);
 
         if ($this->cart->isEmpty()) {
             return redirect()->route('shop')->with('error', 'Your cart is empty');
         }
 
-        $deliveryCharge = $validated['delivery_type'] === 'pickup' ? 0 : $this->cart->getDeliveryCharge();
+        if (auth()->check() && $request->filled('save_address')) {
+            auth()->user()->addresses()->updateOrCreate(
+                ['address' => $validated['customer_address'], 'area' => $validated['customer_area'] ?? null],
+                [
+                    'name' => $validated['customer_name'],
+                    'phone' => $validated['customer_phone'],
+                ]
+            );
+        }
+
+        $deliveryCharge = $validated['delivery_type'] === 'pickup' ? 0 : $this->cart->getDeliveryCharge($validated['customer_area']);
         $subtotal = $this->cart->getSubtotal();
 
         $order = Order::create([
+            'user_id' => auth()->id(),
             'customer_name' => $validated['customer_name'],
             'customer_phone' => $validated['customer_phone'],
             'customer_address' => $validated['delivery_type'] === 'pickup' ? 'Store Pickup' : $validated['customer_address'],

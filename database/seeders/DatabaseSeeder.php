@@ -13,42 +13,40 @@ use Illuminate\Support\Str;
 class DatabaseSeeder extends Seeder {
     public function run(): void {
         // Create admin user
-        User::create([
-            'name'              => 'Admin',
-            'email'             => 'admin@gmail.com',
-            'password'          => bcrypt('111111'),
-            'email_verified_at' => now(),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name'              => 'Admin',
+                'password'          => bcrypt('111111'),
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Suppliers
-        Supplier::create([
-            'name'           => 'Garden Fresh Supplying Co.',
-            'contact_person' => 'Mr. Rahim',
-            'phone'          => '01700000001',
-            'email'          => 'rahim@gardenfresh.com',
-            'address'        => 'Chapainawabganj, Bangladesh',
-        ]);
+        Supplier::updateOrCreate(
+            ['phone' => '01700000001'],
+            [
+                'name'           => 'Garden Fresh Supplying Co.',
+                'contact_person' => 'Mr. Rahim',
+                'email'          => 'rahim@gardenfresh.com',
+                'address'        => 'Chapainawabganj, Bangladesh',
+            ]
+        );
 
         // Categories
         $categories = [
-            ['name'       => 'আম (Mangoes)',
-                'slug'        => 'mangoes',
-                'description' => 'চাঁপাই নবাবগঞ্জের সেরা আম - Garden fresh mangoes from Chapainawabganj', 'sort_order' => 1],
-            ['name' => 'খেজুর গুড় (Date Palm Jaggery)',
-                'slug'  => 'date-palm-jaggery', 'description' => 'রাজশাহীর খাঁটি খেজুরের গুড় - Pure date palm jaggery from Rajshahi', 'sort_order' => 2],
-            ['name'       => 'ঘি (Ghee)', 'slug'                             => 'ghee',
-                'description' => 'খাঁটি গাওয়া ঘি - Pure cow ghee', 'sort_order' => 3],
-            ['name' => 'সরিষার তেল (Mustard Oil)',
-                'slug'  => 'mustard-oil', 'description' => 'ঘানিভাঙ্গা খাঁটি সরিষার তেল - Cold-pressed pure mustard oil', 'sort_order' => 4],
+            ['name' => 'আম (Mangoes)', 'slug' => 'mangoes', 'description' => 'চাঁপাই নবাবগঞ্জের সেরা আম - Garden fresh mangoes from Chapainawabganj', 'sort_order' => 1],
+            ['name' => 'খেজুর গুড় (Date Palm Jaggery)', 'slug' => 'date-palm-jaggery', 'description' => 'রাজশাহীর খাঁটি খেজুরের গুড় - Pure date palm jaggery from Rajshahi', 'sort_order' => 2],
+            ['name' => 'ঘি (Ghee)', 'slug' => 'ghee', 'description' => 'খাঁটি গাওয়া ঘি - Pure cow ghee', 'sort_order' => 3],
+            ['name' => 'সরিষার তেল (Mustard Oil)', 'slug' => 'mustard-oil', 'description' => 'ঘানিভাঙ্গা খাঁটি সরিষার তেল - Cold-pressed pure mustard oil', 'sort_order' => 4],
             ['name' => 'আমসত্ত্ব (Mango Bar)', 'slug' => 'mango-bar', 'description' => 'হাতে তৈরি আমসত্ত্ব - Handmade mango leather/bar', 'sort_order' => 5],
-            ['name'       => 'মধু (Honey)', 'slug'                                        => 'honey',
-                'description' => 'সুন্দরবনের খাঁটি মধু - Pure Sundarbans honey', 'sort_order' => 6],
+            ['name' => 'মধু (Honey)', 'slug' => 'honey', 'description' => 'সুন্দরবনের খাঁটি মধু - Pure Sundarbans honey', 'sort_order' => 6],
             ['name' => 'মৌসুমী ফল (Seasonal Fruits)', 'slug' => 'seasonal-fruits', 'description' => 'দেশি মৌসুমী তাজা ফল - Fresh seasonal local fruits', 'sort_order' => 7],
             ['name' => 'মশলা ও অন্যান্য (Spices & Others)', 'slug' => 'spices-others', 'description' => 'দেশি মশলা ও অন্যান্য অর্গানিক পণ্য - Local spices and organic products', 'sort_order' => 8],
         ];
 
         foreach ($categories as $cat) {
-            Category::create($cat);
+            Category::updateOrCreate(['slug' => $cat['slug']], $cat);
         }
 
         // Products with Variants
@@ -63,6 +61,7 @@ class DatabaseSeeder extends Seeder {
                 'is_featured'       => true,
                 'is_bestseller'     => true,
                 'is_trending'       => true,
+                'image'             => 'himsagar.png',
                 'variants'          => [
                     ['name' => '৬ কেজি (6 kg)', 'weight_kg' => 6, 'price' => 2600, 'sale_price' => 2500, 'stock' => 50],
                     ['name' => '১২ কেজি (12 kg)', 'weight_kg' => 12, 'price' => 5000, 'sale_price' => 4800, 'stock' => 30],
@@ -77,6 +76,7 @@ class DatabaseSeeder extends Seeder {
                 'description'       => 'রাজশাহীর সেরা হিমসাগর আম। অত্যন্ত মিষ্টি ও রসালো। গাছপাকা ও ফরমালিনমুক্ত।',
                 'is_featured'       => true,
                 'is_bestseller'     => true,
+                'image'             => 'himsagar.png',
                 'variants'          => [
                     ['name' => '৬ কেজি (6 kg)', 'weight_kg' => 6, 'price' => 1800, 'sale_price' => 1690, 'stock' => 40],
                     ['name' => '১২ কেজি (12 kg)', 'weight_kg' => 12, 'price' => 3500, 'sale_price' => 3200, 'stock' => 25],
@@ -129,6 +129,7 @@ class DatabaseSeeder extends Seeder {
                 'description'       => 'শীতে চলে বাঙালির উৎসবের পিঠা, পায়েশ কিংবা ভাপা পিঠায় রাখুন রাজশাহীর খাঁটি খেজুরের গুড়। ১০০% খাঁটি, কোনো মেশাল নেই।',
                 'is_featured'       => true,
                 'is_bestseller'     => true,
+                'image'             => 'khejur-gur.png',
                 'variants'          => [
                     ['name' => '১ কেজি (1 kg)', 'weight_kg' => 1, 'price' => 500, 'sale_price' => 450, 'stock' => 100],
                     ['name' => '২ কেজি (2 kg)', 'weight_kg' => 2, 'price' => 1000, 'sale_price' => 880, 'stock' => 60],
@@ -143,6 +144,7 @@ class DatabaseSeeder extends Seeder {
                 'short_description' => 'দেশি গরুর দুধের খাঁটি ঘি',
                 'description'       => 'দেশি গরুর দুধ থেকে তৈরি ১০০% খাঁটি ঘি। রান্না, পোলাও, বিরিয়ানি ও পিঠা তৈরিতে অসাধারণ স্বাদ আনে।',
                 'is_featured'       => true,
+                'image'             => 'cow-ghee.png',
                 'variants'          => [
                     ['name' => '৫০০ গ্রাম (500g)', 'weight_kg' => 0.5, 'price' => 700, 'sale_price' => 650, 'stock' => 80],
                     ['name' => '১ কেজি (1 kg)', 'weight_kg' => 1, 'price' => 1400, 'sale_price' => 1250, 'stock' => 50],
@@ -157,6 +159,7 @@ class DatabaseSeeder extends Seeder {
                 'description'       => 'ঘানিতে ভাঙ্গা ১০০% খাঁটি সরিষার তেল। কোনো কেমিক্যাল প্রসেসিং নেই।',
                 'is_featured'       => true,
                 'is_trending'       => true,
+                'image'             => 'mustard-oil-bottle.png',
                 'variants'          => [
                     ['name' => '১ লিটার (1 liter)', 'weight_kg' => 1, 'price' => 400, 'sale_price' => 350, 'stock' => 100],
                     ['name' => '৫ লিটার (5 liters)', 'weight_kg' => 5, 'price' => 1800, 'sale_price' => 1600, 'stock' => 40],
@@ -184,6 +187,7 @@ class DatabaseSeeder extends Seeder {
                 'description'       => 'সুন্দরবন থেকে সরাসরি সংগ্রহ করা ১০০% খাঁটি মধু। কোনো চিনি বা কেমিক্যাল মেশানো নেই।',
                 'is_featured'       => true,
                 'is_trending'       => true,
+                'image'             => 'sundarban-honey.png',
                 'variants'          => [
                     ['name' => '৫০০ গ্রাম (500g)', 'weight_kg' => 0.5, 'price' => 600, 'sale_price' => 550, 'stock' => 70],
                     ['name' => '১ কেজি (1 kg)', 'weight_kg' => 1, 'price' => 1100, 'sale_price' => 1000, 'stock' => 40],
@@ -222,20 +226,24 @@ class DatabaseSeeder extends Seeder {
             $variants = $data['variants'];
             unset($data['category_slug'], $data['variants']);
 
-            $product = Product::create(array_merge($data, [
-                'category_id'   => $category->id,
-                'is_featured'   => $data['is_featured'] ?? false,
-                'is_bestseller' => $data['is_bestseller'] ?? false,
-                'is_trending'   => $data['is_trending'] ?? false,
-                'is_preorder'   => $data['is_preorder'] ?? false,
-            ]));
+            $product = Product::updateOrCreate(
+                ['slug' => $data['slug']],
+                array_merge($data, [
+                    'category_id'   => $category->id,
+                    'is_featured'   => $data['is_featured'] ?? false,
+                    'is_bestseller' => $data['is_bestseller'] ?? false,
+                    'is_trending'   => $data['is_trending'] ?? false,
+                    'is_preorder'   => $data['is_preorder'] ?? false,
+                ])
+            );
 
             foreach ($variants as $i => $variant) {
-                ProductVariant::create(array_merge($variant, [
-                    'product_id' => $product->id,
-                    'sku'        => strtoupper(Str::slug($product->slug . '-' . ($i + 1))),
-                    'sort_order' => $i,
-                ]));
+                ProductVariant::updateOrCreate(
+                    ['product_id' => $product->id, 'sort_order' => $i],
+                    array_merge($variant, [
+                        'sku'        => strtoupper(Str::slug($product->slug . '-' . ($i + 1))),
+                    ])
+                );
             }
         }
     }

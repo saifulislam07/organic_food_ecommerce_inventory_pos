@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'order_number', 'customer_name', 'customer_phone', 'customer_address',
+        'user_id', 'order_number', 'customer_name', 'customer_phone', 'customer_address',
         'customer_area', 'notes', 'subtotal', 'discount_amount', 'delivery_charge', 'total',
         'status', 'payment_method', 'source', 'pickup_point'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     protected $casts = [
         'subtotal' => 'decimal:2',

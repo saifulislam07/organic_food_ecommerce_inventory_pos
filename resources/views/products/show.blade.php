@@ -3,6 +3,157 @@
 @section('title', $product->meta_title ?? $product->name . ' – Mango Hut')
 @section('meta_description', $product->meta_description ?? $product->short_description)
 
+@push('styles')
+<style>
+    .page-header {
+        background-color: var(--primary-dark);
+        padding: 60px 0;
+        color: white;
+    }
+    .page-header h1 {
+        color: white !important;
+        margin-bottom: 10px;
+    }
+    .breadcrumb-custom {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    .breadcrumb-custom a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+    .breadcrumb-custom a:hover {
+        color: white;
+    }
+    .breadcrumb-custom span {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .breadcrumb-custom li:last-child {
+        color: white;
+        font-weight: 600;
+    }
+
+    /* Product Meta Modern Styles */
+    .product-meta-section {
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .meta-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #94a3b8;
+    }
+    .meta-value {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #334155;
+        text-decoration: none;
+    }
+    .link-primary-custom {
+        color: var(--primary);
+        transition: var(--transition);
+        position: relative;
+    }
+    .link-primary-custom::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary-light);
+        transition: var(--transition);
+        border-radius: 2px;
+    }
+    .link-primary-custom:hover::after {
+        width: 100%;
+    }
+
+    /* Modern Variant Selection */
+    .variant-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .variant-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
+        padding: 12px 16px;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .variant-btn:hover {
+        border-color: var(--primary-light);
+        background: var(--primary-50);
+        transform: translateY(-2px);
+    }
+
+    .variant-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white !important;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+    }
+
+    .variant-btn .variant-name {
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin-bottom: 2px;
+    }
+
+    .variant-btn .variant-price {
+        font-size: 0.85rem;
+        font-weight: 600;
+        opacity: 0.9;
+    }
+
+    .variant-btn.active .variant-price {
+        color: white;
+        opacity: 1;
+    }
+
+    /* Selection Badge */
+    .variant-btn::before {
+        content: "\F272"; /* bootstrap-icons check-circle-fill */
+        font-family: "bootstrap-icons";
+        position: absolute;
+        top: -20px;
+        right: 8px;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        opacity: 0;
+    }
+
+    .variant-btn.active::before {
+        top: 6px;
+        opacity: 1;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="page-header">
     <div class="container">
@@ -61,13 +212,12 @@
                                     data-sale="{{ $variant->sale_price }}"
                                     data-stock="{{ $variant->stock }}"
                                     data-name="{{ $variant->name }}">
-                                {{ $variant->name }}
+                                <span class="variant-name">{{ $variant->name }}</span>
                                 <span class="variant-price">৳{{ number_format($variant->display_price) }}</span>
                             </button>
                             @endforeach
                         </div>
                     </div>
-                    @endif
 
                     <!-- Quantity -->
                     <div class="mb-4">
@@ -90,10 +240,34 @@
                     </div>
 
                     <!-- Product Meta -->
-                    <div class="border-top pt-3 mt-3">
-                        <p class="mb-1"><strong>{{ app()->getLocale() == 'bn' ? 'ক্যাটাগরি:' : 'Category:' }}</strong> <a href="{{ route('shop', ['category' => $product->category->slug]) }}">{{ $product->category->name }}</a></p>
+                    <div class="product-meta-section mt-5 pt-4 border-top">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="meta-item">
+                                    <span class="meta-label">{{ app()->getLocale() == 'bn' ? 'ক্যাটাগরি:' : 'Category:' }}</span>
+                                    <a href="{{ route('shop', ['category' => $product->category->slug]) }}" class="meta-value link-primary-custom">
+                                        {{ $product->category->name }}
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <div class="meta-item">
+                                    <span class="meta-label">{{ app()->getLocale() == 'bn' ? 'স্ট্যাটাস:' : 'Status:' }}</span>
+                                    @php $stock = $product->variants->sum('stock'); @endphp
+                                    <span class="meta-value {{ $stock > 0 ? 'text-green-600' : 'text-rose-500' }}">
+                                        {{ $stock > 0 ? (app()->getLocale() == 'bn' ? 'স্টকে আছে' : 'In Stock') : (app()->getLocale() == 'bn' ? 'স্টক শেষ' : 'Out of Stock') }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
                         @if($product->is_preorder)
-                            <p class="mb-1"><span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> {{ app()->getLocale() == 'bn' ? 'প্রি-অর্ডার পাওয়া যাবে' : 'Pre-order Available' }}</span></p>
+                        <div class="mt-3">
+                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 text-xs font-bold uppercase tracking-wider">
+                                <i class="bi bi-clock-history"></i>
+                                {{ app()->getLocale() == 'bn' ? 'প্রি-অর্ডার পাওয়া যাবে' : 'Pre-order Available' }}
+                            </span>
+                        </div>
                         @endif
                     </div>
                 </div>

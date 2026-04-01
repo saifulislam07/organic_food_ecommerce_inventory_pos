@@ -1,54 +1,51 @@
-<section class="space-y-6">
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Delete Account') }}
-        </h2>
+<section>
+    <p class="text-muted small mb-4">
+        {{ (app()->getLocale() == 'bn' ? 'আপনার অ্যাকাউন্ট মুছে ফেলা হলে, এর সমস্ত তথ্য স্থায়ীভাবে মুছে যাবে। অ্যাকাউন্টটি মুছে ফেলার আগে, দয়া করে আপনার প্রয়োজনীয় কোনো তথ্য থাকলে ডাউনলোড করে নিন।' : 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
+    </p>
 
-        <p class="mt-1 text-sm text-gray-600">
-            {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
-        </p>
-    </header>
-
-    <x-danger-button
+    <button 
+        class="btn btn-danger fw-bold"
         x-data=""
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('Delete Account') }}</x-danger-button>
+    >
+        <i class="bi bi-trash"></i> {{ app()->getLocale() == 'bn' ? 'অ্যাকাউন্ট মুছে ফেলুন' : 'Delete Account' }}
+    </button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
+        <form method="post" action="{{ route('profile.destroy') }}" class="p-4 bg-white rounded shadow-lg">
             @csrf
             @method('delete')
 
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ __('Are you sure you want to delete your account?') }}
-            </h2>
+            <h4 class="fw-bold mb-3 text-dark">
+                {{ app()->getLocale() == 'bn' ? 'আপনি কি নিশ্চিত যে আপনি আপনার অ্যাকাউন্টটি মুছে ফেলতে চান?' : 'Are you sure you want to delete your account?' }}
+            </h4>
 
-            <p class="mt-1 text-sm text-gray-600">
-                {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
+            <p class="text-muted small mb-4">
+                {{ app()->getLocale() == 'bn' ? 'একবার আপনার অ্যাকাউন্ট মুছে ফেলা হলে, এর সমস্ত ডেটা স্থায়ীভাবে মুছে যাবে। আপনার অ্যাকাউন্ট স্থায়ীভাবে মুছে ফেলতে চাইলে অনুগ্রহ করে আপনার পাসওয়ার্ড লিখুন।' : 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' }}
             </p>
 
-            <div class="mt-6">
-                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
-
-                <x-text-input
+            <div class="mb-4">
+                <label for="password" class="form-label fw-bold small text-uppercase">{{ app()->getLocale() == 'bn' ? 'পাসওয়ার্ড' : 'Password' }}</label>
+                <input 
                     id="password"
                     name="password"
                     type="password"
-                    class="mt-1 block w-3/4"
-                    placeholder="{{ __('Password') }}"
+                    class="form-control @error('password', 'userDeletion') is-invalid @enderror"
+                    placeholder="{{ app()->getLocale() == 'bn' ? 'পাসওয়ার্ড লিখুন' : 'Password' }}"
                 />
-
-                <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
+                @error('password', 'userDeletion')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
-                </x-secondary-button>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-light fw-bold" x-on:click="$dispatch('close')">
+                    {{ app()->getLocale() == 'bn' ? 'বাতিল' : 'Cancel' }}
+                </button>
 
-                <x-danger-button class="ms-3">
-                    {{ __('Delete Account') }}
-                </x-danger-button>
+                <button type="submit" class="btn btn-danger fw-bold">
+                    {{ app()->getLocale() == 'bn' ? 'মুছে ফেলুন' : 'Delete Account' }}
+                </button>
             </div>
         </form>
     </x-modal>

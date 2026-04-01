@@ -4,6 +4,40 @@
 
 @push('styles')
 <style>
+    .page-header {
+        background-color: var(--primary-dark);
+        padding: 60px 0;
+        color: white;
+    }
+    .page-header h1 {
+        color: white !important;
+        margin-bottom: 10px;
+    }
+    .breadcrumb-custom {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    .breadcrumb-custom a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+    .breadcrumb-custom a:hover {
+        color: white;
+    }
+    .breadcrumb-custom span {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .breadcrumb-custom li:last-child {
+        color: white;
+        font-weight: 600;
+    }
+
     .cart-table th {
         background: var(--gray-100);
         color: var(--dark);
@@ -121,6 +155,27 @@
         .cart-table td:first-child::before, .cart-table td:last-child::before { content: none; }
         .cart-remove { position: absolute; top: 15px; right: 15px; }
     }
+
+    /* Custom Secondary Button */
+    .btn-secondary-custom {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #f8fafc;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        padding: 12px 24px;
+        border-radius: var(--radius-md);
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .btn-secondary-custom:hover {
+        background: #f1f5f9;
+        color: var(--primary);
+        border-color: var(--primary-light);
+        transform: translateX(-5px);
+    }
 </style>
 @endpush
 
@@ -157,7 +212,7 @@
                             <tr id="cart-row-{{ $key }}">
                                 <td data-label="{{ app()->getLocale() == 'bn' ? 'পণ্য' : 'Product' }}">
                                     <div class="d-flex align-items-center gap-3">
-                                        <img src="{{ $item['image'] ? asset('storage/' . $item['image']) : asset('images/product-placeholder.jpg') }}"
+                                        <img src="{{ $item['image'] }}"
                                              alt="{{ $item['product_name'] }}" class="cart-item-img">
                                         <div>
                                             <strong class="d-block">{{ $item['product_name'] }}</strong>
@@ -184,7 +239,7 @@
                         </tbody>
                     </table>
                 </div>
-                <a href="{{ route('shop') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('shop') }}" class="btn-primary-custom">
                     <i class="bi bi-arrow-left"></i> {{ app()->getLocale() == 'bn' ? 'আরো কেনাকাটা করুন' : 'Continue Shopping' }}
                 </a>
             </div>
@@ -209,9 +264,10 @@
                         <span>{{ app()->getLocale() == 'bn' ? 'সর্বমোট' : 'Total' }}</span>
                         <span id="cartTotal">৳{{ number_format($total) }}</span>
                     </div>
-                    @if($subtotal < 2000)
+                    @php $threshold = (float) \App\Models\Setting::get('free_delivery_threshold', 2000); @endphp
+                    @if($subtotal < $threshold)
                     <div class="alert alert-info mt-3 mb-0" style="font-size:0.85rem;">
-                        <i class="bi bi-info-circle"></i> {{ app()->getLocale() == 'bn' ? '৳'.number_format(2000 - $subtotal).' আরো অর্ডার করলে ফ্রি ডেলিভারি পাবেন!' : 'Order ৳'.number_format(2000 - $subtotal).' more for FREE delivery!' }}
+                        <i class="bi bi-info-circle"></i> {{ app()->getLocale() == 'bn' ? '৳'.number_format($threshold - $subtotal).' আরো অর্ডার করলে ফ্রি ডেলিভারি পাবেন!' : 'Order ৳'.number_format($threshold - $subtotal).' more for FREE delivery!' }}
                     </div>
                     @endif
                     <a href="{{ route('checkout') }}" class="btn-primary-custom w-100 justify-content-center mt-3">

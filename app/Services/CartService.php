@@ -6,6 +6,8 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Session;
 
+use App\Models\Setting;
+
 class CartService
 {
     private string $sessionKey = 'cart';
@@ -37,7 +39,7 @@ class CartService
                 'variant_name' => $variant->name,
                 'price' => $variant->display_price,
                 'original_price' => $variant->price,
-                'image' => $product->image,
+                'image' => $product->image_url,
                 'quantity' => $quantity,
                 'weight_kg' => $variant->weight_kg,
             ];
@@ -83,16 +85,25 @@ class CartService
         return array_sum(array_column($items, 'subtotal'));
     }
 
-    public function getDeliveryCharge(): float
+    public function getDeliveryCharge($area = 'dhaka_inside'): float
     {
         $subtotal = $this->getSubtotal();
-        // Free delivery on orders above 2000 BDT
-        return $subtotal >= 2000 ? 0 : 100;
+        $threshold = (float) Setting::get('free_delivery_threshold', 2000);
+
+        if ($subtotal >= $threshold) {
+            return 0;
+        }
+
+        if ($area === 'dhaka_outside') {
+            return (float) Setting::get('shipping_fee_outside', 120);
+        }
+
+        return (float) Setting::get('shipping_fee_inside', 60);
     }
 
-    public function getTotal(): float
+    public function getTotal($area = 'dhaka_inside'): float
     {
-        return $this->getSubtotal() + $this->getDeliveryCharge();
+        return $this->getSubtotal() + $this->getDeliveryCharge($area);
     }
 
     public function count(): int

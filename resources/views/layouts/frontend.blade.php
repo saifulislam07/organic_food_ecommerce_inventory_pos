@@ -266,6 +266,18 @@
             .btn-add-cart { font-size: 0.75rem; padding: 6px 8px; }
         }
 
+        /* Nav Icon Buttons */
+        .nav-icon-btn {
+            font-size: 1.5rem;
+            color: var(--dark);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+        .nav-icon-btn:hover {
+            color: var(--primary);
+        }
+
         /* General Mobile Fixes */
         .container { padding-left: 20px; padding-right: 20px; }
     </style>
@@ -278,7 +290,8 @@
             <div class="d-flex justify-content-between align-items-center" style="overflow: visible;">
                 <div class="top-bar-left d-flex align-items-center gap-3" style="overflow: visible;">
                     <span class="top-bar-text d-none d-sm-inline">
-                        <i class="bi bi-truck"></i> {{ app()->getLocale() == 'bn' ? 'সারাদেশে ডেলিভারি | ৳২০০০+ অর্ডারে ফ্রি ডেলিভারি' : 'Delivery Nationwide | Free Delivery on Order ৳2000+' }}
+                        @php $threshold = \App\Models\Setting::get('free_delivery_threshold', 2000); @endphp
+                        <i class="bi bi-truck"></i> {{ app()->getLocale() == 'bn' ? 'সারাদেশে ডেলিভারি | ৳'.number_format($threshold).'+ অর্ডারে ফ্রি ডেলিভারি' : 'Delivery Nationwide | Free Delivery on Order ৳'.number_format($threshold).'+' }}
                     </span>
                     <div class="custom-lang-dropdown">
                         <button class="lang-trigger">
@@ -357,6 +370,15 @@
                             <i class="bi bi-cart3"></i>
                             <span class="cart-badge" id="desktopCartBadge">0</span>
                         </a>
+                        @auth
+                            <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('customer.dashboard') }}" class="nav-icon-btn ms-2">
+                                <i class="bi bi-person-circle"></i>
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="nav-icon-btn ms-2">
+                                <i class="bi bi-person"></i>
+                            </a>
+                        @endauth
                     </div>
                 </div>
             </div>
@@ -405,6 +427,10 @@
             <i class="bi bi-cart{{ request()->routeIs('cart.index') ? '-fill' : '3' }}"></i>
             <span class="cart-badge badge rounded-pill bg-danger" id="mobileNavBadge">0</span>
             <span>{{ app()->getLocale() == 'bn' ? 'কার্ট' : 'Cart' }}</span>
+        </a>
+        <a href="{{ auth()->check() ? (auth()->user()->isAdmin() ? route('admin.dashboard') : route('customer.dashboard')) : route('login') }}" class="{{ request()->routeIs('login') || request()->routeIs('customer.dashboard') || request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <i class="bi bi-person{{ request()->routeIs('login') || request()->routeIs('customer.dashboard') || request()->routeIs('admin.dashboard') ? '-fill' : '' }}"></i>
+            <span>{{ auth()->check() ? (app()->getLocale() == 'bn' ? 'অ্যাকাউন্ট' : 'Account') : (app()->getLocale() == 'bn' ? 'লগইন' : 'Login') }}</span>
         </a>
         <a href="https://wa.me/{{ \App\Models\Setting::get('whatsapp', '8801716952365') }}" target="_blank">
             <i class="bi bi-whatsapp"></i>

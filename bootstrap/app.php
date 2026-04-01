@@ -14,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
         ]);
+        $middleware->alias([
+            'is_admin' => \App\Http\Middleware\IsAdmin::class,
+        ]);
+        $middleware->redirectUsersTo(fn (\Illuminate\Http\Request $request) => 
+            $request->user()?->isAdmin() ? route('admin.dashboard', absolute: false) : route('home', absolute: false)
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
