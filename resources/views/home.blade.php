@@ -2,142 +2,15 @@
 
 @push('styles')
 <style>
-    /* Hero Section Responsiveness */
-    .hero-section {
-        padding: 100px 0 60px;
-        background: linear-gradient(135deg, #f8fdfb 0%, #e8f5e9 100%);
-        position: relative;
-        overflow: hidden;
-    }
-    .hero-content { position: relative; z-index: 2; }
-    .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(45, 106, 79, 0.1);
-        color: var(--primary);
-        padding: 6px 16px;
-        border-radius: 30px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-bottom: 20px;
-    }
-    .hero-title {
-        margin-bottom: 25px;
-    }
-    .hero-title span { color: var(--primary); }
-    .hero-desc {
-        font-size: 1.1rem;
-        color: #555;
-        margin-bottom: 35px;
-        max-width: 500px;
-    }
-    .hero-btn {
-        background: var(--primary);
-        color: white;
-        padding: 14px 35px;
-        border-radius: var(--radius-md);
-        text-decoration: none;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        transition: var(--transition);
-        box-shadow: 0 10px 20px rgba(45, 106, 79, 0.2);
-    }
-    .hero-btn:hover {
-        background: var(--primary-light);
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(45, 106, 79, 0.3);
-        color: white;
-    }
-
-    .hero-stats {
-        display: flex;
-        gap: 30px;
-        margin-top: 50px;
-    }
-    .hero-stat-num {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--primary);
-        line-height: 1;
-    }
-    .hero-stat-label {
-        font-size: 0.85rem;
-        color: var(--gray-500);
-        font-weight: 500;
-    }
-
+    /* Safe Mobile-Only Optimizations */
     @media (max-width: 991px) {
-        .hero-section { text-align: center; padding: 60px 0 40px; }
+        .hero-section { padding: 40px 0; text-align: center; }
         .hero-content { display: flex; flex-direction: column; align-items: center; }
         .hero-desc { margin-left: auto; margin-right: auto; }
-        .hero-stats { justify-content: center; gap: 20px; }
+        .hero-stats { justify-content: center; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
+        .hero-btn { width: 100%; justify-content: center; }
+        .btn-whatsapp { width: 100%; justify-content: center; }
     }
-
-    /* Section Headers */
-    .section-header { text-align: center; margin-bottom: 50px; }
-    .section-badge {
-        display: inline-block;
-        color: var(--secondary);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-size: 0.8rem;
-        margin-bottom: 10px;
-    }
-    .section-title { margin-bottom: 15px; }
-    .section-subtitle { color: var(--gray-500); max-width: 600px; margin: 0 auto; }
-
-    /* Category Promo */
-    .category-promo {
-        height: 280px;
-        border-radius: var(--radius-lg);
-        background-size: cover;
-        background-position: center;
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        align-items: flex-end;
-        padding: 30px;
-        transition: var(--transition);
-        z-index: 1;
-    }
-    .category-promo::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
-        z-index: -1;
-    }
-    .category-promo:hover { transform: translateY(-5px); }
-    .category-promo-content h3 { color: white; margin-bottom: 8px; }
-    .category-promo-content p { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 15px; }
-    .promo-btn {
-        color: var(--secondary);
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 0.9rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    /* CTA Section Layout */
-    .btn-whatsapp {
-        background: #25d366;
-        color: white;
-        padding: 12px 30px;
-        border-radius: var(--radius-md);
-        text-decoration: none;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        transition: var(--transition);
-    }
-    .btn-whatsapp:hover { background: #128c7e; transform: translateY(-3px); color: white; }
 </style>
 @endpush
 
@@ -151,7 +24,7 @@
                 <div class="col-lg-6">
                     <div class="hero-content">
                         <div class="hero-badge">
-                            <i class="bi bi-patch-check-fill"></i> ১০০% খাঁটি ও অর্গানিক
+                            <i class="bi bi-patch-check-fill"></i> {{ app()->getLocale() == 'bn' ? '১০০% খাঁটি ও অর্গানিক' : '100% Pure & Organic' }}
                         </div>
                         <h1 class="hero-title">
                             {!! \App\Models\Setting::get('hero_title', 'Pure & Organic <br><span>Nature</span> Online Market') !!}

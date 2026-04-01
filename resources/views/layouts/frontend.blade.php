@@ -91,8 +91,35 @@
         }
         @media (max-width: 576px) {
             .top-bar-text { font-size: 0.7rem; text-align: center; }
-            .top-bar .container > .d-flex { flex-direction: column; gap: 8px; }
         }
+
+        /* Robust Language Dropdown CSS */
+        .custom-lang-dropdown { position: relative; z-index: 1100; }
+        .lang-trigger {
+            background: transparent; border: none; color: white;
+            display: flex; align-items: center; gap: 5px; font-size: 0.8rem;
+            cursor: pointer; padding: 4px; border-radius: 4px; transition: var(--transition);
+        }
+        .lang-trigger:hover, .lang-trigger:focus-within { background: rgba(255,255,255,0.1); }
+        .lang-menu {
+            position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            background: var(--primary-dark);
+            border: 1px solid rgba(255,255,255,0.1); min-width: 100px;
+            border-radius: var(--radius-sm); z-index: 1000;
+            display: none; flex-direction: column; overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .custom-lang-dropdown:hover .lang-menu { display: flex; }
+        .lang-menu a {
+            color: rgba(255,255,255,0.8); text-decoration: none;
+            padding: 8px 15px; font-size: 0.8rem; transition: var(--transition); text-align: center;
+        }
+        .lang-menu a:hover, .lang-menu a.active {
+            background: rgba(255,255,255,0.1); color: white;
+        }
+        .top-bar-link { color: rgba(255,255,255,0.9); text-decoration: none; transition: var(--transition); display: flex; align-items: center; gap: 6px; }
+        .top-bar-link:hover { color: var(--secondary); }
+
 
         /* Buttons */
         .btn-primary-custom {
@@ -287,14 +314,8 @@
                 @endif
             </a>
 
-            <div class="d-flex align-items-center gap-2 d-lg-none">
-                <a href="{{ route('cart.index') }}" class="nav-cart-btn position-relative">
-                    <i class="bi bi-cart3"></i>
-                    <span class="cart-badge" id="mobileCartBadge">0</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <div class="d-flex align-items-center d-lg-none">
+                <!-- Top toggles removed to prefer the bottom mobile-nav -->
             </div>
 
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -351,9 +372,6 @@
             </div>
         </form>
     </div>
-            </div>
-        </div>
-    </nav>
 
     <!-- Flash Messages -->
     @if(session('success'))

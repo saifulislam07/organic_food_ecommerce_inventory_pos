@@ -2,6 +2,128 @@
 
 @section('title', 'Cart – Mango Hut')
 
+@push('styles')
+<style>
+    .cart-table th {
+        background: var(--gray-100);
+        color: var(--dark);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        border: none;
+        padding: 15px;
+    }
+    .cart-item-img {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border-radius: var(--radius-sm);
+        background: var(--gray-100);
+    }
+    .qty-control {
+        display: flex;
+        align-items: center;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        width: fit-content;
+    }
+    .qty-btn {
+        background: var(--gray-100);
+        border: none;
+        width: 30px;
+        height: 35px;
+        font-weight: 700;
+        transition: var(--transition);
+    }
+    .qty-btn:hover { background: var(--gray-200); }
+    .qty-value {
+        width: 40px;
+        text-align: center;
+        border: none;
+        border-left: 1px solid var(--gray-300);
+        border-right: 1px solid var(--gray-300);
+        font-size: 0.9rem;
+    }
+    .cart-remove {
+        color: var(--accent);
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        transition: var(--transition);
+    }
+    .cart-remove:hover { color: #c32f27; transform: scale(1.1); }
+
+    .cart-summary {
+        background: white;
+        padding: 30px;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--gray-100);
+        box-shadow: var(--shadow-sm);
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        color: #555;
+    }
+    .summary-row.total {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid var(--gray-100);
+        color: var(--primary);
+        font-weight: 800;
+        font-size: 1.3rem;
+    }
+    .free-delivery-badge {
+        background: var(--primary);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+        .cart-table thead { display: none; }
+        .cart-table, .cart-table tbody, .cart-table tr, .cart-table td { display: block; width: 100%; }
+        .cart-table tr {
+            margin-bottom: 20px;
+            background: white;
+            border: 1px solid var(--gray-100);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            position: relative;
+        }
+        .cart-table td {
+            border: none;
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: right;
+        }
+        .cart-table td:first-child {
+            display: block;
+            text-align: left;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--gray-100);
+            padding-bottom: 15px;
+        }
+        .cart-table td:first-child .d-flex { gap: 15px; }
+        .cart-table td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        .cart-table td:first-child::before, .cart-table td:last-child::before { content: none; }
+        .cart-remove { position: absolute; top: 15px; right: 15px; }
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="page-header">
     <div class="container">
@@ -33,27 +155,27 @@
                         <tbody id="cartItems">
                             @foreach($items as $key => $item)
                             <tr id="cart-row-{{ $key }}">
-                                <td>
+                                <td data-label="{{ app()->getLocale() == 'bn' ? 'পণ্য' : 'Product' }}">
                                     <div class="d-flex align-items-center gap-3">
                                         <img src="{{ $item['image'] ? asset('storage/' . $item['image']) : asset('images/product-placeholder.jpg') }}"
                                              alt="{{ $item['product_name'] }}" class="cart-item-img">
                                         <div>
-                                            <strong>{{ $item['product_name'] }}</strong>
-                                            <br><small class="text-muted">{{ $item['variant_name'] }}</small>
+                                            <strong class="d-block">{{ $item['product_name'] }}</strong>
+                                            <small class="text-muted">{{ $item['variant_name'] }}</small>
                                         </div>
                                     </div>
                                 </td>
-                                <td>৳{{ number_format($item['price']) }}</td>
-                                <td>
+                                <td data-label="{{ app()->getLocale() == 'bn' ? 'মূল্য' : 'Price' }}">৳{{ number_format($item['price']) }}</td>
+                                <td data-label="{{ app()->getLocale() == 'bn' ? 'পরিমান' : 'Quantity' }}">
                                     <div class="qty-control">
                                         <button class="qty-btn" onclick="updateCartQty('{{ $key }}', {{ $item['quantity'] - 1 }})">−</button>
                                         <input type="text" class="qty-value" value="{{ $item['quantity'] }}" readonly>
                                         <button class="qty-btn" onclick="updateCartQty('{{ $key }}', {{ $item['quantity'] + 1 }})">+</button>
                                     </div>
                                 </td>
-                                <td class="fw-bold">৳{{ number_format($item['subtotal']) }}</td>
+                                <td data-label="{{ app()->getLocale() == 'bn' ? 'মোট' : 'Subtotal' }}" class="fw-bold text-primary">৳{{ number_format($item['subtotal']) }}</td>
                                 <td>
-                                    <button class="cart-remove" onclick="removeFromCart('{{ $key }}')">
+                                    <button class="cart-remove" onclick="removeFromCart('{{ $key }}')" title="Remove">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>

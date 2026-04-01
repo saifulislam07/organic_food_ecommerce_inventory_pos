@@ -2,6 +2,67 @@
 
 @section('title', 'Checkout – Mango Hut')
 
+@push('styles')
+<style>
+    .admin-card {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--gray-100);
+        box-shadow: var(--shadow-sm);
+    }
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    .form-control, .form-select {
+        border-radius: var(--radius-sm);
+        padding: 12px 15px;
+        border: 1px solid var(--gray-200);
+        background-color: var(--gray-100);
+        transition: var(--transition);
+        font-size: 0.95rem;
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: white;
+        border-color: var(--primary);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .custom-radio-group {
+        display: flex;
+        gap: 15px;
+        background: var(--light);
+        padding: 15px;
+        border-radius: var(--radius-md);
+        margin-bottom: 25px;
+    }
+    .custom-radio {
+        flex: 1;
+        background: white;
+        padding: 12px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid transparent;
+        transition: var(--transition);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .custom-radio:has(input:checked) {
+        border-color: var(--primary);
+        background: rgba(45, 106, 79, 0.05);
+    }
+    .custom-radio input { margin: 0; }
+    .custom-radio label { margin: 0; cursor: pointer; flex-grow: 1; }
+
+    @media (max-width: 576px) {
+        .custom-radio-group { flex-direction: column; }
+        .checkout-form .card { padding: 20px !important; }
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="page-header">
     <div class="container">
@@ -41,19 +102,15 @@
                             @error('customer_phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="card bg-light border-0 p-3 mb-4 rounded-3 d-flex flex-row justify-content-around gap-4 shadow-sm">
-                            <div class="form-check custom-radio">
+                        <div class="custom-radio-group shadow-sm">
+                            <label class="custom-radio" for="delivery_home">
                                 <input class="form-check-input" type="radio" name="delivery_type" id="delivery_home" value="home" checked>
-                                <label class="form-check-label fw-bold d-block" for="delivery_home">
-                                    <i class="bi bi-truck me-1"></i> {{ app()->getLocale() == 'bn' ? 'হোম ডেলিভারি' : 'Home Delivery' }}
-                                </label>
-                            </div>
-                            <div class="form-check custom-radio">
+                                <span class="fw-bold"><i class="bi bi-truck"></i> {{ app()->getLocale() == 'bn' ? 'হোম ডেলিভারি' : 'Home' }}</span>
+                            </label>
+                            <label class="custom-radio" for="delivery_pickup">
                                 <input class="form-check-input" type="radio" name="delivery_type" id="delivery_pickup" value="pickup">
-                                <label class="form-check-label fw-bold d-block" for="delivery_pickup">
-                                    <i class="bi bi-geo-alt me-1"></i> {{ app()->getLocale() == 'bn' ? 'পিকআপ পয়েন্ট' : 'Store Pickup' }}
-                                </label>
-                            </div>
+                                <span class="fw-bold"><i class="bi bi-geo-alt"></i> {{ app()->getLocale() == 'bn' ? 'পিকআপ পয়েন্ট' : 'Pickup' }}</span>
+                            </label>
                         </div>
 
                         <div id="home_delivery_fields">
