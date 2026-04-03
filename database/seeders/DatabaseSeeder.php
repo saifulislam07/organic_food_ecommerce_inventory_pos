@@ -246,5 +246,41 @@ class DatabaseSeeder extends Seeder {
                 );
             }
         }
+
+        // --- Pages Seeding ---
+        $pages = [
+            [
+                'slug'       => 'about-us',
+                'title_en'   => 'About Mango Hut',
+                'title_bn'   => 'ম্যাংগো হাট সম্পর্কে',
+                'content_en' => '<h3>Our Journey</h3><p>At Mango Hut, we believe in the purity of nature. Born in the heart of Chapainawabganj, the mango capital of Bangladesh, we started with a simple mission: to bring the authentic, garden-fresh taste of premium mangoes directly to your table.</p><h3>Why Choose Us?</h3><ul><li><strong>100% Organic:</strong> No formalin or harmful chemicals.</li><li><strong>Direct Sourcing:</strong> Straight from our monitored orchards.</li><li><strong>Premium Quality:</strong> Every fruit is hand-picked for perfection.</li></ul>',
+                'content_bn' => '<h3>আমাদের যাত্রা</h3><p>ম্যাংগো হাটে আমরা প্রকৃতির বিশুদ্ধতায় বিশ্বাস করি। বাংলাদেশের আমের রাজধানী চাঁপাইনবাবগঞ্জের প্রাণকেন্দ্রে আমাদের যাত্রা শুরু। আমাদের লক্ষ্য ছিল সাধারণ: প্রিমিয়াম আমের আসল, বাগান-তাজা স্বাদ সরাসরি আপনার টেবিলে পৌঁছে দেওয়া।</p><h3>কেন আমাদের বেছে নেবেন?</h3><ul><li><strong>১০০% অর্গানিক:</strong> কোনো ফরমালিন বা ক্ষতিকারক রাসায়নিক নেই।</li><li><strong>সরাসরি সংগ্রহ:</strong> আমাদের নিজস্ব তত্ত্বাবধানে থাকা বাগান থেকে সরাসরি।</li><li><strong>সেরা মান:</strong> প্রতিটি ফল নিখুঁতভাবে হাতে বাছাই করা হয়।</li></ul>',
+            ],
+            [
+                'slug'       => 'terms-and-conditions',
+                'title_en'   => 'Terms & Conditions',
+                'title_bn'   => 'টার্মস ও কন্ডিশন',
+                'content_en' => '<h3>1. Agreement to Terms</h3><p>By using Mango Hut, you agree to comply with our service policies. We strive to provide the best organic products, but availability depends on seasonal harvests.</p><h3>2. Ordering & Payment</h3><p>Orders are confirmed after verification. Payments can be made via Cash on Delivery or digital payment gateways.</p>',
+                'content_bn' => '<h3>১. শর্তাবলী সম্মতি</h3><p>ম্যাংগো হাট ব্যবহারের মাধ্যমে আপনি আমাদের পরিষেবা নীতি মেনে চলতে সম্মত হন। আমরা সেরা অর্গানিক পণ্য প্রদানের চেষ্টা করি, তবে প্রাপ্যতা মৌসুমী ফসলের ওপর নির্ভর করে।</p><h3>২. অর্ডার এবং পেমেন্ট</h3><p>যাচাইকরণের পরে অর্ডার নিশ্চিত করা হয়। পেমেন্ট ক্যাশ অন ডেলিভারি বা ডিজিটাল পেমেন্ট গেটওয়ের মাধ্যমে করা যেতে পারে।</p>',
+            ],
+            [
+                'slug'       => 'privacy-policy',
+                'title_en'   => 'Privacy Policy',
+                'title_bn'   => 'প্রাইভেসি পলিসি',
+                'content_en' => '<h3>Data Collection</h3><p>We respect your privacy. We only collect necessary information for order processing and delivery. Your data is never shared with third parties for marketing purposes.</p>',
+                'content_bn' => '<h3>তথ্য সংগ্রহ</h3><p>আমরা আপনার গোপনীয়তাকে সম্মান করি। আমরা কেবল অর্ডার প্রসেসিং এবং ডেলিভারির জন্য প্রয়োজনীয় তথ্য সংগ্রহ করি। আপনার তথ্য কখনোই মার্কেটিং উদ্দেশ্যে তৃতীয় পক্ষের সাথে শেয়ার করা হয় না।</p>',
+            ],
+            [
+                'slug'       => 'shipping-policy',
+                'title_en'   => 'Shipping Policy',
+                'title_bn'   => 'শিপিং পলিসি',
+                'content_en' => '<h3>Delivery Times</h3><p>Internal city delivery takes 24-48 hours. Nationwide delivery takes 3-5 days. Mangoes are shipped in specialized crates to ensure freshness.</p><h3>Free Delivery</h3><p>Free delivery is available on orders above the specified threshold (currently ৳2,000).</p>',
+                'content_bn' => '<h3>ডেলিভারি সময়</h3><p>শহরের অভ্যন্তরে ডেলিভারি ২৪-৪৮ ঘণ্টা সময় নেয়। সারাদেশে ডেলিভারি হতে ৩-৫ দিন সময় লাগে। সতেজতা নিশ্চিত করতে আম বিশেষ ক্র্যাটে পাঠানো হয়।</p><h3>ফ্রি ডেলিভারি</h3><p>নির্দিষ্ট পরিমাণের বেশি অর্ডারে (বর্তমানে ২,০০০ টাকা) ফ্রি ডেলিভারি উপলব্ধ।</p>',
+            ],
+        ];
+
+        foreach ($pages as $page) {
+            \App\Models\Page::updateOrCreate(['slug' => $page['slug']], $page);
+        }
     }
 }

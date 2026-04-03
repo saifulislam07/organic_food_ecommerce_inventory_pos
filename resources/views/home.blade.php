@@ -52,10 +52,8 @@
                     </div>
                 </div>
                 <div class="col-lg-6 d-none d-lg-block">
-                    <div class="hero-image-wrapper">
-                        <div style="font-size: 12rem; text-align: center; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));">
-                            🥭
-                        </div>
+                    <div class="hero-image-wrapper text-center">
+                        <img src="{{ asset('images/hero-mango.png') }}" alt="Premium Mango Basket" class="img-fluid rounded-4 shadow-lg hero-floating-img" style="max-height: 450px; border: 8px solid white;">
                     </div>
                 </div>
             </div>
