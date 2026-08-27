@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\PresentsVariantOptions;
 use App\Http\Controllers\Controller;
 use App\Models\Adjustment;
 use App\Models\ProductVariant;
@@ -10,17 +11,21 @@ use Illuminate\Support\Facades\DB;
 
 class AdminAdjustmentController extends Controller
 {
+    use PresentsVariantOptions;
+
     public function index()
     {
         $adjustments = Adjustment::with('productVariant.product')
             ->latest('adjustment_date')
             ->paginate(20);
+
         return view('admin.adjustments.index', compact('adjustments'));
     }
 
     public function create()
     {
-        $variants = ProductVariant::with('product')->get();
+        $variants = $this->variantOptions();
+
         return view('admin.adjustments.create', compact('variants'));
     }
 
@@ -36,7 +41,7 @@ class AdminAdjustmentController extends Controller
 
         DB::transaction(function () use ($validated) {
             Adjustment::create($validated);
-            
+
             $variant = ProductVariant::find($validated['product_variant_id']);
             // Reductions except for 'returned' which might increase stock depending on business logic
             // For now, let's assume 'returned' increases and others decrease

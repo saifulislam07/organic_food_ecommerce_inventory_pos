@@ -12,12 +12,14 @@ class AdminExpenseController extends Controller
     {
         $expenses = Expense::orderBy('expense_date', 'desc')->paginate(20);
         $totalAmount = Expense::sum('amount');
+
         return view('admin.expenses.index', compact('expenses', 'totalAmount'));
     }
 
     public function create()
     {
         $categories = ['Product Sourcing', 'Packing', 'Delivery', 'Marketing', 'Utilities', 'Other'];
+
         return view('admin.expenses.create', compact('categories'));
     }
 
@@ -39,6 +41,7 @@ class AdminExpenseController extends Controller
     public function edit(Expense $expense)
     {
         $categories = ['Product Sourcing', 'Packing', 'Delivery', 'Marketing', 'Utilities', 'Other'];
+
         return view('admin.expenses.edit', compact('expense', 'categories'));
     }
 
@@ -60,6 +63,7 @@ class AdminExpenseController extends Controller
     public function destroy(Expense $expense)
     {
         $expense->delete();
+
         return redirect()->route('admin.expenses.index')->with('success', 'Expense deleted successfully.');
     }
 }

@@ -10,7 +10,7 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'order_number', 'customer_name', 'customer_phone', 'customer_address',
         'customer_area', 'notes', 'subtotal', 'discount_amount', 'delivery_charge', 'total',
-        'status', 'payment_method', 'source', 'pickup_point'
+        'status', 'payment_method', 'source', 'pickup_point',
     ];
 
     public function user()
@@ -35,14 +35,14 @@ class Order extends Model
         parent::boot();
         static::creating(function ($order) {
             if (empty($order->order_number)) {
-                $order->order_number = 'MH-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -5));
+                $order->order_number = 'MH-'.date('Ymd').'-'.strtoupper(substr(uniqid(), -5));
             }
         });
     }
 
     public function getStatusBadgeAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => '<span class="badge bg-warning">Pending</span>',
             'confirmed' => '<span class="badge bg-info">Confirmed</span>',
             'processing' => '<span class="badge bg-primary">Processing</span>',

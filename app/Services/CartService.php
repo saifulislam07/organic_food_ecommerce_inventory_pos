@@ -4,9 +4,8 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
-use Illuminate\Support\Facades\Session;
-
 use App\Models\Setting;
+use Illuminate\Support\Facades\Session;
 
 class CartService
 {
@@ -20,7 +19,7 @@ class CartService
     public function add(int $productId, int $variantId, int $quantity = 1): array
     {
         $cart = $this->getItems();
-        $key = $productId . '_' . $variantId;
+        $key = $productId.'_'.$variantId;
 
         if (isset($cart[$key])) {
             $cart[$key]['quantity'] += $quantity;
@@ -28,7 +27,7 @@ class CartService
             $product = Product::find($productId);
             $variant = ProductVariant::find($variantId);
 
-            if (!$product || !$variant) {
+            if (! $product || ! $variant) {
                 return ['success' => false, 'message' => 'Product not found'];
             }
 
@@ -55,7 +54,7 @@ class CartService
     {
         $cart = $this->getItems();
 
-        if (!isset($cart[$key])) {
+        if (! isset($cart[$key])) {
             return ['success' => false, 'message' => 'Item not found in cart'];
         }
 
@@ -82,6 +81,7 @@ class CartService
     public function getSubtotal(): float
     {
         $items = $this->getItems();
+
         return array_sum(array_column($items, 'subtotal'));
     }
 
@@ -109,6 +109,7 @@ class CartService
     public function count(): int
     {
         $items = $this->getItems();
+
         return array_sum(array_column($items, 'quantity'));
     }
 

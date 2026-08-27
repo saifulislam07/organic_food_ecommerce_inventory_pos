@@ -38,7 +38,7 @@ class CartController extends Controller
             $request->get('quantity', 1)
         );
 
-        if ($request->ajax()) {
+        if ($request->expectsJson()) {
             return response()->json($result);
         }
 
@@ -54,7 +54,7 @@ class CartController extends Controller
 
         $result = $this->cart->update($request->key, $request->quantity);
 
-        if ($request->ajax()) {
+        if ($request->expectsJson()) {
             return response()->json(array_merge($result, [
                 'subtotal' => $this->cart->getSubtotal(),
                 'delivery' => $this->cart->getDeliveryCharge(),
@@ -72,11 +72,12 @@ class CartController extends Controller
 
         $result = $this->cart->remove($request->key);
 
-        if ($request->ajax()) {
+        if ($request->expectsJson()) {
             return response()->json(array_merge($result, [
                 'subtotal' => $this->cart->getSubtotal(),
                 'delivery' => $this->cart->getDeliveryCharge(),
                 'total' => $this->cart->getTotal(),
+                'items' => $this->cart->getItems(),
             ]));
         }
 

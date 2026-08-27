@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -38,12 +39,21 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /**
+     * Route name of the dashboard this user belongs on. Admins and customers
+     * have separate ones, and sending a customer to the admin dashboard is a 403.
+     */
+    public function dashboardRoute(): string
+    {
+        return $this->isAdmin() ? 'admin.dashboard' : 'customer.dashboard';
+    }
+
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    public function addresses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function addresses(): HasMany
     {
         return $this->hasMany(UserAddress::class);
     }

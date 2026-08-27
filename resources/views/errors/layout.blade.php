@@ -1,62 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title') - {{ config('app.name', 'Laravel') }}</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title') – {{ \App\Models\Setting::get('site_title', 'Mango Hut') }}</title>
 
-    <!-- Style -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
-        .animate-blob {
-            animation: blob 7s infinite;
+        :root {
+            --primary: #2d6a4f;
+            --primary-light: #40916c;
+            --primary-dark: #1b4332;
+            --dark: #1a1a2e;
+            --gray-100: #f1f3f5;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .animation-delay-2000 {
-            animation-delay: 2s;
+
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #fdfdfd;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
         }
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
+
+        .error-container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .error-image {
+            max-width: 320px;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.08));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .error-image { animation: none; }
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: 900;
+            line-height: 1;
+            color: var(--gray-100);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            user-select: none;
+        }
+
+        h1 {
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+        }
+
+        .error-container p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        .btn-premium {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            box-shadow: 0 10px 25px rgba(45, 106, 79, 0.2);
+        }
+
+        .btn-premium:hover {
+            background: var(--primary-light);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(45, 106, 79, 0.3);
+            color: white;
         }
     </style>
+    @stack('styles')
 </head>
-<body class="antialiased bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans selection:bg-green-500 selection:text-white">
-    <div class="min-h-screen flex items-center justify-center relative overflow-hidden">
-        <!-- Background Decoration -->
-        <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-800 dark:to-gray-900 z-0"></div>
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-green-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 dark:opacity-10 animate-blob"></div>
-        <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 dark:opacity-10 animate-blob animation-delay-2000"></div>
+<body>
+    <div class="error-container position-relative">
+        <div class="error-code">@yield('code')</div>
 
-        <!-- Main Content Glassmorphism Card -->
-        <div class="relative z-10 w-full max-w-3xl px-6 py-16 mx-4 text-center 
-                    bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl 
-                    rounded-3xl shadow-2xl border border-white/40 dark:border-gray-700/50">
-            
-            <div class="mb-4">
-                <span class="text-9xl md:text-[12rem] font-black text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-400 drop-shadow-sm">
-                    @yield('code')
-                </span>
-            </div>
+        @hasSection('image')
+            <img src="@yield('image')" alt="@yield('code')" class="error-image">
+        @endif
 
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-gray-900 dark:text-white">@yield('message')</h1>
-            
-            <p class="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-lg mx-auto leading-relaxed">
-                @yield('description', "We couldn't process your request right now. Please navigate back or try again later.")
-            </p>
+        <h1>@yield('message')</h1>
+        <p>@yield('description')</p>
 
-            <a href="{{ url('/') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full hover:from-green-600 hover:to-emerald-700 shadow-xl shadow-green-500/30 hover:shadow-green-500/50 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-green-500/50 active:translate-y-0">
-                <svg class="w-6 h-6 mr-3 -ml-1 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Return to Homepage
+        @hasSection('actions')
+            @yield('actions')
+        @else
+            <a href="{{ url('/') }}" class="btn-premium">
+                <i class="bi bi-house-door"></i>
+                {{ app()->getLocale() == 'bn' ? 'হোম পেজে ফিরে যান' : 'Return to Homepage' }}
             </a>
+        @endif
+
+        <div class="mt-5 pt-4 text-muted small border-top">
+            @hasSection('footnote')
+                @yield('footnote')
+            @else
+                <p>
+                    {{ app()->getLocale() == 'bn' ? 'সাহায্য দরকার?' : 'Need help?' }}
+                    <a href="https://wa.me/{{ \App\Models\Setting::get('whatsapp', '8801716952365') }}" class="text-primary text-decoration-none fw-bold">
+                        WhatsApp Support
+                    </a>
+                </p>
+            @endif
         </div>
     </div>
 </body>

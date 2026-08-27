@@ -52,81 +52,29 @@
                     </div>
 
                     <!-- Variants -->
+                    @php
+                        $variantRows = old('variants', isset($product)
+                            ? $product->variants->map(fn ($v) => [
+                                'name' => $v->name,
+                                'unit_id' => $v->unit_id,
+                                'unit_value' => $v->unit_value,
+                                'price' => $v->price,
+                                'sale_price' => $v->sale_price,
+                                'stock' => $v->stock,
+                            ])->values()->all()
+                            : []);
+                    @endphp
                     <div class="mb-3">
                         <label class="form-label fw-bold">Product Variants *</label>
-                        <div id="variantContainer">
-                            @if(isset($product) && $product->variants->count())
-                                @foreach($product->variants as $i => $variant)
-                                <div class="variant-row border rounded p-3 mb-2">
-                                    <div class="row g-2 align-items-end">
-                                        <div class="col-md-3">
-                                            <label class="form-label">Variant Name *</label>
-                                            <input type="text" name="variants[{{ $i }}][name]" class="form-control form-control-sm"
-                                                   value="{{ $variant->name }}" placeholder="e.g. ৬ কেজি" required>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Weight (kg)</label>
-                                            <input type="number" step="0.01" name="variants[{{ $i }}][weight_kg]" class="form-control form-control-sm"
-                                                   value="{{ $variant->weight_kg }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Price *</label>
-                                            <input type="number" name="variants[{{ $i }}][price]" class="form-control form-control-sm"
-                                                   value="{{ $variant->price }}" required>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Sale Price</label>
-                                            <input type="number" name="variants[{{ $i }}][sale_price]" class="form-control form-control-sm"
-                                                   value="{{ $variant->sale_price }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Stock *</label>
-                                            <input type="number" name="variants[{{ $i }}][stock]" class="form-control form-control-sm"
-                                                   value="{{ $variant->stock }}" required>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.variant-row').remove()">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endforeach
-                            @else
-                                <div class="variant-row border rounded p-3 mb-2">
-                                    <div class="row g-2 align-items-end">
-                                        <div class="col-md-3">
-                                            <label class="form-label">Variant Name *</label>
-                                            <input type="text" name="variants[0][name]" class="form-control form-control-sm" placeholder="e.g. ৬ কেজি" required>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Weight (kg)</label>
-                                            <input type="number" step="0.01" name="variants[0][weight_kg]" class="form-control form-control-sm">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Price *</label>
-                                            <input type="number" name="variants[0][price]" class="form-control form-control-sm" required>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Sale Price</label>
-                                            <input type="number" name="variants[0][sale_price]" class="form-control form-control-sm">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label">Stock *</label>
-                                            <input type="number" name="variants[0][stock]" class="form-control form-control-sm" value="0" required>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.variant-row').remove()">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-success mt-2" id="addVariantBtn">
-                            <i class="bi bi-plus-circle"></i> Add Variant
-                        </button>
+                        <div
+                            data-vue="VariantRepeater"
+                            data-props="{{ json_encode([
+                                'rows' => $variantRows,
+                                'units' => $units,
+                                'errors' => $errors->toArray(),
+                            ], JSON_UNESCAPED_UNICODE) }}"
+                        ></div>
+                        @error('variants') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                     </div>
 
                     <!-- SEO -->
@@ -160,10 +108,15 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Product Image</label>
-                        @if(isset($product) && $product->image)
-                            <div class="mb-2"><img src="{{ $product->image_url }}" alt="" style="max-width:100%; border-radius:8px;"></div>
-                        @endif
-                        <input type="file" name="image" class="form-control" accept="image/*">
+                        <div
+                            data-vue="ImageUpload"
+                            data-props="{{ json_encode([
+                                'currentUrl' => isset($product) && $product->image ? $product->image_url : null,
+                                'name' => 'image',
+                                'maxKb' => 2048,
+                            ], JSON_UNESCAPED_UNICODE) }}"
+                        ></div>
+                        @error('image') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="mb-3">
@@ -209,43 +162,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-let variantIndex = {{ isset($product) ? $product->variants->count() : 1 }};
-
-document.getElementById('addVariantBtn').addEventListener('click', function() {
-    const html = `<div class="variant-row border rounded p-3 mb-2">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label">Variant Name *</label>
-                <input type="text" name="variants[${variantIndex}][name]" class="form-control form-control-sm" required>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Weight (kg)</label>
-                <input type="number" step="0.01" name="variants[${variantIndex}][weight_kg]" class="form-control form-control-sm">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Price *</label>
-                <input type="number" name="variants[${variantIndex}][price]" class="form-control form-control-sm" required>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Sale Price</label>
-                <input type="number" name="variants[${variantIndex}][sale_price]" class="form-control form-control-sm">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Stock *</label>
-                <input type="number" name="variants[${variantIndex}][stock]" class="form-control form-control-sm" value="0" required>
-            </div>
-            <div class="col-md-1">
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.variant-row').remove()">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-        </div>
-    </div>`;
-    document.getElementById('variantContainer').insertAdjacentHTML('beforeend', html);
-    variantIndex++;
-});
-</script>
-@endpush

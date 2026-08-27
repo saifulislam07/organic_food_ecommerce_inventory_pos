@@ -178,7 +178,14 @@
 
                 <div class="mt-5 d-flex justify-content-center" id="load-more-container">
                     @if($products->hasMorePages())
-                        <button id="load-more-btn" class="btn-primary-custom px-5" data-page="2">
+                        <button
+                            id="load-more-btn"
+                            class="btn-primary-custom px-5"
+                            data-load-more
+                            data-page="2"
+                            data-loading-label="{{ app()->getLocale() == 'bn' ? 'লোড হচ্ছে...' : 'Loading...' }}"
+                            data-retry-label="{{ app()->getLocale() == 'bn' ? 'আবার চেষ্টা করুন' : 'Try Again' }}"
+                        >
                             <i class="bi bi-arrow-clockwise"></i> {{ app()->getLocale() == 'bn' ? 'আরও দেখুন' : 'Load More' }}
                         </button>
                     @endif
@@ -198,57 +205,3 @@
     </div>
 </section>
 @endsection
-
-@push('scripts')
-<script>
-$(document).ready(function() {
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-    }, {threshold: 0.1});
-
-    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-
-    $('#load-more-btn').click(function() {
-        const btn = $(this);
-        const page = parseInt(btn.data('page')) || 2;
-        const container = $('#product-grid');
-        const showingText = $('#showing-text');
-        const originalHtml = btn.html();
-        
-        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span> {{ app()->getLocale() == "bn" ? "লোড হচ্ছে..." : "Loading..." }}');
-
-        const params = new URLSearchParams(window.location.search);
-        params.set('page', page);
-        const url = window.location.pathname + '?' + params.toString();
-
-        $.ajax({
-            url: url,
-            type: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            success: function(data) {
-                if (data && data.html && data.html.trim().length > 0) {
-                    container.append(data.html);
-                    btn.data('page', page + 1);
-                    if (data.showing) showingText.text(data.showing);
-                    
-                    if (!data.hasMore) {
-                        $('#load-more-container').fadeOut();
-                    } else {
-                        btn.prop('disabled', false).html(originalHtml);
-                    }
-                    
-                    // Re-init observer for new items
-                    document.querySelectorAll('.fade-up:not(.visible)').forEach(el => observer.observe(el));
-                } else {
-                    $('#load-more-container').fadeOut();
-                }
-            },
-            error: function(xhr) {
-                console.error('Load more failed', xhr);
-                btn.prop('disabled', false).html('<i class="bi bi-exclamation-triangle"></i> {{ app()->getLocale() == "bn" ? "আবার চেষ্টা করুন" : "Try Again" }}');
-            }
-        });
-    });
-});
-</script>
-@endpush

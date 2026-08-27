@@ -44,9 +44,14 @@
                 <i class="bi bi-eye"></i> {{ app()->getLocale() == 'bn' ? 'বিস্তারিত দেখুন' : 'View Options' }}
             </a>
         @elseif($firstVariant && $product->is_in_stock)
-            <button onclick="addToCart({{ $product->id }}, {{ $firstVariant->id }})" class="btn-add-cart">
-                <i class="bi bi-cart-plus"></i> {{ app()->getLocale() == 'bn' ? 'এখনই কিনুন' : 'Buy Now' }}
-            </button>
+            <div
+                data-vue="AddToCartButton"
+                data-props="{{ json_encode([
+                    'productId' => $product->id,
+                    'variantId' => $firstVariant->id,
+                    'label' => app()->getLocale() == 'bn' ? 'এখনই কিনুন' : 'Buy Now',
+                ], JSON_UNESCAPED_UNICODE) }}"
+            ></div>
         @else
             <button class="btn-add-cart" disabled>
                 <i class="bi bi-x-circle"></i> {{ app()->getLocale() == 'bn' ? 'স্টক শেষ' : 'Out of Stock' }}

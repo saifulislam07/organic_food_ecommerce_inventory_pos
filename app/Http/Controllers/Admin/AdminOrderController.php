@@ -20,31 +20,45 @@ class AdminOrderController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
-                  ->orWhere('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_phone', 'like', "%{$search}%");
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_phone', 'like', "%{$search}%");
             });
         }
 
         $orders = $query->latest()->paginate(15);
+
         return view('admin.orders.index', compact('orders'));
     }
 
     public function show(Order $order)
     {
         $order->load('items');
+
         return view('admin.orders.show', compact('order'));
     }
 
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate(['status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled']);
+
         $order->update(['status' => $request->status]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order status updated!',
+                'status' => $order->status,
+                'updated_at' => $order->updated_at->format('d M Y, h:i A'),
+            ]);
+        }
+
         return back()->with('success', 'Order status updated!');
     }
 
     public function invoice(Order $order)
     {
         $order->load('items.product');
+
         return view('admin.orders.invoice', compact('order'));
     }
 }

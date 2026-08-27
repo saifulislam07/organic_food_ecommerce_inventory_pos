@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Setting;
 use App\Services\CartService;
 use Illuminate\Http\Request;
 
@@ -24,11 +25,11 @@ class CheckoutController extends Controller
 
         $items = $this->cart->getItems();
         $subtotal = $this->cart->getSubtotal();
-        
-        $shippingFeeInside = (float) \App\Models\Setting::get('shipping_fee_inside', 60);
-        $shippingFeeOutside = (float) \App\Models\Setting::get('shipping_fee_outside', 120);
-        $threshold = (float) \App\Models\Setting::get('free_delivery_threshold', 2000);
-        
+
+        $shippingFeeInside = (float) Setting::get('shipping_fee_inside', 60);
+        $shippingFeeOutside = (float) Setting::get('shipping_fee_outside', 120);
+        $threshold = (float) Setting::get('free_delivery_threshold', 2000);
+
         $userAddresses = auth()->check() ? auth()->user()->addresses : collect([]);
         $defaultAddress = $userAddresses->where('is_default', true)->first() ?? $userAddresses->first();
 
@@ -36,7 +37,7 @@ class CheckoutController extends Controller
         $total = $this->cart->getTotal($defaultAddress->area ?? 'dhaka_inside');
 
         return view('checkout.index', compact(
-            'items', 'subtotal', 'delivery', 'total', 
+            'items', 'subtotal', 'delivery', 'total',
             'shippingFeeInside', 'shippingFeeOutside', 'threshold',
             'userAddresses', 'defaultAddress'
         ));
@@ -108,6 +109,7 @@ class CheckoutController extends Controller
     public function success(string $orderNumber)
     {
         $order = Order::where('order_number', $orderNumber)->with('items')->firstOrFail();
+
         return view('checkout.success', compact('order'));
     }
 }

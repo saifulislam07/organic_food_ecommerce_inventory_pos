@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -14,21 +13,36 @@ class AdminPOSController extends Controller
 {
     public function index()
     {
-        $products = Product::with('variants')->get();
-        return view('admin.pos.index', compact('products'));
+        $items = ProductVariant::with('product')
+            ->orderBy('product_id')
+            ->orderBy('sort_order')
+            ->get()
+            ->filter(fn (ProductVariant $variant) => $variant->product !== null)
+            ->map(fn (ProductVariant $variant) => $this->presentVariant($variant))
+            ->values();
+
+        return view('admin.pos.index', compact('items'));
     }
 
     public function search(Request $request)
     {
-        $query = $request->get('q');
+        $query = trim((string) $request->get('q'));
+
         $variants = ProductVariant::with('product')
-            ->whereHas('product', function($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%");
+            ->where(function ($builder) use ($query) {
+                $builder
+                    ->whereHas('product', fn ($q) => $q->where('name', 'like', "%{$query}%"))
+                    ->orWhere('sku', 'like', "%{$query}%");
             })
-            ->orWhere('sku', 'like', "%{$query}%")
+            ->limit(20)
             ->get();
 
-        return response()->json($variants);
+        return response()->json(
+            $variants
+                ->filter(fn (ProductVariant $variant) => $variant->product !== null)
+                ->map(fn (ProductVariant $variant) => $this->presentVariant($variant))
+                ->values()
+        );
     }
 
     public function store(Request $request)
@@ -49,8 +63,10 @@ class AdminPOSController extends Controller
             $orderItems = [];
 
             foreach ($validated['items'] as $itemData) {
-                $variant = ProductVariant::with('product')->find($itemData['variant_id']);
-                
+                $variant = ProductVariant::with('product')
+                    ->lockForUpdate()
+                    ->find($itemData['variant_id']);
+
                 if ($variant->stock < $itemData['quantity']) {
                     throw new \Exception("Insufficient stock for {$variant->product->name} ({$variant->name})");
                 }
@@ -81,7 +97,7 @@ class AdminPOSController extends Controller
                 'delivery_charge' => $validated['delivery_charge'],
                 'total' => ($subtotal + $validated['delivery_charge']) - $validated['discount_amount'],
                 'status' => 'confirmed',
-                'payment_method' => 'cod', 
+                'payment_method' => 'cod',
                 'source' => 'pos',
             ]);
 
@@ -94,8 +110,26 @@ class AdminPOSController extends Controller
                 'success' => true,
                 'message' => 'Order created successfully.',
                 'order_id' => $order->id,
-                'redirect' => route('admin.orders.show', $order)
+                'redirect' => route('admin.orders.show', $order),
             ]);
         });
+    }
+
+    /**
+     * Flat shape the POS Vue component consumes, for both the initial grid and
+     * the search endpoint. Accessors like image_url are not serialised by
+     * default, so they are spelled out here.
+     */
+    private function presentVariant(ProductVariant $variant): array
+    {
+        return [
+            'id' => $variant->id,
+            'name' => $variant->name,
+            'sku' => $variant->sku,
+            'price' => (float) ($variant->sale_price ?? $variant->price),
+            'stock' => (int) $variant->stock,
+            'product_name' => $variant->product->name,
+            'image' => $variant->product->image_url,
+        ];
     }
 }

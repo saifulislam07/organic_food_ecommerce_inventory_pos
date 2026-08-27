@@ -8,19 +8,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Category extends Model
 {
     protected $fillable = [
-        'name', 'name_en', 'name_bn', 'slug', 'image', 'description', 
-        'description_en', 'description_bn', 'is_active', 'sort_order'
+        'name', 'name_en', 'name_bn', 'slug', 'image', 'description',
+        'description_en', 'description_bn', 'is_active', 'sort_order',
     ];
 
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         return $this->{"name_{$locale}"} ?? $this->attributes['name'];
     }
 
     public function getDescriptionAttribute(): ?string
     {
         $locale = app()->getLocale();
+
         return $this->{"description_{$locale}"} ?? $this->attributes['description'];
     }
 
@@ -41,8 +43,14 @@ class Category extends Model
 
     public function getImageUrlAttribute(): string
     {
-        if (!$this->image) return asset('assets/img/placeholder.png');
-        if (str_starts_with($this->image, 'categories/')) return asset('storage/' . $this->image);
-        return asset('assets/img/categories/' . $this->image);
+        if (! $this->image) {
+            return asset('assets/img/placeholder.png');
+        }
+        if (str_starts_with($this->image, 'categories/')) {
+            return asset('storage/'.$this->image);
+        }
+
+        // Legacy bare filenames have no shipped directory behind them any more.
+        return asset('assets/img/placeholder.png');
     }
 }

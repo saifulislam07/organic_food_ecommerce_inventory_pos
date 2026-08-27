@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,13 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
-            \App\Http\Middleware\SetLocale::class,
+            SetLocale::class,
         ]);
         $middleware->alias([
-            'is_admin' => \App\Http\Middleware\IsAdmin::class,
+            'is_admin' => IsAdmin::class,
         ]);
-        $middleware->redirectUsersTo(fn (\Illuminate\Http\Request $request) => 
-            $request->user()?->isAdmin() ? route('admin.dashboard', absolute: false) : route('home', absolute: false)
+        $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->isAdmin() ? route('admin.dashboard', absolute: false) : route('home', absolute: false)
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
 class AdminCategoryController extends Controller
 {
+    use GeneratesUniqueSlug;
+
     public function index()
     {
         $categories = Category::withCount('products')->sorted()->paginate(15);
+
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -34,7 +37,9 @@ class AdminCategoryController extends Controller
         ]);
 
         $data = $validated;
-        $data['slug'] = Str::slug($request->name_en);
+        // categories.name is the non-localised fallback Category::getNameAttribute() reads.
+        $data['name'] = $validated['name_en'];
+        $data['slug'] = $this->uniqueSlug($validated['name_en'], 'categories');
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('image')) {
@@ -42,6 +47,7 @@ class AdminCategoryController extends Controller
         }
 
         Category::create($data);
+
         return redirect()->route('admin.categories.index')->with('success', 'Category created!');
     }
 
@@ -63,22 +69,29 @@ class AdminCategoryController extends Controller
         ]);
 
         $data = $validated;
-        $data['slug'] = Str::slug($request->name_en);
+        $data['name'] = $validated['name_en'];
+        $data['slug'] = $this->uniqueSlug($validated['name_en'], 'categories', $category->id);
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('image')) {
-            if ($category->image) Storage::disk('public')->delete($category->image);
+            if ($category->image) {
+                Storage::disk('public')->delete($category->image);
+            }
             $data['image'] = $request->file('image')->store('categories', 'public');
         }
 
         $category->update($data);
+
         return redirect()->route('admin.categories.index')->with('success', 'Category updated!');
     }
 
     public function destroy(Category $category)
     {
-        if ($category->image) Storage::disk('public')->delete($category->image);
+        if ($category->image) {
+            Storage::disk('public')->delete($category->image);
+        }
         $category->delete();
+
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted!');
     }
 }

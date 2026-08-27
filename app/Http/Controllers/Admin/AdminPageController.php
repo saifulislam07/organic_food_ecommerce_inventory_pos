@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Page;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 
 class AdminPageController extends Controller
 {
+    use GeneratesUniqueSlug;
+
     public function index()
     {
         $pages = Page::all();
+
         return view('admin.pages.index', compact('pages'));
     }
 
@@ -30,9 +33,12 @@ class AdminPageController extends Controller
             'slug' => 'nullable|string|unique:pages,slug',
         ]);
 
-        $validated['slug'] = $validated['slug'] ?: Str::slug($validated['title_en']);
+        // An auto-generated slug still has to clear the UNIQUE index.
+        // A nullable field that was not posted is absent from $validated entirely.
+        $validated['slug'] = ($validated['slug'] ?? null) ?: $this->uniqueSlug($validated['title_en'], 'pages');
 
         Page::create($validated);
+
         return redirect()->route('admin.pages.index')->with('success', 'Page created successfully');
     }
 
@@ -52,6 +58,7 @@ class AdminPageController extends Controller
         ]);
 
         $page->update($validated);
+
         return redirect()->route('admin.pages.index')->with('success', 'Page updated successfully');
     }
 }

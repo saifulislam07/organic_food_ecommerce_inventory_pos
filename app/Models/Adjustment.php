@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Adjustment extends Model
 {
     protected $fillable = [
-        'product_variant_id', 'quantity', 'type', 'reason', 'adjustment_date'
+        'product_variant_id', 'quantity', 'type', 'reason', 'adjustment_date',
     ];
 
     protected $casts = [

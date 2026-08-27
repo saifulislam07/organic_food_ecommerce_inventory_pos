@@ -1,32 +1,39 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ShopController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Admin\AdminAdjustmentController;
+use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminCustomerController;
+use App\Http\Controllers\Admin\AdminExpenseController;
+use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminMailSettingController;
+use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\AdminPageController;
+use App\Http\Controllers\Admin\AdminPOSController;
+use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminPurchaseController;
+use App\Http\Controllers\Admin\AdminSettingController;
+use App\Http\Controllers\Admin\AdminSupplierController;
+use App\Http\Controllers\Admin\AdminUnitController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\AdminProductController;
-use App\Http\Controllers\Admin\AdminCategoryController;
-use App\Http\Controllers\Admin\AdminOrderController;
-use App\Http\Controllers\Admin\AdminExpenseController;
-use App\Http\Controllers\Admin\AdminSettingController;
-use App\Http\Controllers\Admin\AdminPageController;
-use App\Http\Controllers\Admin\AdminSupplierController;
-use App\Http\Controllers\Admin\AdminPurchaseController;
-use App\Http\Controllers\Admin\AdminAdjustmentController;
+use App\Http\Controllers\Customer\CustomerDashboardController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
-Route::get('/p/{slug}', [\App\Http\Controllers\PageController::class, 'show'])->name('pages.show');
-Route::get('/about', fn() => view('pages.about'))->name('about');
-Route::get('/contact', fn() => view('pages.contact'))->name('contact');
-Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
-
+Route::get('/p/{slug}', [PageController::class, 'show'])->name('pages.show');
+Route::get('/about', fn () => view('pages.about'))->name('about');
+Route::get('/contact', fn () => view('pages.contact'))->name('contact');
+Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 
 // Cart Routes (AJAX)
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -45,9 +52,9 @@ Route::get('/order-success/{orderNumber}', [CheckoutController::class, 'success'
 
 // Customer Routes
 Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/orders/{orderNumber}', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'show'])->name('orders.show');
-    Route::get('/orders/{orderNumber}/invoice', [\App\Http\Controllers\Customer\CustomerDashboardController::class, 'invoice'])->name('orders.invoice');
+    Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/orders/{orderNumber}', [CustomerDashboardController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{orderNumber}/invoice', [CustomerDashboardController::class, 'invoice'])->name('orders.invoice');
 });
 
 // Admin Routes
@@ -56,18 +63,22 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
 
     Route::resource('products', AdminProductController::class);
     Route::resource('categories', AdminCategoryController::class);
+    Route::resource('units', AdminUnitController::class)->except(['show']);
     Route::resource('expenses', AdminExpenseController::class);
 
-    Route::get('/inventory', [\App\Http\Controllers\Admin\AdminInventoryController::class, 'index'])->name('inventory.index');
-    Route::patch('/inventory/{variant}', [\App\Http\Controllers\Admin\AdminInventoryController::class, 'updateStock'])->name('inventory.update');
+    Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
+    Route::patch('/inventory/{variant}', [AdminInventoryController::class, 'updateStock'])->name('inventory.update');
 
-    Route::get('/pos', [\App\Http\Controllers\Admin\AdminPOSController::class, 'index'])->name('pos.index');
-    Route::post('/pos', [\App\Http\Controllers\Admin\AdminPOSController::class, 'store'])->name('pos.store');
-    Route::get('/pos/search', [\App\Http\Controllers\Admin\AdminPOSController::class, 'search'])->name('pos.search');
+    Route::get('/pos', [AdminPOSController::class, 'index'])->name('pos.index');
+    Route::post('/pos', [AdminPOSController::class, 'store'])->name('pos.store');
+    Route::get('/pos/search', [AdminPOSController::class, 'search'])->name('pos.search');
 
-    Route::resource('suppliers', \App\Http\Controllers\Admin\AdminSupplierController::class);
-    Route::resource('purchases', \App\Http\Controllers\Admin\AdminPurchaseController::class)->except(['edit', 'update']);
-    Route::resource('adjustments', \App\Http\Controllers\Admin\AdminAdjustmentController::class)->except(['edit', 'update']);
+    Route::resource('suppliers', AdminSupplierController::class);
+    Route::resource('purchases', AdminPurchaseController::class)->except(['edit', 'update']);
+    Route::resource('adjustments', AdminAdjustmentController::class)->except(['edit', 'update']);
+
+    Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
 
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
@@ -75,6 +86,9 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     // Settings & Pages
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
+    Route::get('/settings/mail', [AdminMailSettingController::class, 'edit'])->name('settings.mail.edit');
+    Route::post('/settings/mail', [AdminMailSettingController::class, 'update'])->name('settings.mail.update');
+    Route::post('/settings/mail/test', [AdminMailSettingController::class, 'test'])->name('settings.mail.test');
     Route::resource('pages', AdminPageController::class);
 
     Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
@@ -91,6 +105,7 @@ Route::get('/lang/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'bn'])) {
         session()->put('locale', $locale);
     }
+
     return back();
 })->name('lang.switch');
 

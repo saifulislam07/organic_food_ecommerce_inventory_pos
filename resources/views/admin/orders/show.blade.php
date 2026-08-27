@@ -80,27 +80,14 @@
         <!-- Status Control -->
         <div class="card admin-card mb-4 p-4">
             <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">Order Status</h5>
-            <div class="mb-3">
-                <div class="d-flex align-items-center gap-2">
-                    {!! $order->status_badge !!}
-                    <span class="text-muted small">Updated on {{ $order->updated_at->format('d M Y, h:i A') }}</span>
-                </div>
-            </div>
-            <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST">
-                @csrf
-                @method('PATCH')
-                <div class="input-group">
-                    <select name="status" class="form-select">
-                        <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="confirmed" {{ $order->status == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                        <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Processing</option>
-                        <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
-                        <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered</option>
-                        <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                    </select>
-                    <button class="btn btn-primary" type="submit">Update</button>
-                </div>
-            </form>
+            <div
+                data-vue="OrderStatusControl"
+                data-props="{{ json_encode([
+                    'current' => $order->status,
+                    'updateUrl' => route('admin.orders.updateStatus', $order),
+                    'updatedAt' => $order->updated_at->format('d M Y, h:i A'),
+                ], JSON_UNESCAPED_UNICODE) }}"
+            ></div>
         </div>
 
         <!-- Customer Info -->

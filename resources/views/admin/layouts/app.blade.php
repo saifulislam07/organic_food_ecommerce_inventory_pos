@@ -91,6 +91,7 @@
             .admin-content { margin-left: 0; }
         }
     </style>
+    @vite(['resources/js/admin.js'])
     @stack('styles')
 </head>
 <body>
@@ -117,8 +118,18 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.units.index') }}" class="{{ request()->routeIs('admin.units.*') ? 'active' : '' }}">
+                    <i class="bi bi-rulers"></i> Units
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                     <i class="bi bi-receipt"></i> Orders
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
+                    <i class="bi bi-people"></i> Customers
                 </a>
             </li>
             <li>
@@ -158,8 +169,13 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
                     <i class="bi bi-gear"></i> Site Settings
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.settings.mail.edit') }}" class="{{ request()->routeIs('admin.settings.mail.*') ? 'active' : '' }}">
+                    <i class="bi bi-envelope-gear"></i> Email / SMTP
                 </a>
             </li>
             <div class="nav-divider"></div>
@@ -201,11 +217,22 @@
         </div>
         @endif
 
+        @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show">
+            <strong><i class="bi bi-exclamation-triangle-fill me-1"></i> Please fix the following:</strong>
+            <ul class="mb-0 mt-2 ps-3">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
         @yield('content')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     @stack('scripts')
 </body>
 </html>

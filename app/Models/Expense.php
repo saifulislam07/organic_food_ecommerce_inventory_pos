@@ -11,11 +11,11 @@ class Expense extends Model
         'category',
         'amount',
         'expense_date',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [
         'expense_date' => 'date',
-        'amount' => 'decimal:2'
+        'amount' => 'decimal:2',
     ];
 }

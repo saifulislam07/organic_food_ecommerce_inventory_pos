@@ -2,27 +2,32 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\PresentsVariantOptions;
 use App\Http\Controllers\Controller;
+use App\Models\ProductVariant;
 use App\Models\Purchase;
 use App\Models\Supplier;
-use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminPurchaseController extends Controller
 {
+    use PresentsVariantOptions;
+
     public function index()
     {
         $purchases = Purchase::with(['supplier', 'productVariant.product'])
             ->latest('purchase_date')
             ->paginate(20);
+
         return view('admin.purchases.index', compact('purchases'));
     }
 
     public function create()
     {
-        $suppliers = Supplier::orderBy('name')->get();
-        $variants = ProductVariant::with('product')->get();
+        $suppliers = Supplier::orderBy('name')->get(['id', 'name']);
+        $variants = $this->variantOptions();
+
         return view('admin.purchases.create', compact('suppliers', 'variants'));
     }
 
@@ -39,7 +44,7 @@ class AdminPurchaseController extends Controller
 
         DB::transaction(function () use ($validated) {
             $purchase = Purchase::create($validated);
-            
+
             // Update Variant Stock and Cost Price
             $variant = ProductVariant::find($validated['product_variant_id']);
             $variant->increment('stock', $validated['quantity']);

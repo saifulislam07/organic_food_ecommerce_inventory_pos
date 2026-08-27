@@ -8,7 +8,7 @@ class Purchase extends Model
 {
     protected $fillable = [
         'supplier_id', 'product_variant_id', 'purchase_price',
-        'quantity', 'purchase_date', 'notes'
+        'quantity', 'purchase_date', 'notes',
     ];
 
     protected $casts = [

@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-
-use App\Models\Setting;
+use App\Models\Category;
 use App\Models\Page;
+use App\Models\Setting;
+use Illuminate\Database\Seeder;
 
 class InitialSettingsSeeder extends Seeder
 {
@@ -44,11 +43,11 @@ class InitialSettingsSeeder extends Seeder
                 'description_en' => '100% natural flower honey.',
                 'description_bn' => '১০০% প্রাকৃতিক ফুলের মধু।',
                 'is_active' => true,
-            ]
+            ],
         ];
 
         foreach ($categories as $cat) {
-            \App\Models\Category::updateOrCreate(['slug' => $cat['slug']], $cat);
+            Category::updateOrCreate(['slug' => $cat['slug']], $cat);
         }
 
         // Essential Pages

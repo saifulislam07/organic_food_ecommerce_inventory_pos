@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('delivery_charge', 10, 2)->default(0);
             $table->decimal('total', 10, 2);
             $table->enum('status', [
-                'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'
+                'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled',
             ])->default('pending');
             $table->string('payment_method')->default('cod');
             $table->timestamps();

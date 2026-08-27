@@ -18,6 +18,30 @@
 
     <!-- Custom CSS -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    {{-- Runtime config for resources/js/storefront.js --}}
+    @php
+        $storefrontConfig = [
+            'routes' => [
+                'add' => route('cart.add'),
+                'update' => route('cart.update'),
+                'remove' => route('cart.remove'),
+                'count' => route('cart.count'),
+                'mini' => route('cart.mini'),
+            ],
+            'locale' => app()->getLocale(),
+            'freeDeliveryThreshold' => (float) \App\Models\Setting::get('free_delivery_threshold', 2000),
+            'whatsapp' => \App\Models\Setting::get('whatsapp', '8801716952365'),
+            'strings' => [
+                'added' => app()->getLocale() == 'bn' ? 'কার্টে যোগ করা হয়েছে!' : 'Added to cart!',
+                'removed' => app()->getLocale() == 'bn' ? 'পণ্যটি সরানো হয়েছে' : 'Item removed',
+                'error' => app()->getLocale() == 'bn' ? 'কিছু ভুল হয়েছে!' : 'Something went wrong!',
+            ],
+        ];
+    @endphp
+    <script type="application/json" id="storefront-config">{!! json_encode($storefrontConfig, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+
+    @vite(['resources/js/storefront.js'])
     <style>
         :root {
             --primary: #2d6a4f;
@@ -368,7 +392,7 @@
                     <div class="d-flex align-items-center gap-2">
                         <a href="{{ route('cart.index') }}" class="nav-cart-btn position-relative" id="desktopCartBtn">
                             <i class="bi bi-cart3"></i>
-                            <span class="cart-badge" id="desktopCartBadge">0</span>
+                            <span data-vue="CartBadge"></span>
                         </a>
                         @auth
                             <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('customer.dashboard') }}" class="nav-icon-btn ms-2">
@@ -425,7 +449,7 @@
         </a>
         <a href="{{ route('cart.index') }}" class="{{ request()->routeIs('cart.index') ? 'active' : '' }} position-relative">
             <i class="bi bi-cart{{ request()->routeIs('cart.index') ? '-fill' : '3' }}"></i>
-            <span class="cart-badge badge rounded-pill bg-danger" id="mobileNavBadge">0</span>
+            <span data-vue="CartBadge" data-props="{{ json_encode(['extraClass' => 'badge rounded-pill bg-danger']) }}"></span>
             <span>{{ app()->getLocale() == 'bn' ? 'কার্ট' : 'Cart' }}</span>
         </a>
         <a href="{{ auth()->check() ? (auth()->user()->isAdmin() ? route('admin.dashboard') : route('customer.dashboard')) : route('login') }}" class="{{ request()->routeIs('login') || request()->routeIs('customer.dashboard') || request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -588,77 +612,11 @@
         <i class="bi bi-whatsapp"></i>
     </a>
 
-    <!-- Toast Notification -->
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
-        <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert">
-            <div class="d-flex">
-                <div class="toast-body" id="cartToastBody">{{ app()->getLocale() == 'bn' ? 'কার্টে যোগ করা হয়েছে!' : 'Added to cart!' }}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    </div>
+    <!-- Toast Notifications (Vue) -->
+    <div data-vue="CartToast"></div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <script>
-        // CSRF Token for AJAX
-        $.ajaxSetup({
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-        });
-
-        // Update cart badge on page load
-        function updateCartBadge() {
-            $.get('{{ route("cart.count") }}', function(data) {
-                $('#desktopCartBadge, #mobileCartBadge').text(data.count);
-                if (data.count > 0) {
-                    $('#desktopCartBadge, #mobileCartBadge').addClass('show');
-                } else {
-                    $('#desktopCartBadge, #mobileCartBadge').removeClass('show');
-                }
-            });
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = $('#cartToast');
-            toast.removeClass('bg-success bg-danger bg-warning').addClass('bg-' + type);
-            $('#cartToastBody').text(message);
-            new bootstrap.Toast(toast[0]).show();
-        }
-
-        // Add to cart function
-        function addToCart(productId, variantId, qty = 1) {
-            $.post('{{ route("cart.add") }}', {
-                product_id: productId,
-                variant_id: variantId,
-                quantity: qty
-            }, function(data) {
-                if (data.success) {
-                    showToast(data.message);
-                    updateCartBadge();
-                } else {
-                    showToast(data.message, 'danger');
-                }
-            }).fail(function() {
-                showToast('{{ app()->getLocale() == "bn" ? "কিছু ভুল হয়েছে!" : "Something went wrong!" }}', 'danger');
-            });
-        }
-
-        $(document).ready(function() {
-            updateCartBadge();
-
-            // Navbar scroll effect
-            $(window).scroll(function() {
-                if ($(this).scrollTop() > 50) {
-                    $('#mainNavbar').addClass('scrolled');
-                } else {
-                    $('#mainNavbar').removeClass('scrolled');
-                }
-            });
-        });
-    </script>
     @stack('scripts')
 </body>
 </html>

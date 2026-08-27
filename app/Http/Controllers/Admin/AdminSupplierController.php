@@ -11,6 +11,7 @@ class AdminSupplierController extends Controller
     public function index()
     {
         $suppliers = Supplier::orderBy('name')->paginate(20);
+
         return view('admin.suppliers.index', compact('suppliers'));
     }
 
@@ -61,6 +62,7 @@ class AdminSupplierController extends Controller
         }
 
         $supplier->delete();
+
         return redirect()->route('admin.suppliers.index')->with('success', 'Supplier deleted successfully.');
     }
 }

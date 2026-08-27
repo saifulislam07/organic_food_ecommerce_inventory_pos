@@ -44,8 +44,8 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        if (!$request->user()->isAdmin()) {
-            \Illuminate\Support\Facades\Auth::guard('web')->logout();
+        if (! $request->user()->isAdmin()) {
+            Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 

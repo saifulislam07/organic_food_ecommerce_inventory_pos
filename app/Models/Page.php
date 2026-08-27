@@ -11,12 +11,14 @@ class Page extends Model
     public function getTitleAttribute()
     {
         $locale = app()->getLocale();
+
         return $this->{"title_{$locale}"} ?? $this->title_en;
     }
 
     public function getContentAttribute()
     {
         $locale = app()->getLocale();
+
         return $this->{"content_{$locale}"} ?? $this->content_en;
     }
 }

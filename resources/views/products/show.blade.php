@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @section('title', $product->meta_title ?? $product->name . ' – Mango Hut')
-@section('meta_description', $product->meta_description ?? $product->short_description)
+@section('meta_description', $product->meta_description ?? $product->short_description ?? $product->name)
 
 @push('styles')
 <style>
@@ -188,56 +188,48 @@
                         <p class="text-muted mb-3">{{ $product->short_description }}</p>
                     @endif
 
-                    <!-- Price Display -->
-                    <div class="product-detail-price" id="priceDisplay">
-                        @php $first = $product->variants->first(); @endphp
-                        @if($first && $first->is_on_sale)
-                            <span class="price-original" style="font-size:1.2rem;">৳{{ number_format($first->price) }}</span>
-                            <span>৳{{ number_format($first->sale_price) }}</span>
-                        @elseif($first)
-                            ৳{{ number_format($first->price) }}
-                        @endif
-                    </div>
+                    @php
+                        $whatsappTemplate = app()->getLocale() == 'bn'
+                            ? "হ্যালো! আমি এই প্রোডাক্টটি অর্ডার করতে চাই:
 
-                    <!-- Variant Selection -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">{{ app()->getLocale() == 'bn' ? 'অপশন সিলেক্ট করুন:' : 'Select Option:' }}</label>
-                        <div class="variant-options">
-                            @foreach($product->variants as $i => $variant)
-                            <button type="button"
-                                    class="variant-btn {{ $i === 0 ? 'active' : '' }}"
-                                    data-variant-id="{{ $variant->id }}"
-                                    data-price="{{ $variant->display_price }}"
-                                    data-original="{{ $variant->price }}"
-                                    data-sale="{{ $variant->sale_price }}"
-                                    data-stock="{{ $variant->stock }}"
-                                    data-name="{{ $variant->name }}">
-                                <span class="variant-name">{{ $variant->name }}</span>
-                                <span class="variant-price">৳{{ number_format($variant->display_price) }}</span>
-                            </button>
-                            @endforeach
-                        </div>
-                    </div>
+পণ্য: {product}
+অপশন: {variant}
+পরিমান: {quantity}
 
-                    <!-- Quantity -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">{{ app()->getLocale() == 'bn' ? 'পরিমান:' : 'Quantity:' }}</label>
-                        <div class="qty-control">
-                            <button class="qty-btn" onclick="changeQty(-1)">−</button>
-                            <input type="number" id="productQty" class="qty-value" value="1" min="1" max="20">
-                            <button class="qty-btn" onclick="changeQty(1)">+</button>
-                        </div>
-                    </div>
+অনুগ্রহ করে ডেলিভরি সম্পর্কে তথ্য দিন।"
+                            : "Hello! I would like to order this product:
 
-                    <!-- Action Buttons -->
-                    <div class="d-flex flex-wrap gap-3 mb-4">
-                        <button onclick="addProductToCart()" class="btn-primary-custom" id="addToCartBtn">
-                            <i class="bi bi-cart-plus"></i> {{ app()->getLocale() == 'bn' ? 'কার্টে যোগ করুন' : 'Add to Cart' }}
-                        </button>
-                        <a href="#" id="whatsappOrderBtn" class="btn-whatsapp" target="_blank">
-                            <i class="bi bi-whatsapp"></i> {{ app()->getLocale() == 'bn' ? 'WhatsApp এ অর্ডার করুন' : 'Order via WhatsApp' }}
-                        </a>
-                    </div>
+Product: {product}
+Variant: {variant}
+Quantity: {quantity}
+
+Please provide delivery info.";
+                    @endphp
+                    <div
+                        data-vue="ProductPurchase"
+                        data-props="{{ json_encode([
+                            'productId' => $product->id,
+                            'productName' => $product->name,
+                            'variants' => $product->variants->map(fn ($v) => [
+                                'id' => $v->id,
+                                'name' => $v->name,
+                                'price' => (float) $v->price,
+                                'sale_price' => $v->sale_price === null ? null : (float) $v->sale_price,
+                                'display_price' => (float) $v->display_price,
+                                'stock' => (int) $v->stock,
+                            ])->values(),
+                            'whatsappNumber' => \App\Models\Setting::get('whatsapp', '8801716952365'),
+                            'whatsappTemplate' => $whatsappTemplate,
+                            'labels' => [
+                                'selectLabel' => app()->getLocale() == 'bn' ? 'অপশন সিলেক্ট করুন:' : 'Select Option:',
+                                'quantityLabel' => app()->getLocale() == 'bn' ? 'পরিমান:' : 'Quantity:',
+                                'addToCart' => app()->getLocale() == 'bn' ? 'কার্টে যোগ করুন' : 'Add to Cart',
+                                'outOfStock' => app()->getLocale() == 'bn' ? 'স্টক শেষ' : 'Out of Stock',
+                                'whatsapp' => app()->getLocale() == 'bn' ? 'WhatsApp এ অর্ডার করুন' : 'Order via WhatsApp',
+                                'selectOption' => app()->getLocale() == 'bn' ? 'একটি অপশন সিলেক্ট করুন' : 'Please select an option',
+                            ],
+                        ], JSON_UNESCAPED_UNICODE) }}"
+                    ></div>
 
                     <!-- Product Meta -->
                     <div class="product-meta-section mt-5 pt-4 border-top">
@@ -309,75 +301,3 @@
     </div>
 </section>
 @endsection
-
-@push('scripts')
-<script>
-let selectedVariantId = {{ $product->variants->first()->id ?? 'null' }};
-let selectedVariantName = '{{ $product->variants->first()->name ?? '' }}';
-
-// Variant selection
-$('.variant-btn').on('click', function() {
-    $('.variant-btn').removeClass('active');
-    $(this).addClass('active');
-
-    selectedVariantId = $(this).data('variant-id');
-    selectedVariantName = $(this).data('name');
-    const price = $(this).data('price');
-    const original = $(this).data('original');
-    const sale = $(this).data('sale');
-    const stock = $(this).data('stock');
-
-    let priceHtml = '';
-    if (sale && sale < original) {
-        priceHtml = '<span class="price-original" style="font-size:1.2rem;">৳' + Number(original).toLocaleString() + '</span> ৳' + Number(sale).toLocaleString();
-    } else {
-        priceHtml = '৳' + Number(original).toLocaleString();
-    }
-    $('#priceDisplay').html(priceHtml);
-
-    if (stock <= 0) {
-        $('#addToCartBtn').prop('disabled', true).html('<i class="bi bi-x-circle"></i> {{ app()->getLocale() == "bn" ? "স্টক শেষ" : "Out of Stock" }}');
-    } else {
-        $('#addToCartBtn').prop('disabled', false).html('<i class="bi bi-cart-plus"></i> {{ app()->getLocale() == "bn" ? "কার্টে যোগ করুন" : "Add to Cart" }}');
-    }
-
-    updateWhatsAppLink();
-});
-
-function changeQty(delta) {
-    const input = document.getElementById('productQty');
-    let val = parseInt(input.value) + delta;
-    if (val < 1) val = 1;
-    if (val > 20) val = 20;
-    input.value = val;
-    updateWhatsAppLink();
-}
-
-function addProductToCart() {
-    if (!selectedVariantId) {
-        showToast('Please select an option', 'warning');
-        return;
-    }
-    const qty = parseInt($('#productQty').val());
-    addToCart({{ $product->id }}, selectedVariantId, qty);
-}
-
-function updateWhatsAppLink() {
-    const qty = $('#productQty').val();
-    const bnText = `হ্যালো! আমি এই প্রোডাক্টটি অর্ডার করতে চাই:\n\nপণ্য: {{ $product->name }}\nঅপশন: ${selectedVariantName}\nপরিমান: ${qty}\n\nঅনুগ্রহ করে ডেলিভরি সম্পর্কে তথ্য দিন।`;
-    const enText = `Hello! I would like to order this product:\n\nProduct: {{ $product->name }}\nVariant: ${selectedVariantName}\nQuantity: ${qty}\n\nPlease provide delivery info.`;
-    const text = '{{ app()->getLocale() == "bn" }}' === '1' ? bnText : enText;
-    const encoded = encodeURIComponent(text);
-    $('#whatsappOrderBtn').attr('href', `https://wa.me/{{ \App\Models\Setting::get('whatsapp', '8801716952365') }}?text=${encoded}`);
-}
-
-updateWhatsAppLink();
-
-// Scroll animation
-document.querySelectorAll('.fade-up').forEach(el => {
-    new IntersectionObserver(entries => {
-        entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-    }, {threshold: 0.1}).observe(el);
-});
-</script>
-@endpush
