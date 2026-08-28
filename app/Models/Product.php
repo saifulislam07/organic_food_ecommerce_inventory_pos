@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CleansUpImages;
+use App\Support\ImageStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +12,19 @@ use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
+    use CleansUpImages;
+
+    protected static function booted(): void
+    {
+        static::deleting(function (self $product) {
+            // Deleted one by one so ProductImage's own hook removes each file;
+            // the database cascade would take the rows but leave the images.
+            $product->images->each->delete();
+
+            self::deleteUploadedImage($product->getRawOriginal('image'), 'products/');
+        });
+    }
+
     protected $fillable = [
         'category_id', 'name', 'name_en', 'name_bn', 'slug',
         'short_description', 'short_description_en', 'short_description_bn',
@@ -84,6 +99,16 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    /**
+     * Everything a product card reads, in three queries instead of one per
+     * variant: is_in_stock walks the variants, and a combo variant's stock is
+     * worked out from its components.
+     */
+    public function scopeWithCardData($query)
+    {
+        return $query->with(['category', 'variants.comboItems.component']);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -137,20 +162,12 @@ class Product extends Model
 
     public function getImageUrlAttribute(): string
     {
-        if (empty($this->image)) {
-            return asset('assets/img/placeholder.png');
+        // A bare filename is a shipped asset from the seed data.
+        if (filled($this->image) && ! str_contains($this->image, '/')) {
+            return asset('assets/img/products/'.$this->image);
         }
 
-        if (str_starts_with($this->image, 'http')) {
-            return $this->image;
-        }
-
-        if (str_starts_with($this->image, 'products/')) {
-            return asset('storage/'.$this->image);
-        }
-
-        // Default path in public/assets/img/products/
-        return asset('assets/img/products/'.$this->image);
+        return ImageStore::url($this->image);
     }
 
     public function getIsOnSaleAttribute(): bool

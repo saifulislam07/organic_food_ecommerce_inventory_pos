@@ -41,6 +41,10 @@
                             @error('expense_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
+                        <div class="col-md-6">
+                            @include('admin.partials.account-select', ['selected' => null])
+                        </div>
+
                         <div class="col-md-12">
                             <label class="form-label fw-bold small text-uppercase">Notes (Optional)</label>
                             <textarea name="notes" class="form-control" rows="3" placeholder="Additional details...">{{ old('notes') }}</textarea>

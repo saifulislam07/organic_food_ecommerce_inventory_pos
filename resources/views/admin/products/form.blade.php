@@ -27,7 +27,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Full Description (English)</label>
-                            <textarea name="description_en" class="form-control" rows="4">{{ old('description_en', $product->description_en ?? '') }}</textarea>
+                            <textarea name="description_en" data-editor="basic" data-editor-height="260" class="form-control" rows="4">{{ old('description_en', $product->description_en ?? '') }}</textarea>
                         </div>
                     </div>
 
@@ -47,7 +47,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">বিস্তারিত বিবরণ (বাংলা)</label>
-                            <textarea name="description_bn" class="form-control" rows="4">{{ old('description_bn', $product->description_bn ?? '') }}</textarea>
+                            <textarea name="description_bn" data-editor="basic" data-editor-height="260" class="form-control" rows="4">{{ old('description_bn', $product->description_bn ?? '') }}</textarea>
                         </div>
                     </div>
 

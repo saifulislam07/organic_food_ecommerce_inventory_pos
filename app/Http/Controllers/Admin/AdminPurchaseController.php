@@ -2,23 +2,34 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\PresentsVariantOptions;
+use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariant;
 use App\Models\Purchase;
 use App\Models\Supplier;
+use App\Support\PaymentAccounts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AdminPurchaseController extends Controller
 {
+    use BulkDeletes;
     use PresentsVariantOptions;
+    use SearchesRecords;
 
-    public function index()
+    public function index(Request $request)
     {
-        $purchases = Purchase::with(['supplier', 'productVariant.product'])
+        $purchases = $this->applySearch(
+            Purchase::with(['supplier', 'productVariant.product']),
+            $request->input('search'),
+            ['notes', 'supplier.name', 'productVariant.name', 'productVariant.product.name']
+        )
             ->latest('purchase_date')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return view('admin.purchases.index', compact('purchases'));
     }
@@ -40,7 +51,11 @@ class AdminPurchaseController extends Controller
             'quantity' => 'required|integer|min:1',
             'purchase_date' => 'required|date',
             'notes' => 'nullable|string',
+            // The form always sends it; a script or an older integration may not.
+            'paid_from' => ['nullable', Rule::in(PaymentAccounts::keys())],
         ]);
+
+        $validated['paid_from'] = $validated['paid_from'] ?? PaymentAccounts::DEFAULT_PAYOUT;
 
         DB::transaction(function () use ($validated) {
             $purchase = Purchase::create($validated);
@@ -56,13 +71,16 @@ class AdminPurchaseController extends Controller
 
     public function destroy(Purchase $purchase)
     {
-        DB::transaction(function () use ($purchase) {
-            // Revert stock
-            $variant = $purchase->productVariant;
-            $variant->decrement('stock', $purchase->quantity);
-            $purchase->delete();
-        });
+        // Purchase::booted() puts the stock back.
+        $purchase->delete();
 
         return redirect()->route('admin.purchases.index')->with('success', 'Purchase deleted and stock reverted.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $result = $this->bulkDelete($request, Purchase::class);
+
+        return $this->bulkResponse($result, 'purchases', 'admin.purchases.index');
     }
 }

@@ -22,7 +22,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Description (English)</label>
-                            <textarea name="description_en" class="form-control" rows="4">{{ old('description_en', $category->description_en ?? '') }}</textarea>
+                            <textarea name="description_en" data-editor="basic" data-editor-height="220" class="form-control" rows="4">{{ old('description_en', $category->description_en ?? '') }}</textarea>
                         </div>
                     </div>
 
@@ -37,7 +37,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">বিবরণ (বাংলা)</label>
-                            <textarea name="description_bn" class="form-control" rows="4">{{ old('description_bn', $category->description_bn ?? '') }}</textarea>
+                            <textarea name="description_bn" data-editor="basic" data-editor-height="220" class="form-control" rows="4">{{ old('description_bn', $category->description_bn ?? '') }}</textarea>
                         </div>
                     </div>
                 </div>

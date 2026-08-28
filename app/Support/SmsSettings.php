@@ -3,8 +3,6 @@
 namespace App\Support;
 
 use App\Models\Setting;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Gateway credentials live in the settings table so the shop owner can change
@@ -12,8 +10,6 @@ use Illuminate\Support\Facades\Schema;
  */
 class SmsSettings
 {
-    public const CACHE_KEY = 'sms_settings';
-
     /** key => storage type */
     public const FIELDS = [
         'sms_driver' => 'text',
@@ -25,21 +21,15 @@ class SmsSettings
     /** @return array<string, string|null> */
     public static function all(): array
     {
-        if (! self::tableIsReady()) {
-            return [];
+        $values = [];
+
+        foreach (array_keys(self::FIELDS) as $key) {
+            $values[$key] = Setting::get($key);
         }
 
-        return Cache::rememberForever(self::CACHE_KEY, function () {
-            $values = [];
+        $values['sms_driver'] = $values['sms_driver'] ?: config('sms.default');
 
-            foreach (array_keys(self::FIELDS) as $key) {
-                $values[$key] = Setting::get($key);
-            }
-
-            $values['sms_driver'] = $values['sms_driver'] ?: config('sms.default');
-
-            return $values;
-        });
+        return $values;
     }
 
     public static function save(array $values): void
@@ -62,7 +52,7 @@ class SmsSettings
 
     public static function forget(): void
     {
-        Cache::forget(self::CACHE_KEY);
+        Setting::flush();
     }
 
     /** True when a real gateway is selected and has the credentials it needs. */
@@ -75,14 +65,5 @@ class SmsSettings
         }
 
         return filled($settings['sms_api_key'] ?? null) && filled($settings['sms_sender_id'] ?? null);
-    }
-
-    private static function tableIsReady(): bool
-    {
-        try {
-            return Schema::hasTable('settings');
-        } catch (\Throwable) {
-            return false;
-        }
     }
 }

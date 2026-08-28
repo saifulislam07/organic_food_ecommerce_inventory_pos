@@ -4,6 +4,17 @@
 @section('page_title', 'Stock Analysis & Adjustments')
 
 @section('content')
+<div class="d-flex mb-3">
+    @include('admin.partials.search', ['route' => route('admin.adjustments.index'), 'placeholder' => 'Product, type or reason'])
+</div>
+@can('adjustments.delete')
+<form id="bulk-adjustments" method="POST" action="{{ route('admin.adjustments.bulkDestroy') }}"
+      data-bulk data-bulk-noun="adjustments">
+    @csrf
+    @method('DELETE')
+    @include('admin.partials.bulk-bar')
+</form>
+@endcan
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0 text-dark fw-bold">Adjustment History</h5>
@@ -16,6 +27,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-muted small text-uppercase">
                     <tr>
+                        @can('adjustments.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-adjustments"></th>@endcan
                         <th class="ps-4">Date</th>
                         <th>Product & Variant</th>
                         <th>Type</th>
@@ -27,6 +39,7 @@
                 <tbody>
                     @forelse($adjustments as $adj)
                     <tr>
+                        @can('adjustments.delete')<td class="ps-4"><input type="checkbox" class="form-check-input" form="bulk-adjustments" name="ids[]" value="{{ $adj->id }}"></td>@endcan
                         <td class="ps-4">{{ $adj->adjustment_date->format('d M, Y') }}</td>
                         <td>
                             <strong class="text-dark">{{ $adj->productVariant->product->name }}</strong><br>
@@ -61,7 +74,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">No adjustment records found.</td>
+                        <td colspan="7" class="text-center py-5 text-muted">No adjustment records found.</td>
                     </tr>
                     @endforelse
                 </tbody>

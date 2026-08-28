@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Admin\Concerns\HandlesProductImages;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Unit;
+use App\Support\RichText;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AdminProductController extends Controller
 {
-    use GeneratesUniqueSlug, HandlesProductImages;
+    use BulkDeletes, GeneratesUniqueSlug, HandlesProductImages;
 
     public function index(Request $request)
     {
@@ -69,6 +70,7 @@ class AdminProductController extends Controller
         ]);
 
         $data = collect($validated)->except(['images', 'remove_images', 'thumbnail_id', 'variants'])->toArray();
+        $data = RichText::cleanKeys($data, ['description_en', 'description_bn']);
         // products.name is the non-localised fallback Product::getNameAttribute() reads.
         $data['name'] = $validated['name_en'];
         $data['slug'] = $this->uniqueSlug($validated['name_en'], 'products');
@@ -141,6 +143,7 @@ class AdminProductController extends Controller
         ]);
 
         $data = collect($validated)->except(['images', 'remove_images', 'thumbnail_id', 'variants'])->toArray();
+        $data = RichText::cleanKeys($data, ['description_en', 'description_bn']);
         $data['name'] = $validated['name_en'];
         $data['slug'] = $this->uniqueSlug($validated['name_en'], 'products', $product->id);
         $data['is_active'] = $request->boolean('is_active', true);
@@ -175,11 +178,18 @@ class AdminProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
-        }
+        // The model's deleting hook removes the files.
         $product->delete();
 
         return redirect()->route('admin.products.index')->with('success', 'Product deleted!');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $result = $this->bulkDelete(
+            $request, Product::class
+        );
+
+        return $this->bulkResponse($result, 'products', 'admin.products.index');
     }
 }

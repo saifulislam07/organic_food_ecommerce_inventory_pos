@@ -8,6 +8,8 @@ class Page extends Model
 {
     protected $fillable = ['slug', 'title_en', 'title_bn', 'content_en', 'content_bn', 'is_active'];
 
+    protected $casts = ['is_active' => 'boolean'];
+
     public function getTitleAttribute()
     {
         $locale = app()->getLocale();

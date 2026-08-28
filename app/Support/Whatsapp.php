@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use App\Models\Setting;
 use App\Sms\SmsManager;
 
 /**
@@ -15,7 +14,7 @@ class Whatsapp
     /** Link to the shop's own WhatsApp, or null when no number is configured. */
     public static function shopUrl(?string $text = null): ?string
     {
-        return self::url(Setting::get('whatsapp'), $text);
+        return self::url(ChatSettings::whatsappNumber(), $text);
     }
 
     /** Link to any number, e.g. a customer's mobile from an order. */

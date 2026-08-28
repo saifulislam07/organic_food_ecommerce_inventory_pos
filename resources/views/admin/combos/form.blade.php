@@ -67,12 +67,12 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Full description (English)</label>
-                            <textarea name="description_en" rows="4" class="form-control">{{ old('description_en', $product->description_en ?? '') }}</textarea>
+                            <textarea name="description_en" data-editor="basic" data-editor-height="260" rows="4" class="form-control">{{ old('description_en', $product->description_en ?? '') }}</textarea>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">বিস্তারিত বিবরণ (বাংলা)</label>
-                            <textarea name="description_bn" rows="4" class="form-control">{{ old('description_bn', $product->description_bn ?? '') }}</textarea>
+                            <textarea name="description_bn" data-editor="basic" data-editor-height="260" rows="4" class="form-control">{{ old('description_bn', $product->description_bn ?? '') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -133,7 +133,7 @@
         @if($product)
             @can('combos.delete')
                 <form action="{{ route('admin.combos.destroy', $product) }}" method="POST" class="ms-auto"
-                      onsubmit="return confirm('Delete this combo? The products inside are not affected.')">
+                      data-confirm="Delete this combo? The products inside are not affected.">
                     @csrf
                     @method('DELETE')
                     <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Delete Combo</button>

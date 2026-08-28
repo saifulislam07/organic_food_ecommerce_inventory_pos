@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Support\ImageStore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -100,10 +101,11 @@ class AdminSettingController extends Controller
         }
 
         $existing = Setting::where('key', $key)->first();
-        $path = $request->file("{$key}.value_en")->store('settings', 'public');
+        $path = ImageStore::put($request->file("{$key}.value_en"), 'settings');
 
         // Replacing an image should not leave the old file orphaned on disk.
         if ($existing?->value_en && $existing->value_en !== $path) {
+            ImageStore::delete($existing->value_en);
             Storage::disk('public')->delete($existing->value_en);
         }
 

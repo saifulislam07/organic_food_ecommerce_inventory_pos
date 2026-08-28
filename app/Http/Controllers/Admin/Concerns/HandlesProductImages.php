@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin\Concerns;
 
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Support\ImageStore;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -44,13 +44,8 @@ trait HandlesProductImages
             return;
         }
 
-        $product->images()->whereIn('id', $ids)->get()->each(function (ProductImage $image) {
-            if (str_starts_with($image->path, 'products/')) {
-                Storage::disk('public')->delete($image->path);
-            }
-
-            $image->delete();
-        });
+        // ProductImage::booted() removes the file as the row goes.
+        $product->images()->whereIn('id', $ids)->get()->each->delete();
     }
 
     private function storeNewImages(Request $request, Product $product): void
@@ -65,7 +60,7 @@ trait HandlesProductImages
 
         foreach ($files as $file) {
             $product->images()->create([
-                'path' => $file->store('products', 'public'),
+                'path' => ImageStore::put($file, 'products'),
                 'sort_order' => ++$next,
             ]);
         }

@@ -872,34 +872,71 @@ body {
     font-size: 0.85rem;
 }
 
-/* === WHATSAPP FLOAT === */
-.whatsapp-float {
+/* === FLOATING CHAT BUTTONS === */
+.chat-float {
     position: fixed;
     bottom: 30px;
-    right: 30px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 12px;
+}
+.chat-float--right { right: 30px; align-items: flex-end; }
+.chat-float--left { left: 30px; align-items: flex-start; }
+
+.chat-float__btn {
     width: 60px;
     height: 60px;
-    background: #25d366;
-    color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
     font-size: 1.8rem;
-    box-shadow: 0 6px 20px rgba(37,211,102,0.4);
-    z-index: 1000;
     text-decoration: none;
     transition: var(--transition);
-    animation: whatsappPulse 2s infinite;
+    position: relative;
 }
-.whatsapp-float:hover {
-    transform: scale(1.1);
-    color: white;
-    box-shadow: 0 8px 30px rgba(37,211,102,0.5);
+.chat-float__btn:hover { transform: scale(1.1); color: #fff; }
+
+.chat-float__btn--whatsapp {
+    background: #25d366;
+    box-shadow: 0 6px 20px rgba(37,211,102,0.4);
+    animation: chatFloatPulse 2s infinite;
 }
-@keyframes whatsappPulse {
+.chat-float__btn--whatsapp:hover { box-shadow: 0 8px 30px rgba(37,211,102,0.5); }
+
+.chat-float__btn--messenger {
+    background: linear-gradient(45deg, #0084ff, #a033ff);
+    box-shadow: 0 6px 20px rgba(0,132,255,0.35);
+}
+.chat-float__btn--messenger:hover { box-shadow: 0 8px 30px rgba(0,132,255,0.45); }
+
+/* The name slides out on hover, and is read out to screen readers regardless. */
+.chat-float__label {
+    position: absolute;
+    white-space: nowrap;
+    background: rgba(33,37,41,0.9);
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.chat-float--right .chat-float__label { right: 72px; }
+.chat-float--left .chat-float__label { left: 72px; }
+.chat-float__btn:hover .chat-float__label,
+.chat-float__btn:focus-visible .chat-float__label { opacity: 1; }
+
+@keyframes chatFloatPulse {
     0%, 100% { box-shadow: 0 6px 20px rgba(37,211,102,0.4); }
     50% { box-shadow: 0 6px 30px rgba(37,211,102,0.6); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .chat-float__btn--whatsapp { animation: none; }
+    .chat-float__btn:hover { transform: none; }
 }
 
 /* === ORDER SUCCESS === */
@@ -1018,7 +1055,11 @@ body {
     .section { padding: 40px 0; }
     .section-title { font-size: 1.5rem; }
     .product-detail-info h1 { font-size: 1.5rem; }
-    .whatsapp-float { bottom: 20px; right: 20px; width: 52px; height: 52px; font-size: 1.5rem; }
+    .chat-float { bottom: 80px; gap: 10px; }
+    .chat-float--right { right: 16px; }
+    .chat-float--left { left: 16px; }
+    .chat-float__btn { width: 50px; height: 50px; font-size: 1.4rem; }
+    .chat-float__label { display: none; }
     .cart-table { font-size: 0.85rem; }
     .cart-item-img { width: 50px; height: 50px; }
 }

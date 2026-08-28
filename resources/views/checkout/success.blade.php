@@ -49,9 +49,11 @@
                     <a href="{{ route('shop') }}" class="btn-primary-custom">
                         <i class="bi bi-shop"></i> Continue Shopping
                     </a>
-                    <a href="{{ \App\Support\Whatsapp::shopUrl() }}?text=আমার অর্ডার নম্বর: {{ $order->order_number }}" target="_blank" class="btn-whatsapp">
+                    @if($trackUrl = \App\Support\Whatsapp::shopUrl('আমার অর্ডার নম্বর: '.$order->order_number))
+                    <a href="{{ $trackUrl }}" target="_blank" rel="noopener" class="btn-whatsapp">
                         <i class="bi bi-whatsapp"></i> Track via WhatsApp
                     </a>
+                    @endif
                 </div>
             </div>
         </div>

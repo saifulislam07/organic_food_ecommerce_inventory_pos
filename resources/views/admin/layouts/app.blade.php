@@ -191,10 +191,12 @@
                     'patterns' => ['admin.settings.*'],
                     'items' => [
                         ['route' => 'admin.settings.index', 'active' => 'admin.settings.index', 'label' => 'Site Settings', 'can' => 'settings.view'],
-                        ['route' => 'admin.settings.mail.edit', 'active' => 'admin.settings.mail.*', 'label' => 'Email / SMTP', 'can' => 'settings.view'],
-                        ['route' => 'admin.settings.sms.edit', 'active' => 'admin.settings.sms.*', 'label' => 'SMS Gateway', 'can' => 'settings.view'],
-                        ['route' => 'admin.settings.seo.edit', 'active' => 'admin.settings.seo.*', 'label' => 'SEO & Analytics', 'can' => 'settings.view'],
-                        ['route' => 'admin.users.index', 'active' => 'admin.users.*', 'label' => 'Users & Roles', 'can' => 'users.view'],
+                        ['route' => 'admin.settings.mail.edit', 'active' => 'admin.settings.mail.*', 'label' => 'Email / SMTP', 'can' => 'settings.edit'],
+                        ['route' => 'admin.settings.sms.edit', 'active' => 'admin.settings.sms.*', 'label' => 'SMS Gateway', 'can' => 'settings.edit'],
+                        ['route' => 'admin.settings.seo.edit', 'active' => 'admin.settings.seo.*', 'label' => 'SEO & Analytics', 'can' => 'settings.edit'],
+                        ['route' => 'admin.settings.chat.edit', 'active' => 'admin.settings.chat.*', 'label' => 'WhatsApp & Messenger', 'can' => 'settings.edit'],
+                        ['route' => 'admin.users.index', 'active' => 'admin.users.*', 'label' => 'Users', 'can' => 'users.view'],
+                        ['route' => 'admin.roles.index', 'active' => 'admin.roles.*', 'label' => 'Roles', 'can' => 'roles.view'],
                     ],
                 ],
             ];
@@ -241,6 +243,13 @@
             <li>
                 <a href="{{ route('admin.expenses.index') }}" class="{{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}">
                     <i class="bi bi-cash-stack"></i> Expenses
+                </a>
+            </li>
+            @endcan
+            @can('reports.view')
+            <li>
+                <a href="{{ route('admin.reports.profitLoss') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                    <i class="bi bi-graph-up-arrow"></i> Profit &amp; Loss
                 </a>
             </li>
             @endcan
@@ -294,24 +303,15 @@
             </div>
         </div>
 
-        @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        @endif
-
-        @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show">
-            <strong><i class="bi bi-exclamation-triangle-fill me-1"></i> Please fix the following:</strong>
-            <ul class="mb-0 mt-2 ps-3">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        @endif
+        @php
+            $adminFlash = [
+                'success' => session('success'),
+                'error' => session('error'),
+                'errors' => $errors->all(),
+            ];
+        @endphp
+        <script type="application/json" id="admin-flash">{!! json_encode($adminFlash, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+        <div data-vue="AdminDialogs"></div>
 
         @yield('content')
     </div>

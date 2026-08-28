@@ -8,11 +8,11 @@ class ProductController extends Controller
 {
     public function show(string $slug)
     {
-        $product = Product::where('slug', $slug)->with('variants', 'category', 'images')->active()->firstOrFail();
+        $product = Product::where('slug', $slug)->withCardData()->with('images')->active()->firstOrFail();
         $related = Product::active()
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
-            ->with('variants')
+            ->withCardData()
             ->take(4)
             ->get();
 

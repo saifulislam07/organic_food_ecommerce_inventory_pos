@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Admin\Concerns\HandlesProductImages;
+use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ComboItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\InventoryService;
+use App\Support\RichText;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -24,14 +27,18 @@ use Illuminate\Validation\ValidationException;
  */
 class AdminComboController extends Controller
 {
-    use GeneratesUniqueSlug, HandlesProductImages;
+    use BulkDeletes, GeneratesUniqueSlug, HandlesProductImages, SearchesRecords;
 
-    public function index()
+    public function index(Request $request)
     {
-        $combos = Product::where('is_combo', true)
-            ->with(['variants.comboItems.component.product', 'category'])
+        $combos = $this->applySearch(
+            Product::where('is_combo', true)->with(['variants.comboItems.component.product', 'category']),
+            $request->input('search'),
+            ['name', 'name_en', 'name_bn']
+        )
             ->orderBy('name')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         $inventory = app(InventoryService::class);
 
@@ -63,8 +70,8 @@ class AdminComboController extends Controller
                 'slug' => $this->uniqueSlug($validated['name_en'], 'products'),
                 'short_description_en' => $validated['short_description_en'] ?? null,
                 'short_description_bn' => $validated['short_description_bn'] ?? null,
-                'description_en' => $validated['description_en'] ?? null,
-                'description_bn' => $validated['description_bn'] ?? null,
+                'description_en' => RichText::clean($validated['description_en'] ?? null),
+                'description_bn' => RichText::clean($validated['description_bn'] ?? null),
                 'is_active' => $request->boolean('is_active', true),
                 'is_combo' => true,
             ]);
@@ -115,8 +122,8 @@ class AdminComboController extends Controller
                 'slug' => $this->uniqueSlug($validated['name_en'], 'products', $product->id),
                 'short_description_en' => $validated['short_description_en'] ?? null,
                 'short_description_bn' => $validated['short_description_bn'] ?? null,
-                'description_en' => $validated['description_en'] ?? null,
-                'description_bn' => $validated['description_bn'] ?? null,
+                'description_en' => RichText::clean($validated['description_en'] ?? null),
+                'description_bn' => RichText::clean($validated['description_bn'] ?? null),
                 'is_active' => $request->boolean('is_active', true),
             ]);
 
@@ -145,6 +152,18 @@ class AdminComboController extends Controller
         $product->delete();
 
         return redirect()->route('admin.combos.index')->with('success', "Combo \"{$name}\" removed.");
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        // The combo list only ever shows combos, but the ids arrive from the
+        // browser, so an ordinary product must not slip through this route.
+        $result = $this->bulkDelete(
+            $request, Product::class,
+            fn (Product $product) => $product->is_combo ? null : "\"{$product->name}\" is not a combo."
+        );
+
+        return $this->bulkResponse($result, 'combos', 'admin.combos.index');
     }
 
     /* ------------------------------------------------------------ helpers */

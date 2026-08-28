@@ -286,7 +286,7 @@ Please provide delivery info.";
                         <i class="bi bi-info-circle"></i> {{ app()->getLocale() == 'bn' ? 'পণ্যের বিবরণ' : 'Product Description' }}
                     </h4>
                     <div class="text-muted" style="line-height: 1.8;">
-                        {!! nl2br(e($product->description)) !!}
+                        {!! \App\Support\RichText::display($product->description) !!}
                     </div>
                 </div>
             </div>

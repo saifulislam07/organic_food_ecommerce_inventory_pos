@@ -8,14 +8,16 @@ use App\Models\OrderItem;
 use App\Models\ProductVariant;
 use App\Services\InventoryService;
 use App\Support\OrderNotifier;
+use App\Support\PaymentAccounts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AdminPOSController extends Controller
 {
     public function index()
     {
-        $items = ProductVariant::with('product')
+        $items = ProductVariant::with('product', 'comboItems.component')
             ->orderBy('product_id')
             ->orderBy('sort_order')
             ->get()
@@ -30,7 +32,7 @@ class AdminPOSController extends Controller
     {
         $query = trim((string) $request->get('q'));
 
-        $variants = ProductVariant::with('product')
+        $variants = ProductVariant::with('product', 'comboItems.component')
             ->where(function ($builder) use ($query) {
                 $builder
                     ->whereHas('product', fn ($q) => $q->where('name', 'like', "%{$query}%"))
@@ -58,6 +60,7 @@ class AdminPOSController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'delivery_charge' => 'required|numeric|min:0',
             'discount_amount' => 'required|numeric|min:0',
+            'payment_method' => ['nullable', Rule::in(PaymentAccounts::keys())],
         ]);
 
         return DB::transaction(function () use ($validated) {
@@ -94,7 +97,7 @@ class AdminPOSController extends Controller
                 'delivery_charge' => $validated['delivery_charge'],
                 'total' => ($subtotal + $validated['delivery_charge']) - $validated['discount_amount'],
                 'status' => 'confirmed',
-                'payment_method' => 'cod',
+                'payment_method' => $validated['payment_method'] ?? PaymentAccounts::DEFAULT_POS,
                 'source' => 'pos',
             ]);
 

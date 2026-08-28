@@ -4,6 +4,17 @@
 @section('page_title', 'Users & Roles')
 
 @section('content')
+<div class="d-flex mb-3">
+    @include('admin.partials.search', ['route' => route('admin.users.index'), 'placeholder' => 'Name, email or mobile'])
+</div>
+@can('users.delete')
+<form id="bulk-users" method="POST" action="{{ route('admin.users.bulkDestroy') }}"
+      data-bulk data-bulk-noun="users">
+    @csrf
+    @method('DELETE')
+    @include('admin.partials.bulk-bar')
+</form>
+@endcan
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
@@ -21,6 +32,7 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light text-muted small text-uppercase">
                             <tr>
+                                @can('users.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-users"></th>@endcan
                                 <th class="ps-4">Name</th>
                                 <th>Contact</th>
                                 <th>Access</th>
@@ -30,6 +42,7 @@
                         <tbody>
                             @forelse($users as $staff)
                             <tr>
+                                @can('users.delete')<td class="ps-4"><input type="checkbox" class="form-check-input" form="bulk-users" name="ids[]" value="{{ $staff->id }}" @disabled($staff->is(auth()->user()))></td>@endcan
                                 <td class="ps-4">
                                     <span class="fw-bold text-dark">{{ $staff->name }}</span>
                                     @if($staff->is(auth()->user()))
@@ -58,7 +71,7 @@
                                         @endcan
                                         @can('users.delete')
                                             <form action="{{ route('admin.users.destroy', $staff) }}" method="POST"
-                                                  onsubmit="return confirm('Remove this user?')">
+                                                  data-confirm="Remove this user?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button class="btn btn-outline-danger" @disabled($staff->is(auth()->user()))>
@@ -70,7 +83,7 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr><td colspan="4" class="text-center py-5 text-muted">No staff accounts yet.</td></tr>
+                            <tr><td colspan="5" class="text-center py-5 text-muted">No staff accounts yet.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -102,6 +115,12 @@
                     <strong>{{ \App\Support\AdminModules::SUPER_ADMIN }}</strong> passes every
                     permission check, so it never needs updating when a new section is added.
                 </p>
+
+                @can('roles.view')
+                    <a href="{{ route('admin.roles.index') }}" class="btn btn-sm btn-outline-primary w-100 mt-3">
+                        <i class="bi bi-person-badge"></i> Manage roles
+                    </a>
+                @endcan
             </div>
         </div>
     </div>

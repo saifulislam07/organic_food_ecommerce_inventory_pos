@@ -4,6 +4,9 @@
 @section('page_title', 'Inventory Management')
 
 @section('content')
+<div class="d-flex mb-3">
+    @include('admin.partials.search', ['route' => route('admin.inventory.index'), 'placeholder' => 'Product, variant or SKU'])
+</div>
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-danger border-0 shadow-sm text-white">

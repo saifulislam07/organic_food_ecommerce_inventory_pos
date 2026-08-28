@@ -2,19 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
+use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Support\ImageStore;
+use App\Support\RichText;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class AdminCategoryController extends Controller
 {
-    use GeneratesUniqueSlug;
+    use BulkDeletes, GeneratesUniqueSlug;
+    use SearchesRecords;
 
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::withCount('products')->sorted()->paginate(15);
+        $categories = $this->applySearch(
+            Category::withCount('products'),
+            $request->input('search'),
+            ['name', 'name_en', 'name_bn', 'slug']
+        )->sorted()->paginate(15)->withQueryString();
 
         return view('admin.categories.index', compact('categories'));
     }
@@ -36,14 +44,14 @@ class AdminCategoryController extends Controller
             'sort_order' => 'nullable|integer',
         ]);
 
-        $data = $validated;
+        $data = RichText::cleanKeys($validated, ['description_en', 'description_bn']);
         // categories.name is the non-localised fallback Category::getNameAttribute() reads.
         $data['name'] = $validated['name_en'];
         $data['slug'] = $this->uniqueSlug($validated['name_en'], 'categories');
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('categories', 'public');
+            $data['image'] = ImageStore::put($request->file('image'), 'categories');
         }
 
         Category::create($data);
@@ -68,16 +76,15 @@ class AdminCategoryController extends Controller
             'sort_order' => 'nullable|integer',
         ]);
 
-        $data = $validated;
+        $data = RichText::cleanKeys($validated, ['description_en', 'description_bn']);
         $data['name'] = $validated['name_en'];
         $data['slug'] = $this->uniqueSlug($validated['name_en'], 'categories', $category->id);
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('image')) {
-            if ($category->image) {
-                Storage::disk('public')->delete($category->image);
-            }
-            $data['image'] = $request->file('image')->store('categories', 'public');
+            // Replacing the picture should not leave the old file behind.
+            ImageStore::delete($category->getRawOriginal('image'));
+            $data['image'] = ImageStore::put($request->file('image'), 'categories');
         }
 
         $category->update($data);
@@ -87,11 +94,22 @@ class AdminCategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        if ($category->image) {
-            Storage::disk('public')->delete($category->image);
-        }
+        // The model's deleting hook removes the files.
         $category->delete();
 
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted!');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $result = $this->bulkDelete(
+            $request, Category::class,
+            fn ($category) => $category->products()->exists()
+                ? "\"{$category->name}\" still has products."
+                : null
+
+        );
+
+        return $this->bulkResponse($result, 'categories', 'admin.categories.index');
     }
 }

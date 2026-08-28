@@ -2,19 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 
 class AdminInventoryController extends Controller
 {
+    use SearchesRecords;
+
     private const LOW_STOCK_THRESHOLD = 5;
 
-    public function index()
+    public function index(Request $request)
     {
-        $variants = ProductVariant::with('product')
+        $variants = $this->applySearch(
+            ProductVariant::with('product', 'comboItems.component'),
+            $request->input('search'),
+            ['name', 'sku', 'product.name']
+        )
             ->orderBy('stock', 'asc')
-            ->paginate(30);
+            ->paginate(30)
+            ->withQueryString();
 
         $rows = $variants->getCollection()
             ->filter(fn (ProductVariant $variant) => $variant->product !== null)

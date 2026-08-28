@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\PresentsVariantOptions;
+use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Adjustment;
 use App\Models\ProductVariant;
@@ -11,13 +13,20 @@ use Illuminate\Support\Facades\DB;
 
 class AdminAdjustmentController extends Controller
 {
+    use BulkDeletes;
     use PresentsVariantOptions;
+    use SearchesRecords;
 
-    public function index()
+    public function index(Request $request)
     {
-        $adjustments = Adjustment::with('productVariant.product')
+        $adjustments = $this->applySearch(
+            Adjustment::with('productVariant.product'),
+            $request->input('search'),
+            ['reason', 'type', 'productVariant.name', 'productVariant.product.name']
+        )
             ->latest('adjustment_date')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return view('admin.adjustments.index', compact('adjustments'));
     }
@@ -43,13 +52,10 @@ class AdminAdjustmentController extends Controller
             Adjustment::create($validated);
 
             $variant = ProductVariant::find($validated['product_variant_id']);
-            // Reductions except for 'returned' which might increase stock depending on business logic
-            // For now, let's assume 'returned' increases and others decrease
-            if ($validated['type'] == 'returned') {
-                $variant->increment('stock', $validated['quantity']);
-            } else {
-                $variant->decrement('stock', $validated['quantity']);
-            }
+
+            $validated['type'] === Adjustment::RETURNED
+                ? $variant->increment('stock', $validated['quantity'])
+                : $variant->decrement('stock', $validated['quantity']);
         });
 
         return redirect()->route('admin.adjustments.index')->with('success', 'Stock adjustment recorded.');
@@ -57,16 +63,16 @@ class AdminAdjustmentController extends Controller
 
     public function destroy(Adjustment $adjustment)
     {
-        DB::transaction(function () use ($adjustment) {
-            $variant = $adjustment->productVariant;
-            if ($adjustment->type == 'returned') {
-                $variant->decrement('stock', $adjustment->quantity);
-            } else {
-                $variant->increment('stock', $adjustment->quantity);
-            }
-            $adjustment->delete();
-        });
+        // Adjustment::booted() puts the stock back.
+        $adjustment->delete();
 
         return redirect()->route('admin.adjustments.index')->with('success', 'Adjustment deleted and stock reverted.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $result = $this->bulkDelete($request, Adjustment::class);
+
+        return $this->bulkResponse($result, 'adjustments', 'admin.adjustments.index');
     }
 }

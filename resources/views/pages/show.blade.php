@@ -26,7 +26,7 @@
                     </div>
 
                     <div class="page-content position-relative z-index-1" style="line-height: 1.8; color: var(--dark); font-size: 1.05rem;">
-                        {!! $page->content !!}
+                        {!! \App\Support\RichText::display($page->content) !!}
                     </div>
 
                     <div class="mt-5 pt-4 border-top">

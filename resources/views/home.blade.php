@@ -91,7 +91,7 @@
                     <div class="category-promo" style="background-image: url('{{ $category->image_url }}');">
                         <div class="category-promo-content">
                             <h3>{{ $category->name }}</h3>
-                            <p>{{ $category->description ?? '' }}</p>
+                            <p>{{ Str::limit(strip_tags($category->description ?? ''), 90) }}</p>
                             <a href="{{ route('shop', ['category' => $category->slug]) }}" class="promo-btn">
                                 {{ app()->getLocale() == 'bn' ? 'বিস্তারিত দেখুন' : 'Shop Now' }} <i class="bi bi-arrow-right"></i>
                             </a>
@@ -135,9 +135,11 @@
             <h2 class="section-title">{{ app()->getLocale() == 'bn' ? 'সহজেই অর্ডার করুন' : 'Order Effortlessly' }}</h2>
             <p class="section-subtitle mb-4">{{ app()->getLocale() == 'bn' ? 'ফোন কল, WhatsApp বা সরাসরি ওয়েবসাইট থেকে অর্ডার করুন' : 'Order via phone, WhatsApp, or directly from our website' }}</p>
             <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="{{ \App\Support\Whatsapp::shopUrl() }}?text={{ app()->getLocale() == 'bn' ? 'হ্যালো! আমি অর্ডার করতে চাই।' : 'Hello! I want to order.' }}" target="_blank" class="btn-whatsapp">
+                @if($orderUrl = \App\Support\Whatsapp::shopUrl(app()->getLocale() == 'bn' ? 'হ্যালো! আমি অর্ডার করতে চাই।' : 'Hello! I want to order.'))
+                <a href="{{ $orderUrl }}" target="_blank" rel="noopener" class="btn-whatsapp">
                     <i class="bi bi-whatsapp"></i> {{ app()->getLocale() == 'bn' ? 'WhatsApp এ অর্ডার করুন' : 'Order on WhatsApp' }}
                 </a>
+                @endif
                 <a href="{{ route('shop') }}" class="btn-primary-custom">
                     <i class="bi bi-shop"></i> {{ app()->getLocale() == 'bn' ? 'শপ করুন' : 'Shop Now' }}
                 </a>

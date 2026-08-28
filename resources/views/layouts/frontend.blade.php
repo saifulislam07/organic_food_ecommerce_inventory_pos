@@ -394,8 +394,8 @@
     <nav class="navbar navbar-expand-lg sticky-top" id="mainNavbar">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                @if($logo = \App\Models\Setting::where('key', 'logo')->first())
-                    <img src="{{ asset('storage/' . $logo->value_en) }}" alt="Logo" height="40" class="me-2">
+                @if($logo = \App\Models\Setting::value('logo'))
+                    <img src="{{ \App\Support\ImageStore::url($logo) }}" alt="Logo" height="40" class="me-2">
                 @else
                     <span class="brand-icon">🥭</span>
                     <span class="brand-text">
@@ -510,10 +510,12 @@
             <i class="bi bi-person{{ request()->routeIs('login') || request()->routeIs('customer.dashboard') || request()->routeIs('admin.dashboard') ? '-fill' : '' }}"></i>
             <span>{{ auth()->check() ? (app()->getLocale() == 'bn' ? 'অ্যাকাউন্ট' : 'Account') : (app()->getLocale() == 'bn' ? 'লগইন' : 'Login') }}</span>
         </a>
-        <a href="{{ \App\Support\Whatsapp::shopUrl() }}" target="_blank">
+        @if($navWhatsapp = \App\Support\Whatsapp::shopUrl())
+        <a href="{{ $navWhatsapp }}" target="_blank" rel="noopener">
             <i class="bi bi-whatsapp"></i>
             <span>{{ app()->getLocale() == 'bn' ? 'কল' : 'Call' }}</span>
         </a>
+        @endif
     </div>
 
     <!-- Main Content -->
@@ -659,6 +661,7 @@
                         <li><a href="{{ route('pages.show', 'terms-and-conditions') }}">{{ app()->getLocale() == 'bn' ? 'টার্মস ও কন্ডিশন' : 'Terms & Conditions' }}</a></li>
                         <li><a href="{{ route('pages.show', 'privacy-policy') }}">{{ app()->getLocale() == 'bn' ? 'প্রাইভেসি পলিসি' : 'Privacy Policy' }}</a></li>
                         <li><a href="{{ route('pages.show', 'shipping-policy') }}">{{ app()->getLocale() == 'bn' ? 'শিপিং পলিসি' : 'Shipping Policy' }}</a></li>
+                        <li><a href="{{ route('pages.show', 'return-policy') }}">{{ app()->getLocale() == 'bn' ? 'রিটার্ন পলিসি' : 'Return Policy' }}</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6">
@@ -676,10 +679,8 @@
         </div>
     </footer>
 
-    <!-- Floating WhatsApp Button -->
-    <a href="{{ \App\Support\Whatsapp::shopUrl() }}?text={{ app()->getLocale() == 'bn' ? 'হ্যালো! আমি আপনার ওয়েবসাইট থেকে অর্ডার করতে চাই।' : 'Hello! I want to order from your website.' }}" class="whatsapp-float" target="_blank" id="whatsappFloat">
-        <i class="bi bi-whatsapp"></i>
-    </a>
+    <!-- Floating chat buttons (Admin > Settings > WhatsApp & Messenger) -->
+    @include('partials.chat-float')
 
     <!-- Toast Notifications (Vue) -->
     <div data-vue="CartToast"></div>

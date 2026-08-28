@@ -197,7 +197,7 @@ class SeoTest extends TestCase
 
     public function test_uploading_a_share_image_replaces_the_previous_file(): void
     {
-        Storage::fake('public');
+        Storage::fake('uploads');
 
         $this->actingAs($this->admin())->post(route('admin.settings.seo.update'), [
             'og_image' => UploadedFile::fake()->image('first.png'),
@@ -205,7 +205,11 @@ class SeoTest extends TestCase
 
         SeoSettings::forget();
         $first = SeoSettings::get('seo_og_image');
-        Storage::disk('public')->assertExists($first);
+
+        // Uploads are converted and land under public/uploads now.
+        $this->assertStringStartsWith('uploads/seo/', $first);
+        $this->assertStringEndsWith('.webp', $first);
+        Storage::disk('uploads')->assertExists($first);
 
         $this->actingAs($this->admin())->post(route('admin.settings.seo.update'), [
             'og_image' => UploadedFile::fake()->image('second.png'),
@@ -215,7 +219,7 @@ class SeoTest extends TestCase
         $second = SeoSettings::get('seo_og_image');
 
         $this->assertNotSame($first, $second);
-        Storage::disk('public')->assertMissing($first);
+        Storage::disk('uploads')->assertMissing($first);
     }
 
     public function test_a_customer_cannot_change_seo_settings(): void

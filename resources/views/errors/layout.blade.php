@@ -130,9 +130,11 @@
             @else
                 <p>
                     {{ app()->getLocale() == 'bn' ? 'সাহায্য দরকার?' : 'Need help?' }}
-                    <a href="{{ \App\Support\Whatsapp::shopUrl() }}" class="text-primary text-decoration-none fw-bold">
+                    @if($helpUrl = \App\Support\Whatsapp::shopUrl())
+                    <a href="{{ $helpUrl }}" target="_blank" rel="noopener" class="text-primary text-decoration-none fw-bold">
                         WhatsApp Support
                     </a>
+                    @endif
                 </p>
             @endif
         </div>

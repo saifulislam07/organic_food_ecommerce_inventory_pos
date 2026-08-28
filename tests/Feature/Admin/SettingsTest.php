@@ -92,7 +92,7 @@ class SettingsTest extends TestCase
 
     public function test_the_logo_must_be_an_image_within_the_size_limit(): void
     {
-        Storage::fake('public');
+        Storage::fake('uploads');
 
         $this->actingAs($this->admin())
             ->post(route('admin.settings.update'), [
@@ -105,14 +105,17 @@ class SettingsTest extends TestCase
 
     public function test_replacing_the_logo_deletes_the_previous_file(): void
     {
-        Storage::fake('public');
+        Storage::fake('uploads');
 
         $this->actingAs($this->admin())->post(route('admin.settings.update'), [
             'logo' => ['value_en' => UploadedFile::fake()->image('old-logo.png')],
         ])->assertRedirect();
 
         $first = Setting::where('key', 'logo')->firstOrFail()->value_en;
-        Storage::disk('public')->assertExists($first);
+
+        $this->assertStringStartsWith('uploads/settings/', $first);
+        $this->assertStringEndsWith('.webp', $first);
+        Storage::disk('uploads')->assertExists($first);
 
         $this->actingAs($this->admin())->post(route('admin.settings.update'), [
             'logo' => ['value_en' => UploadedFile::fake()->image('new-logo.png')],
@@ -121,8 +124,8 @@ class SettingsTest extends TestCase
         $second = Setting::where('key', 'logo')->firstOrFail()->value_en;
 
         $this->assertNotSame($first, $second);
-        Storage::disk('public')->assertMissing($first);
-        Storage::disk('public')->assertExists($second);
+        Storage::disk('uploads')->assertMissing($first);
+        Storage::disk('uploads')->assertExists($second);
     }
 
     public function test_a_field_the_form_did_not_submit_is_left_alone(): void

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\BulkDeletes;
+use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\AdminModules;
@@ -12,12 +14,19 @@ use Spatie\Permission\Models\Role;
 
 class AdminUserController extends Controller
 {
-    public function index()
+    use BulkDeletes;
+    use SearchesRecords;
+
+    public function index(Request $request)
     {
-        $users = User::where('role', 'admin')
-            ->with('roles')
+        $users = $this->applySearch(
+            User::where('role', 'admin')->with('roles'),
+            $request->input('search'),
+            ['name', 'email', 'mobile']
+        )
             ->orderBy('name')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return view('admin.users.index', [
             'users' => $users,
@@ -94,6 +103,18 @@ class AdminUserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('success', "{$name} removed.");
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $result = $this->bulkDelete($request, User::class, fn (User $user) => match (true) {
+            $user->role !== 'admin' => "{$user->name} is not a staff account.",
+            $user->is($request->user()) => 'You cannot delete your own account.',
+            $this->isLastSuperAdmin($user) => "{$user->name} is the last super admin.",
+            default => null,
+        });
+
+        return $this->bulkResponse($result, 'users', 'admin.users.index');
     }
 
     /* ------------------------------------------------------------ helpers */

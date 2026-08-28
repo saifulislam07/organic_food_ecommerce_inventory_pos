@@ -29,7 +29,7 @@
                         <i class="bi bi-whatsapp"></i>
                     </div>
                     <h5>WhatsApp</h5>
-                    <a href="{{ \App\Support\Whatsapp::shopUrl() }}" target="_blank" class="text-muted">01716-952365</a>
+                    <a href="{{ \App\Support\Whatsapp::shopUrl() ?: '#' }}" target="_blank" rel="noopener" class="text-muted">{{ \App\Support\ChatSettings::whatsappNumber() ?: 'Not set' }}</a>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
@@ -61,9 +61,11 @@
                                 <textarea class="form-control" rows="4" placeholder="Your message..."></textarea>
                             </div>
                             <div class="col-12">
-                                <button type="button" class="btn-primary-custom" onclick="window.open('{{ \App\Support\Whatsapp::shopUrl() }}', '_blank')">
+                                @if($sendUrl = \App\Support\Whatsapp::shopUrl())
+                                <a href="{{ $sendUrl }}" target="_blank" rel="noopener" class="btn-primary-custom">
                                     <i class="bi bi-whatsapp"></i> Send via WhatsApp
-                                </button>
+                                </a>
+                                @endif
                             </div>
                         </div>
                     </form>

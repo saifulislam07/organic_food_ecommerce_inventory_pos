@@ -4,6 +4,9 @@
 @section('page_title', 'Expense Management')
 
 @section('content')
+<div class="d-flex mb-3">
+    @include('admin.partials.search', ['route' => route('admin.expenses.index'), 'placeholder' => 'Title, category or note'])
+</div>
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card bg-white border-0 shadow-sm">
@@ -15,6 +18,14 @@
     </div>
 </div>
 
+@can('expenses.delete')
+<form id="bulk-expenses" method="POST" action="{{ route('admin.expenses.bulkDestroy') }}"
+      data-bulk data-bulk-noun="expenses">
+    @csrf
+    @method('DELETE')
+    @include('admin.partials.bulk-bar')
+</form>
+@endcan
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Expense List</h5>
@@ -27,6 +38,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-muted small text-uppercase">
                     <tr>
+                        @can('expenses.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-expenses"></th>@endcan
                         <th class="ps-4">Date</th>
                         <th>Title</th>
                         <th>Category</th>
@@ -37,6 +49,7 @@
                 <tbody>
                     @forelse($expenses as $expense)
                     <tr>
+                        @can('expenses.delete')<td class="ps-4"><input type="checkbox" class="form-check-input" form="bulk-expenses" name="ids[]" value="{{ $expense->id }}"></td>@endcan
                         <td class="ps-4">{{ $expense->expense_date->format('d M, Y') }}</td>
                         <td>
                             <strong>{{ $expense->title }}</strong>
@@ -50,7 +63,7 @@
                             <a href="{{ route('admin.expenses.edit', $expense) }}" class="btn btn-sm btn-outline-info me-1">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form action="{{ route('admin.expenses.destroy', $expense) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?')">
+                            <form action="{{ route('admin.expenses.destroy', $expense) }}" method="POST" class="d-inline" data-confirm="Are you sure?">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger">
@@ -61,7 +74,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">No expenses recorded yet.</td>
+                        <td colspan="6" class="text-center py-5 text-muted">No expenses recorded yet.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -74,4 +87,5 @@
     </div>
     @endif
 </div>
+
 @endsection

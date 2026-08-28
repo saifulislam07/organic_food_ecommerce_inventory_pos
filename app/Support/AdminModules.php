@@ -41,9 +41,11 @@ class AdminModules
         'suppliers' => ['Suppliers', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'adjustments' => ['Adjustments', [self::VIEW, self::CREATE, self::DELETE]],
         'expenses' => ['Expenses', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
+        'reports' => ['Reports', [self::VIEW]],
         'pages' => ['Static Pages', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'settings' => ['Settings', [self::VIEW, self::EDIT]],
-        'users' => ['Users & Roles', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
+        'users' => ['Users', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
+        'roles' => ['Roles', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
     ];
 
     /** Every permission name, e.g. products.create. */

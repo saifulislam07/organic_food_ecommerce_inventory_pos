@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\BulkDeletes;
+use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Unit;
 use Illuminate\Http\Request;
@@ -9,9 +11,15 @@ use Illuminate\Validation\Rule;
 
 class AdminUnitController extends Controller
 {
-    public function index()
+    use BulkDeletes, SearchesRecords;
+
+    public function index(Request $request)
     {
-        $units = Unit::withCount('variants')->sorted()->paginate(30);
+        $units = $this->applySearch(
+            Unit::withCount('variants'),
+            $request->input('search'),
+            ['name', 'name_bn', 'short_code']
+        )->sorted()->paginate(30)->withQueryString();
 
         return view('admin.units.index', compact('units'));
     }
@@ -70,5 +78,18 @@ class AdminUnitController extends Controller
         $data['sort_order'] = $data['sort_order'] ?? 0;
 
         return $data;
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $result = $this->bulkDelete(
+            $request, Unit::class,
+            fn ($unit) => $unit->variants()->exists()
+                ? "\"{$unit->name}\" is used by product variants."
+                : null
+
+        );
+
+        return $this->bulkResponse($result, 'units', 'admin.units.index');
     }
 }

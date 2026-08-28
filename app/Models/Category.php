@@ -2,11 +2,22 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CleansUpImages;
+use App\Support\ImageStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
+    use CleansUpImages;
+
+    protected static function booted(): void
+    {
+        static::deleting(fn (self $category) => self::deleteUploadedImage(
+            $category->getRawOriginal('image'), 'categories/'
+        ));
+    }
+
     protected $fillable = [
         'name', 'name_en', 'name_bn', 'slug', 'image', 'description',
         'description_en', 'description_bn', 'is_active', 'sort_order',
@@ -43,14 +54,9 @@ class Category extends Model
 
     public function getImageUrlAttribute(): string
     {
-        if (! $this->image) {
-            return asset('assets/img/placeholder.png');
-        }
-        if (str_starts_with($this->image, 'categories/')) {
-            return asset('storage/'.$this->image);
-        }
-
         // Legacy bare filenames have no shipped directory behind them any more.
-        return asset('assets/img/placeholder.png');
+        return ImageStore::url(
+            str_contains((string) $this->image, '/') ? $this->image : null
+        );
     }
 }

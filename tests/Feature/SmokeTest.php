@@ -132,6 +132,8 @@ class SmokeTest extends TestCase
             'seo settings' => ['/admin/settings/seo'],
             'users' => ['/admin/users'],
             'user create' => ['/admin/users/create'],
+            'roles' => ['/admin/roles'],
+            'role create' => ['/admin/roles/create'],
         ];
     }
 

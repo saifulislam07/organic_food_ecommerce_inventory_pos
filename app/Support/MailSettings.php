@@ -3,8 +3,6 @@
 namespace App\Support;
 
 use App\Models\Setting;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * SMTP credentials live in the settings table so the shop owner can change them
@@ -12,8 +10,6 @@ use Illuminate\Support\Facades\Schema;
  */
 class MailSettings
 {
-    public const CACHE_KEY = 'mail_settings';
-
     /** key => [type, config path it feeds] */
     public const FIELDS = [
         'mail_host' => 'text',
@@ -25,24 +21,22 @@ class MailSettings
         'mail_from_name' => 'text',
     ];
 
-    /** @return array<string, string|null> */
+    /**
+     * Boot runs before migrations on a fresh install, and on every request
+     * after that. Setting::get() reads one cached copy of the whole table, so
+     * this costs nothing to call repeatedly and needs no cache of its own.
+     *
+     * @return array<string, string|null>
+     */
     public static function all(): array
     {
-        // Boot runs before migrations on a fresh install, and on every request
-        // after that — so guard the table and cache the read.
-        if (! self::tableIsReady()) {
-            return [];
+        $values = [];
+
+        foreach (array_keys(self::FIELDS) as $key) {
+            $values[$key] = Setting::get($key);
         }
 
-        return Cache::rememberForever(self::CACHE_KEY, function () {
-            $values = [];
-
-            foreach (array_keys(self::FIELDS) as $key) {
-                $values[$key] = Setting::get($key);
-            }
-
-            return $values;
-        });
+        return $values;
     }
 
     public static function save(array $values): void
@@ -65,7 +59,7 @@ class MailSettings
 
     public static function forget(): void
     {
-        Cache::forget(self::CACHE_KEY);
+        Setting::flush();
     }
 
     /** True once a host has been configured, i.e. the shop can actually send mail. */
@@ -101,15 +95,6 @@ class MailSettings
 
         if (filled($stored['mail_from_name'] ?? null)) {
             config(['mail.from.name' => $stored['mail_from_name']]);
-        }
-    }
-
-    private static function tableIsReady(): bool
-    {
-        try {
-            return Schema::hasTable('settings');
-        } catch (\Throwable) {
-            return false;
         }
     }
 }

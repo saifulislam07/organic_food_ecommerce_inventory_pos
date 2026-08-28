@@ -1,4 +1,7 @@
 import { startIslands } from './shared/islands';
+import { initBulkDelete } from './admin/bulk';
+import { initEditors } from './admin/editor';
+import { flashToasts, interceptConfirmForms } from './admin/ui';
 
 import PosApp from './admin/components/PosApp.vue';
 import InventoryTable from './admin/components/InventoryTable.vue';
@@ -9,6 +12,7 @@ import OrderStatusControl from './admin/components/OrderStatusControl.vue';
 import ImageUpload from './admin/components/ImageUpload.vue';
 import ProductGallery from './admin/components/ProductGallery.vue';
 import ComboComposer from './admin/components/ComboComposer.vue';
+import AdminDialogs from './admin/components/AdminDialogs.vue';
 
 const components = {
     PosApp,
@@ -20,6 +24,23 @@ const components = {
     ImageUpload,
     ProductGallery,
     ComboComposer,
+    AdminDialogs,
 };
 
 window.mountVueIslands = startIslands(components);
+
+// data-confirm on any form opens the themed dialog instead of window.confirm.
+interceptConfirmForms();
+
+// Laravel's flash messages arrive as toasts rather than a static alert bar.
+function bootAdmin() {
+    flashToasts();
+    initBulkDelete();
+    initEditors();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootAdmin);
+} else {
+    bootAdmin();
+}

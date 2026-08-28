@@ -3,8 +3,6 @@
 namespace App\Support;
 
 use App\Models\Setting;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Site-wide SEO defaults and analytics IDs. Individual pages override the title
@@ -13,8 +11,6 @@ use Illuminate\Support\Facades\Schema;
  */
 class SeoSettings
 {
-    public const CACHE_KEY = 'seo_settings';
-
     public const FIELDS = [
         'seo_meta_title',
         'seo_meta_description',
@@ -28,19 +24,13 @@ class SeoSettings
     /** @return array<string, string|null> */
     public static function all(): array
     {
-        if (! self::tableIsReady()) {
-            return [];
+        $values = [];
+
+        foreach (self::FIELDS as $field) {
+            $values[$field] = Setting::get($field);
         }
 
-        return Cache::rememberForever(self::CACHE_KEY, function () {
-            $values = [];
-
-            foreach (self::FIELDS as $key) {
-                $values[$key] = Setting::get($key);
-            }
-
-            return $values;
-        });
+        return $values;
     }
 
     public static function get(string $key, $default = null)
@@ -61,7 +51,7 @@ class SeoSettings
 
     public static function forget(): void
     {
-        Cache::forget(self::CACHE_KEY);
+        Setting::flush();
     }
 
     /** Absolute URL of the default social sharing image, if one is uploaded. */
@@ -69,11 +59,7 @@ class SeoSettings
     {
         $path = self::get('seo_og_image');
 
-        if (blank($path)) {
-            return null;
-        }
-
-        return str_starts_with($path, 'http') ? $path : asset('storage/'.$path);
+        return blank($path) ? null : ImageStore::url($path);
     }
 
     /**
@@ -91,14 +77,5 @@ class SeoSettings
         $id = self::get('seo_google_analytics');
 
         return blank($id) ? null : trim($id);
-    }
-
-    private static function tableIsReady(): bool
-    {
-        try {
-            return Schema::hasTable('settings');
-        } catch (\Throwable) {
-            return false;
-        }
     }
 }

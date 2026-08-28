@@ -7,11 +7,14 @@ const props = defineProps({
     items: { type: Array, default: () => [] },
     searchUrl: { type: String, required: true },
     storeUrl: { type: String, required: true },
+    paymentMethods: { type: Array, default: () => [] },
+    defaultPaymentMethod: { type: String, default: 'cash' },
 });
 
 const cart = ref([]);
 const deliveryCharge = ref(0);
 const discountAmount = ref(0);
+const paymentMethod = ref(props.defaultPaymentMethod);
 
 const query = ref('');
 const results = ref([]);
@@ -123,6 +126,7 @@ function clearCart() {
     cart.value = [];
     deliveryCharge.value = 0;
     discountAmount.value = 0;
+    paymentMethod.value = props.defaultPaymentMethod;
     alert.value = null;
 }
 
@@ -185,6 +189,7 @@ async function submitOrder() {
             customer_address: form.value.customer_address,
             delivery_charge: Number(deliveryCharge.value || 0),
             discount_amount: Number(discountAmount.value || 0),
+            payment_method: paymentMethod.value,
             items: cart.value.map((line) => ({ variant_id: line.id, quantity: line.quantity })),
         });
 
@@ -430,6 +435,15 @@ onBeforeUnmount(() => {
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Delivery Address</label>
                                         <textarea v-model="form.customer_address" class="form-control" rows="3" required></textarea>
+                                    </div>
+
+                                    <div class="mb-3" v-if="paymentMethods.length">
+                                        <label class="form-label small fw-bold text-muted">Paid by</label>
+                                        <select v-model="paymentMethod" class="form-select" required>
+                                            <option v-for="method in paymentMethods" :key="method.value" :value="method.value">
+                                                {{ method.label }}
+                                            </option>
+                                        </select>
                                     </div>
 
                                     <div class="d-flex justify-content-between mb-3 fw-bold">

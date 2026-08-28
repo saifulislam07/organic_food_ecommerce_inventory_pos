@@ -304,9 +304,11 @@
                         
                         <div class="mt-4 text-center p-3 bg-white admin-card">
                              <p class="small text-muted mb-3">{{ app()->getLocale() == 'bn' ? 'অর্ডার সম্পর্কিত কোনো প্রশ্ন থাকলে যোগাযোগ করুন' : 'Need help with this order?' }}</p>
-                             <a href="{{ \App\Support\Whatsapp::shopUrl() }}" class="btn btn-success btn-sm w-100 fw-bold">
+                             @if($supportUrl = \App\Support\Whatsapp::shopUrl())
+                             <a href="{{ $supportUrl }}" target="_blank" rel="noopener" class="btn btn-success btn-sm w-100 fw-bold">
                                  <i class="bi bi-whatsapp"></i> WhatsApp Support
                              </a>
+                             @endif
                         </div>
                     </div>
                 </div>

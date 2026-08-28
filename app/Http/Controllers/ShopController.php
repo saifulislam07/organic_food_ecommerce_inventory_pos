@@ -11,7 +11,7 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::active()->with('variants', 'category');
+        $query = Product::active()->withCardData();
 
         if ($request->filled('category')) {
             $query->whereHas('category', fn ($q) => $q->where('slug', $request->category));

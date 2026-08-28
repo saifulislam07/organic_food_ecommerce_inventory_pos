@@ -22,6 +22,15 @@
                         ], JSON_UNESCAPED_UNICODE) }}"
                     ></div>
 
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            @include('admin.partials.account-select', [
+                                'label' => 'Paid from',
+                                'help' => 'Which account this stock was bought with.',
+                            ])
+                        </div>
+                    </div>
+
                     <div class="mt-4 pt-3 border-top d-flex gap-2">
                         <button type="submit" class="btn btn-primary px-4">Record Purchase &amp; Add Stock</button>
                         <a href="{{ route('admin.purchases.index') }}" class="btn btn-light px-4">Cancel</a>

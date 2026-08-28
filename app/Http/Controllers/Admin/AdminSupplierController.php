@@ -2,15 +2,23 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\BulkDeletes;
+use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class AdminSupplierController extends Controller
 {
-    public function index()
+    use BulkDeletes, SearchesRecords;
+
+    public function index(Request $request)
     {
-        $suppliers = Supplier::orderBy('name')->paginate(20);
+        $suppliers = $this->applySearch(
+            Supplier::query(),
+            $request->input('search'),
+            ['name', 'contact_person', 'phone', 'email']
+        )->orderBy('name')->paginate(20)->withQueryString();
 
         return view('admin.suppliers.index', compact('suppliers'));
     }
@@ -64,5 +72,14 @@ class AdminSupplierController extends Controller
         $supplier->delete();
 
         return redirect()->route('admin.suppliers.index')->with('success', 'Supplier deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $result = $this->bulkDelete(
+            $request, Supplier::class
+        );
+
+        return $this->bulkResponse($result, 'suppliers', 'admin.suppliers.index');
     }
 }

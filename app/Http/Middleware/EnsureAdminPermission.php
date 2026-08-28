@@ -27,6 +27,7 @@ class EnsureAdminPermission
         'update' => AdminModules::EDIT,
         'updateStatus' => AdminModules::EDIT,
         'destroy' => AdminModules::DELETE,
+        'bulkDestroy' => AdminModules::DELETE,
         'test' => AdminModules::EDIT,
         'read' => null,
         'readAll' => null,

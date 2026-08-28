@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\ImageStore;
 use App\Support\SeoSettings;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class AdminSeoSettingController extends Controller
@@ -39,11 +39,11 @@ class AdminSeoSettingController extends Controller
 
         if ($request->hasFile('og_image')) {
             $previous = SeoSettings::get('seo_og_image');
-            $values['seo_og_image'] = $request->file('og_image')->store('seo', 'public');
+            $values['seo_og_image'] = ImageStore::put($request->file('og_image'), 'seo');
 
             // Replacing the share image should not leave the old file behind.
-            if ($previous && $previous !== $values['seo_og_image']) {
-                Storage::disk('public')->delete($previous);
+            if ($previous !== $values['seo_og_image']) {
+                ImageStore::delete($previous);
             }
         }
 

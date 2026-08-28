@@ -27,14 +27,14 @@
 
             <div class="col-md-12">
                 <label class="form-label">Content (English) *</label>
-                <textarea name="content_en" class="form-control @error('content_en') is-invalid @enderror" rows="10" required>{{ old('content_en', $page->content_en ?? '') }}</textarea>
-                @error('content_en') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                <textarea name="content_en" data-editor class="form-control" rows="10">{{ old('content_en', $page->content_en ?? '') }}</textarea>
+                @error('content_en') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             </div>
 
             <div class="col-md-12">
                 <label class="form-label">Content (Bengali) *</label>
-                <textarea name="content_bn" class="form-control @error('content_bn') is-invalid @enderror" rows="10" required>{{ old('content_bn', $page->content_bn ?? '') }}</textarea>
-                @error('content_bn') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                <textarea name="content_bn" data-editor class="form-control" rows="10">{{ old('content_bn', $page->content_bn ?? '') }}</textarea>
+                @error('content_bn') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
             </div>
 
             <div class="col-12">

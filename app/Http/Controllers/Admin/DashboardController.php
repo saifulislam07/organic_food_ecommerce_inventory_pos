@@ -11,20 +11,42 @@ use App\Models\ProductVariant;
 
 class DashboardController extends Controller
 {
+    /** Anything below this is called low stock across the panel. */
+    private const LOW_STOCK = 5;
+
     public function index()
     {
+        $orders = $this->orderTotals();
+        $stock = $this->stockTotals();
+
         $stats = [
             'total_products' => Product::count(),
             'total_categories' => Category::count(),
-            'total_orders' => Order::count(),
-            'pending_orders' => Order::where('status', 'pending')->count(),
-            'total_revenue' => Order::where('status', 'delivered')->sum('total'),
-            'stock_value' => ProductVariant::selectRaw('SUM(stock * cost_price) as total')->value('total') ?? 0,
-            'low_stock_count' => ProductVariant::where('stock', '<', 5)->count(),
+            'total_orders' => (int) $orders->total,
+            'pending_orders' => (int) $orders->pending,
+            'total_revenue' => (float) $orders->revenue,
+            'stock_value' => (float) $stock->value,
+            'low_stock_count' => (int) $stock->low,
             'total_expenses' => Expense::sum('amount'),
             'recent_orders' => Order::latest()->take(5)->get(),
         ];
 
         return view('admin.dashboard', compact('stats'));
+    }
+
+    /** Three figures off one pass over the orders table rather than three. */
+    private function orderTotals(): object
+    {
+        return Order::selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(status = ?) as pending', ['pending'])
+            ->selectRaw('SUM(CASE WHEN status = ? THEN total ELSE 0 END) as revenue', ['delivered'])
+            ->first();
+    }
+
+    private function stockTotals(): object
+    {
+        return ProductVariant::selectRaw('SUM(stock * cost_price) as value')
+            ->selectRaw('SUM(stock < ?) as low', [self::LOW_STOCK])
+            ->first();
     }
 }

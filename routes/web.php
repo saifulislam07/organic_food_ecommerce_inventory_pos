@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminAdjustmentController;
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminChatSettingController;
 use App\Http\Controllers\Admin\AdminComboController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminExpenseController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\AdminPOSController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminPurchaseController;
+use App\Http\Controllers\Admin\AdminReportController;
+use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminSeoSettingController;
 use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\Admin\AdminSmsSettingController;
@@ -65,6 +68,19 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
 Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Bulk delete: registered before the resources so /bulk is not read
+    // as a record id.
+    Route::delete('products/bulk', [AdminProductController::class, 'bulkDestroy'])->name('products.bulkDestroy');
+    Route::delete('categories/bulk', [AdminCategoryController::class, 'bulkDestroy'])->name('categories.bulkDestroy');
+    Route::delete('units/bulk', [AdminUnitController::class, 'bulkDestroy'])->name('units.bulkDestroy');
+    Route::delete('suppliers/bulk', [AdminSupplierController::class, 'bulkDestroy'])->name('suppliers.bulkDestroy');
+    Route::delete('expenses/bulk', [AdminExpenseController::class, 'bulkDestroy'])->name('expenses.bulkDestroy');
+    Route::delete('pages/bulk', [AdminPageController::class, 'bulkDestroy'])->name('pages.bulkDestroy');
+    Route::delete('combos/bulk', [AdminComboController::class, 'bulkDestroy'])->name('combos.bulkDestroy');
+    Route::delete('purchases/bulk', [AdminPurchaseController::class, 'bulkDestroy'])->name('purchases.bulkDestroy');
+    Route::delete('adjustments/bulk', [AdminAdjustmentController::class, 'bulkDestroy'])->name('adjustments.bulkDestroy');
+    Route::delete('users/bulk', [AdminUserController::class, 'bulkDestroy'])->name('users.bulkDestroy');
+    Route::delete('roles/bulk', [AdminRoleController::class, 'bulkDestroy'])->name('roles.bulkDestroy');
     Route::resource('products', AdminProductController::class);
     Route::get('combos', [AdminComboController::class, 'index'])->name('combos.index');
     Route::get('combos/create', [AdminComboController::class, 'create'])->name('combos.create');
@@ -108,8 +124,12 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::post('/settings/sms/test', [AdminSmsSettingController::class, 'test'])->name('settings.sms.test');
     Route::get('/settings/seo', [AdminSeoSettingController::class, 'edit'])->name('settings.seo.edit');
     Route::post('/settings/seo', [AdminSeoSettingController::class, 'update'])->name('settings.seo.update');
-    Route::resource('pages', AdminPageController::class);
+    Route::get('/reports/profit-loss', [AdminReportController::class, 'profitLoss'])->name('reports.profitLoss');
+    Route::get('/settings/chat', [AdminChatSettingController::class, 'edit'])->name('settings.chat.edit');
+    Route::post('/settings/chat', [AdminChatSettingController::class, 'update'])->name('settings.chat.update');
+    Route::resource('pages', AdminPageController::class)->except(['show']);
     Route::resource('users', AdminUserController::class)->except(['show']);
+    Route::resource('roles', AdminRoleController::class)->except(['show']);
 
     Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
 });

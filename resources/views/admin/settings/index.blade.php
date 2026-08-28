@@ -16,19 +16,19 @@
 
             <div class="col-md-6">
                 <label class="form-label">Site Title (English)</label>
-                <input type="text" name="site_title[value_en]" class="form-control" value="{{ \App\Models\Setting::where('key', 'site_title')->first()->value_en ?? 'Mango Hut' }}">
+                <input type="text" name="site_title[value_en]" class="form-control" value="{{ \App\Models\Setting::value('site_title', 'en', 'Mango Hut') }}">
             </div>
             <div class="col-md-6">
                 <label class="form-label">Site Title (Bengali)</label>
-                <input type="text" name="site_title[value_bn]" class="form-control" value="{{ \App\Models\Setting::where('key', 'site_title')->first()->value_bn ?? 'ম্যাঙ্গো হাট' }}">
+                <input type="text" name="site_title[value_bn]" class="form-control" value="{{ \App\Models\Setting::value('site_title', 'bn', 'ম্যাঙ্গো হাট') }}">
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Site Logo</label>
                 <input type="file" name="logo[value_en]" class="form-control">
-                @if($logo = \App\Models\Setting::where('key', 'logo')->first())
+                @if($logo = \App\Models\Setting::value('logo'))
                     <div class="mt-2 text-center p-2 border rounded bg-light" style="max-width: 150px;">
-                        <img src="{{ asset('storage/' . $logo->value_en) }}" alt="Logo" class="img-fluid" style="max-height: 50px;">
+                        <img src="{{ \App\Support\ImageStore::url($logo) }}" alt="Logo" class="img-fluid" style="max-height: 50px;">
                     </div>
                 @endif
             </div>
@@ -67,23 +67,23 @@
 
             <div class="col-md-6">
                 <label class="form-label">WhatsApp Number</label>
-                <input type="text" name="whatsapp[value_en]" class="form-control" value="{{ \App\Models\Setting::where('key', 'whatsapp')->first()->value_en ?? '' }}">
-                <input type="hidden" name="whatsapp[value_bn]" value="{{ \App\Models\Setting::where('key', 'whatsapp')->first()->value_en ?? '' }}">
+                <input type="text" name="whatsapp[value_en]" class="form-control" value="{{ \App\Models\Setting::value('whatsapp', 'en', '') }}">
+                <input type="hidden" name="whatsapp[value_bn]" value="{{ \App\Models\Setting::value('whatsapp', 'en', '') }}">
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Call Support Number</label>
-                <input type="text" name="phone[value_en]" class="form-control" value="{{ \App\Models\Setting::where('key', 'phone')->first()->value_en ?? '' }}">
-                <input type="hidden" name="phone[value_bn]" value="{{ \App\Models\Setting::where('key', 'phone')->first()->value_en ?? '' }}">
+                <input type="text" name="phone[value_en]" class="form-control" value="{{ \App\Models\Setting::value('phone', 'en', '') }}">
+                <input type="hidden" name="phone[value_bn]" value="{{ \App\Models\Setting::value('phone', 'en', '') }}">
             </div>
 
             <div class="col-md-12">
                 <label class="form-label">Address (English)</label>
-                <textarea name="address[value_en]" class="form-control" rows="2">{{ \App\Models\Setting::where('key', 'address')->first()->value_en ?? '' }}</textarea>
+                <textarea name="address[value_en]" class="form-control" rows="2">{{ \App\Models\Setting::value('address', 'en', '') }}</textarea>
             </div>
             <div class="col-md-12">
                 <label class="form-label">Address (Bengali)</label>
-                <textarea name="address[value_bn]" class="form-control" rows="2">{{ \App\Models\Setting::where('key', 'address')->first()->value_bn ?? '' }}</textarea>
+                <textarea name="address[value_bn]" class="form-control" rows="2">{{ \App\Models\Setting::value('address', 'bn', '') }}</textarea>
             </div>
 
             <!-- Footer Section -->
@@ -95,31 +95,31 @@
 
             <div class="col-md-6">
                 <label class="form-label">Facebook URL</label>
-                <input type="text" name="facebook[value_en]" class="form-control" value="{{ \App\Models\Setting::where('key', 'facebook')->first()->value_en ?? '' }}">
-                <input type="hidden" name="facebook[value_bn]" value="{{ \App\Models\Setting::where('key', 'facebook')->first()->value_en ?? '' }}">
+                <input type="text" name="facebook[value_en]" class="form-control" value="{{ \App\Models\Setting::value('facebook', 'en', '') }}">
+                <input type="hidden" name="facebook[value_bn]" value="{{ \App\Models\Setting::value('facebook', 'en', '') }}">
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">YouTube URL</label>
-                <input type="text" name="youtube[value_en]" class="form-control" value="{{ \App\Models\Setting::where('key', 'youtube')->first()->value_en ?? '' }}">
-                <input type="hidden" name="youtube[value_bn]" value="{{ \App\Models\Setting::where('key', 'youtube')->first()->value_en ?? '' }}">
+                <input type="text" name="youtube[value_en]" class="form-control" value="{{ \App\Models\Setting::value('youtube', 'en', '') }}">
+                <input type="hidden" name="youtube[value_bn]" value="{{ \App\Models\Setting::value('youtube', 'en', '') }}">
             </div>
 
             <div class="col-md-6">
                 <label class="form-label"><i class="bi bi-instagram me-1"></i> Instagram URL</label>
                 <input type="text" name="instagram[value_en]" class="form-control @error('instagram.value_en') is-invalid @enderror"
-                       value="{{ \App\Models\Setting::where('key', 'instagram')->first()->value_en ?? '' }}"
+                       value="{{ \App\Models\Setting::value('instagram', 'en', '') }}"
                        placeholder="https://www.instagram.com/yourshop">
-                <input type="hidden" name="instagram[value_bn]" value="{{ \App\Models\Setting::where('key', 'instagram')->first()->value_en ?? '' }}">
+                <input type="hidden" name="instagram[value_bn]" value="{{ \App\Models\Setting::value('instagram', 'en', '') }}">
                 @error('instagram.value_en') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
             <div class="col-md-6">
                 <label class="form-label"><i class="bi bi-tiktok me-1"></i> TikTok URL</label>
                 <input type="text" name="tiktok[value_en]" class="form-control @error('tiktok.value_en') is-invalid @enderror"
-                       value="{{ \App\Models\Setting::where('key', 'tiktok')->first()->value_en ?? '' }}"
+                       value="{{ \App\Models\Setting::value('tiktok', 'en', '') }}"
                        placeholder="https://www.tiktok.com/@yourshop">
-                <input type="hidden" name="tiktok[value_bn]" value="{{ \App\Models\Setting::where('key', 'tiktok')->first()->value_en ?? '' }}">
+                <input type="hidden" name="tiktok[value_bn]" value="{{ \App\Models\Setting::value('tiktok', 'en', '') }}">
                 @error('tiktok.value_en') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 

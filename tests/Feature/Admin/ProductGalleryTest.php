@@ -23,7 +23,7 @@ class ProductGalleryTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('public');
+        Storage::fake('uploads');
     }
 
     private function admin(): User
@@ -70,7 +70,7 @@ class ProductGalleryTest extends TestCase
         $this->assertSame(3, $product->images()->count());
 
         foreach ($product->images as $image) {
-            Storage::disk('public')->assertExists($image->path);
+            Storage::disk('uploads')->assertExists($image->path);
         }
     }
 
@@ -166,7 +166,7 @@ class ProductGalleryTest extends TestCase
             ->assertRedirect();
 
         $this->assertModelMissing($doomed);
-        Storage::disk('public')->assertMissing($doomed->path);
+        Storage::disk('uploads')->assertMissing($doomed->path);
     }
 
     public function test_deleting_a_product_takes_its_images_with_it(): void

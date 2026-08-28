@@ -38,6 +38,18 @@ return [
             'report' => false,
         ],
 
+        /*
+         * Everything App\Support\ImageStore writes. Rooted at public/ so the
+         * stored path is exactly what asset() needs, and always under uploads/.
+         */
+        'uploads' => [
+            'driver' => 'local',
+            'root' => public_path(),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/'),
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
