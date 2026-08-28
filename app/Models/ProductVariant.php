@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Services\InventoryService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductVariant extends Model
 {
@@ -18,6 +20,32 @@ class ProductVariant extends Model
         'weight_kg' => 'decimal:2',
         'is_active' => 'boolean',
     ];
+
+    /** What this bundle is made of. Empty for an ordinary variant. */
+    public function comboItems(): HasMany
+    {
+        return $this->hasMany(ComboItem::class, 'combo_variant_id');
+    }
+
+    /** Bundles this variant is a component of. */
+    public function partOfCombos(): HasMany
+    {
+        return $this->hasMany(ComboItem::class, 'component_variant_id');
+    }
+
+    /**
+     * Sellable quantity. A combo holds no stock of its own — it is limited by
+     * whichever component runs out first.
+     */
+    public function getAvailableStockAttribute(): int
+    {
+        return app(InventoryService::class)->available($this);
+    }
+
+    public function isCombo(): bool
+    {
+        return $this->comboItems()->exists();
+    }
 
     public function unit(): BelongsTo
     {

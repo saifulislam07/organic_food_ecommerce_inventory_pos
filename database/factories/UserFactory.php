@@ -3,9 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Support\AdminModules;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 /**
  * @extends Factory<User>
@@ -31,6 +33,20 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /** A staff account that can enter the panel but holds no permissions yet. */
+    public function admin(): static
+    {
+        return $this->state(fn () => ['role' => 'admin']);
+    }
+
+    /** A staff account with unrestricted access. */
+    public function superAdmin(): static
+    {
+        return $this->admin()->afterCreating(
+            fn (User $user) => $user->assignRole(Role::findOrCreate(AdminModules::SUPER_ADMIN, 'web'))
+        );
     }
 
     /**

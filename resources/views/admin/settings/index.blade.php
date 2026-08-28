@@ -105,6 +105,32 @@
                 <input type="hidden" name="youtube[value_bn]" value="{{ \App\Models\Setting::where('key', 'youtube')->first()->value_en ?? '' }}">
             </div>
 
+            <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-instagram me-1"></i> Instagram URL</label>
+                <input type="text" name="instagram[value_en]" class="form-control @error('instagram.value_en') is-invalid @enderror"
+                       value="{{ \App\Models\Setting::where('key', 'instagram')->first()->value_en ?? '' }}"
+                       placeholder="https://www.instagram.com/yourshop">
+                <input type="hidden" name="instagram[value_bn]" value="{{ \App\Models\Setting::where('key', 'instagram')->first()->value_en ?? '' }}">
+                @error('instagram.value_en') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-tiktok me-1"></i> TikTok URL</label>
+                <input type="text" name="tiktok[value_en]" class="form-control @error('tiktok.value_en') is-invalid @enderror"
+                       value="{{ \App\Models\Setting::where('key', 'tiktok')->first()->value_en ?? '' }}"
+                       placeholder="https://www.tiktok.com/@yourshop">
+                <input type="hidden" name="tiktok[value_bn]" value="{{ \App\Models\Setting::where('key', 'tiktok')->first()->value_en ?? '' }}">
+                @error('tiktok.value_en') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+
+            <div class="col-12">
+                <div class="alert alert-light border small mb-0">
+                    <i class="bi bi-info-circle"></i>
+                    A blank field simply hides that icon in the footer. WhatsApp uses the
+                    number from the Contact section above.
+                </div>
+            </div>
+
             <!-- Shipping Section -->
             <div class="col-12 mt-5">
                 <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: var(--primary-dark);">

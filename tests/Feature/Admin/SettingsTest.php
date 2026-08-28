@@ -21,7 +21,7 @@ class SettingsTest extends TestCase
 
     private function admin(): User
     {
-        return $this->admin ??= User::factory()->create(['role' => 'admin']);
+        return $this->admin ??= User::factory()->superAdmin()->create();
     }
 
     public function test_known_settings_are_saved_in_both_languages(): void

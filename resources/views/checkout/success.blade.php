@@ -49,7 +49,7 @@
                     <a href="{{ route('shop') }}" class="btn-primary-custom">
                         <i class="bi bi-shop"></i> Continue Shopping
                     </a>
-                    <a href="https://wa.me/8801716952365?text=আমার অর্ডার নম্বর: {{ $order->order_number }}" target="_blank" class="btn-whatsapp">
+                    <a href="{{ \App\Support\Whatsapp::shopUrl() }}?text=আমার অর্ডার নম্বর: {{ $order->order_number }}" target="_blank" class="btn-whatsapp">
                         <i class="bi bi-whatsapp"></i> Track via WhatsApp
                     </a>
                 </div>

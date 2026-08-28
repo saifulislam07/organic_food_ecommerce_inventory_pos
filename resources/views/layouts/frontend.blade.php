@@ -4,8 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Mango Hut – খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার')</title>
-    <meta name="description" content="@yield('meta_description', 'আম, খেজুর গুড়, ঘি, সরিষার তেল, আমসত্ত্ব সহ সকল খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার। সরাসরি চাঁপাই নবাবগঞ্জ থেকে আপনার দোরগোড়ায়।')">
+
+    @php
+        $seoTitle = trim($__env->yieldContent('title', \App\Support\SeoSettings::get('seo_meta_title')
+            ?: \App\Models\Setting::get('site_title', 'Mango Hut')));
+        $seoDescription = trim($__env->yieldContent('meta_description', \App\Support\SeoSettings::get('seo_meta_description') ?: ''));
+        $seoKeywords = \App\Support\SeoSettings::get('seo_meta_keywords');
+        $seoImage = trim($__env->yieldContent('og_image', \App\Support\SeoSettings::ogImageUrl() ?: ''));
+        $seoVerification = \App\Support\SeoSettings::get('seo_google_site_verification');
+        $analyticsId = \App\Support\SeoSettings::analyticsId();
+    @endphp
+
+    <title>{{ $seoTitle }}</title>
+    @if($seoDescription)
+        <meta name="description" content="{{ $seoDescription }}">
+    @endif
+    @if($seoKeywords)
+        <meta name="keywords" content="{{ $seoKeywords }}">
+    @endif
+    <meta name="robots" content="{{ \App\Support\SeoSettings::robots() }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+    @if($seoVerification)
+        <meta name="google-site-verification" content="{{ $seoVerification }}">
+    @endif
+
+    {{-- Open Graph: what Facebook, WhatsApp and Messenger show when a link is shared --}}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ \App\Models\Setting::get('site_title', 'Mango Hut') }}">
+    <meta property="og:locale" content="{{ app()->getLocale() === 'bn' ? 'bn_BD' : 'en_US' }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    @if($seoDescription)
+        <meta property="og:description" content="{{ $seoDescription }}">
+    @endif
+    @if($seoImage)
+        <meta property="og:image" content="{{ $seoImage }}">
+    @endif
+
+    <meta name="twitter:card" content="{{ $seoImage ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    @if($seoDescription)
+        <meta name="twitter:description" content="{{ $seoDescription }}">
+    @endif
+    @if($seoImage)
+        <meta name="twitter:image" content="{{ $seoImage }}">
+    @endif
+
+    @if($analyticsId)
+        {{-- Only loaded once a measurement ID is saved in SEO settings --}}
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $analyticsId }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', @json($analyticsId));
+        </script>
+    @endif
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -456,7 +510,7 @@
             <i class="bi bi-person{{ request()->routeIs('login') || request()->routeIs('customer.dashboard') || request()->routeIs('admin.dashboard') ? '-fill' : '' }}"></i>
             <span>{{ auth()->check() ? (app()->getLocale() == 'bn' ? 'অ্যাকাউন্ট' : 'Account') : (app()->getLocale() == 'bn' ? 'লগইন' : 'Login') }}</span>
         </a>
-        <a href="https://wa.me/{{ \App\Models\Setting::get('whatsapp', '8801716952365') }}" target="_blank">
+        <a href="{{ \App\Support\Whatsapp::shopUrl() }}" target="_blank">
             <i class="bi bi-whatsapp"></i>
             <span>{{ app()->getLocale() == 'bn' ? 'কল' : 'Call' }}</span>
         </a>
@@ -569,11 +623,26 @@
                            ? 'খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার। আম, খেজুর গুড়, ঘি, সরিষার তেল, মধু সহ সকল প্রাকৃতিক পণ্য সরাসরি চাঁপাই নবাবগঞ্জ থেকে সরবরাহ করা হয়।' 
                            : 'Online market for pure and organic products. We supply mangoes, jaggery, ghee, mustard oil, honey and all natural products directly from Chapainawabganj.' }}
                     </p>
+                    @php
+                        // Driven by Site Settings; an empty field simply drops its icon.
+                        $whatsappUrl = \App\Support\Whatsapp::shopUrl();
+                        $socials = array_filter([
+                            'facebook' => \App\Models\Setting::get('facebook'),
+                            'instagram' => \App\Models\Setting::get('instagram'),
+                            'tiktok' => \App\Models\Setting::get('tiktok'),
+                            'youtube' => \App\Models\Setting::get('youtube'),
+                            'whatsapp' => $whatsappUrl,
+                        ]);
+                    @endphp
+                    @if($socials)
                     <div class="footer-social">
-                        <a href="https://www.facebook.com/mangohutt" target="_blank"><i class="bi bi-facebook"></i></a>
-                        <a href="https://wa.me/8801716952365" target="_blank"><i class="bi bi-whatsapp"></i></a>
-                        <a href="https://www.youtube.com/@mangohut7818" target="_blank"><i class="bi bi-youtube"></i></a>
+                        @foreach($socials as $network => $url)
+                            <a href="{{ $url }}" target="_blank" rel="noopener" aria-label="{{ ucfirst($network) }}">
+                                <i class="bi bi-{{ $network }}"></i>
+                            </a>
+                        @endforeach
                     </div>
+                    @endif
                 </div>
                 <div class="col-lg-2 col-md-6">
                     <h5 class="footer-title">{{ app()->getLocale() == 'bn' ? 'লিঙ্ক' : 'Quick Links' }}</h5>
@@ -608,7 +677,7 @@
     </footer>
 
     <!-- Floating WhatsApp Button -->
-    <a href="https://wa.me/{{ \App\Models\Setting::get('whatsapp', '8801716952365') }}?text={{ app()->getLocale() == 'bn' ? 'হ্যালো! আমি আপনার ওয়েবসাইট থেকে অর্ডার করতে চাই।' : 'Hello! I want to order from your website.' }}" class="whatsapp-float" target="_blank" id="whatsappFloat">
+    <a href="{{ \App\Support\Whatsapp::shopUrl() }}?text={{ app()->getLocale() == 'bn' ? 'হ্যালো! আমি আপনার ওয়েবসাইট থেকে অর্ডার করতে চাই।' : 'Hello! I want to order from your website.' }}" class="whatsapp-float" target="_blank" id="whatsappFloat">
         <i class="bi bi-whatsapp"></i>
     </a>
 

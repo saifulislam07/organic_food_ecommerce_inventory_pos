@@ -29,7 +29,7 @@
                         <i class="bi bi-whatsapp"></i>
                     </div>
                     <h5>WhatsApp</h5>
-                    <a href="https://wa.me/8801716952365" target="_blank" class="text-muted">01716-952365</a>
+                    <a href="{{ \App\Support\Whatsapp::shopUrl() }}" target="_blank" class="text-muted">01716-952365</a>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
@@ -61,7 +61,7 @@
                                 <textarea class="form-control" rows="4" placeholder="Your message..."></textarea>
                             </div>
                             <div class="col-12">
-                                <button type="button" class="btn-primary-custom" onclick="window.open('https://wa.me/8801716952365', '_blank')">
+                                <button type="button" class="btn-primary-custom" onclick="window.open('{{ \App\Support\Whatsapp::shopUrl() }}', '_blank')">
                                     <i class="bi bi-whatsapp"></i> Send via WhatsApp
                                 </button>
                             </div>

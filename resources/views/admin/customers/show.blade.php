@@ -22,7 +22,7 @@
                         <span class="text-muted small d-block">Mobile</span>
                         @if($customer->mobile)
                             <a href="tel:{{ $customer->mobile }}" class="fw-bold text-decoration-none">{{ $customer->mobile }}</a>
-                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $customer->mobile) }}"
+                            <a href="{{ \App\Support\Whatsapp::url($customer->mobile) }}"
                                target="_blank" class="btn btn-sm btn-outline-success ms-2">
                                 <i class="bi bi-whatsapp"></i>
                             </a>

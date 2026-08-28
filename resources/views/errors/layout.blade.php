@@ -130,7 +130,7 @@
             @else
                 <p>
                     {{ app()->getLocale() == 'bn' ? 'সাহায্য দরকার?' : 'Need help?' }}
-                    <a href="https://wa.me/{{ \App\Models\Setting::get('whatsapp', '8801716952365') }}" class="text-primary text-decoration-none fw-bold">
+                    <a href="{{ \App\Support\Whatsapp::shopUrl() }}" class="text-primary text-decoration-none fw-bold">
                         WhatsApp Support
                     </a>
                 </p>

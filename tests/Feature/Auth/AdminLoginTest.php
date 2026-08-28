@@ -35,7 +35,7 @@ class AdminLoginTest extends TestCase
 
     public function test_an_admin_can_sign_in_through_the_admin_form(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->superAdmin()->create();
 
         $this->post(route('admin.login'), [
             'login_id' => $admin->email,
@@ -61,7 +61,7 @@ class AdminLoginTest extends TestCase
 
     public function test_a_wrong_password_is_rejected(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->superAdmin()->create();
 
         $this->from(route('admin.login'))
             ->post(route('admin.login'), [
@@ -75,7 +75,7 @@ class AdminLoginTest extends TestCase
 
     public function test_an_admin_can_also_sign_in_with_a_mobile_number(): void
     {
-        $admin = User::factory()->create(['role' => 'admin', 'mobile' => '01799999999']);
+        $admin = User::factory()->superAdmin()->create(['mobile' => '01799999999']);
 
         $this->post(route('admin.login'), [
             'login_id' => '01799999999',

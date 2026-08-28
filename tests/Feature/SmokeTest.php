@@ -107,10 +107,13 @@ class SmokeTest extends TestCase
             'product create' => ['/admin/products/create'],
             'categories' => ['/admin/categories'],
             'category create' => ['/admin/categories/create'],
+            'combos' => ['/admin/combos'],
+            'combo create' => ['/admin/combos/create'],
             'units' => ['/admin/units'],
             'unit create' => ['/admin/units/create'],
             'orders' => ['/admin/orders'],
             'customers' => ['/admin/customers'],
+            'notifications' => ['/admin/notifications'],
             'pos' => ['/admin/pos'],
             'inventory' => ['/admin/inventory'],
             'suppliers' => ['/admin/suppliers'],
@@ -125,6 +128,10 @@ class SmokeTest extends TestCase
             'page create' => ['/admin/pages/create'],
             'settings' => ['/admin/settings'],
             'mail settings' => ['/admin/settings/mail'],
+            'sms settings' => ['/admin/settings/sms'],
+            'seo settings' => ['/admin/settings/seo'],
+            'users' => ['/admin/users'],
+            'user create' => ['/admin/users/create'],
         ];
     }
 
@@ -133,14 +140,14 @@ class SmokeTest extends TestCase
     {
         $this->seedCatalog();
 
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->superAdmin()->create();
 
         $this->actingAs($admin)->get($url)->assertOk();
     }
 
     public function test_admin_order_detail_and_invoice_render(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->superAdmin()->create();
         $order = $this->seedOrder($admin);
 
         $this->actingAs($admin)->get(route('admin.orders.show', $order))->assertOk();
@@ -149,7 +156,7 @@ class SmokeTest extends TestCase
 
     public function test_admin_edit_screens_render(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->superAdmin()->create();
         [$category, $product] = $this->seedCatalog();
 
         $this->actingAs($admin)->get(route('admin.products.edit', $product))->assertOk();
@@ -193,7 +200,7 @@ class SmokeTest extends TestCase
 
     public function test_a_supplier_can_be_created_and_listed(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->superAdmin()->create();
 
         $this->actingAs($admin)
             ->post(route('admin.suppliers.store'), ['name' => 'Chapai Traders', 'phone' => '01700000000'])
@@ -204,7 +211,7 @@ class SmokeTest extends TestCase
 
     public function test_an_expense_can_be_created(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->superAdmin()->create();
 
         $this->actingAs($admin)
             ->post(route('admin.expenses.store'), [
@@ -220,7 +227,7 @@ class SmokeTest extends TestCase
 
     public function test_a_purchase_adds_stock_and_an_adjustment_removes_it(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->superAdmin()->create();
         [, , $variant] = $this->seedCatalog();
         $supplier = Supplier::create(['name' => 'Chapai Traders']);
 

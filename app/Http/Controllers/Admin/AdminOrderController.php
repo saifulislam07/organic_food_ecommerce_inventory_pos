@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Support\OrderNotifier;
 use Illuminate\Http\Request;
 
 class AdminOrderController extends Controller
@@ -41,7 +42,11 @@ class AdminOrderController extends Controller
     {
         $request->validate(['status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled']);
 
+        $previousStatus = $order->status;
+
         $order->update(['status' => $request->status]);
+
+        app(OrderNotifier::class)->statusChanged($order, $previousStatus);
 
         if ($request->expectsJson()) {
             return response()->json([

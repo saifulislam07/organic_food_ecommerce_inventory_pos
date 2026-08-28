@@ -14,6 +14,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Permissions first, so the admin can be granted the Super Admin role.
+        $this->call(PermissionSeeder::class);
+
         // Single source of truth for how an administrator is created.
         $this->call(AdminSeeder::class);
 

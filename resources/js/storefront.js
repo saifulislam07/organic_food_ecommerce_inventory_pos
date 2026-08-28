@@ -9,6 +9,7 @@ import ProductPurchase from './storefront/components/ProductPurchase.vue';
 import CartPage from './storefront/components/CartPage.vue';
 import CheckoutForm from './storefront/components/CheckoutForm.vue';
 import ConfirmDeleteAccount from './storefront/components/ConfirmDeleteAccount.vue';
+import ProductGalleryViewer from './storefront/components/ProductGalleryViewer.vue';
 
 const components = {
     CartBadge,
@@ -18,6 +19,7 @@ const components = {
     CartPage,
     CheckoutForm,
     ConfirmDeleteAccount,
+    ProductGalleryViewer,
 };
 
 const mountIslands = startIslands(components);

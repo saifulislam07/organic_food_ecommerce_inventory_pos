@@ -135,7 +135,7 @@
             <h2 class="section-title">{{ app()->getLocale() == 'bn' ? 'সহজেই অর্ডার করুন' : 'Order Effortlessly' }}</h2>
             <p class="section-subtitle mb-4">{{ app()->getLocale() == 'bn' ? 'ফোন কল, WhatsApp বা সরাসরি ওয়েবসাইট থেকে অর্ডার করুন' : 'Order via phone, WhatsApp, or directly from our website' }}</p>
             <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="https://wa.me/{{ \App\Models\Setting::get('whatsapp', '8801716952365') }}?text={{ app()->getLocale() == 'bn' ? 'হ্যালো! আমি অর্ডার করতে চাই।' : 'Hello! I want to order.' }}" target="_blank" class="btn-whatsapp">
+                <a href="{{ \App\Support\Whatsapp::shopUrl() }}?text={{ app()->getLocale() == 'bn' ? 'হ্যালো! আমি অর্ডার করতে চাই।' : 'Hello! I want to order.' }}" target="_blank" class="btn-whatsapp">
                     <i class="bi bi-whatsapp"></i> {{ app()->getLocale() == 'bn' ? 'WhatsApp এ অর্ডার করুন' : 'Order on WhatsApp' }}
                 </a>
                 <a href="{{ route('shop') }}" class="btn-primary-custom">

@@ -48,6 +48,11 @@
                     <td>
                         <div class="d-flex gap-1">
                             <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            <a href="{{ route('admin.combos.edit', $product) }}"
+                               class="btn btn-sm {{ $product->is_combo ? 'btn-warning' : 'btn-outline-secondary' }}"
+                               title="{{ $product->is_combo ? 'Combo contents' : 'Make this a combo' }}">
+                                <i class="bi bi-box2"></i>
+                            </a>
                             <form action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('Delete this product?')">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>

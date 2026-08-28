@@ -30,6 +30,15 @@
     </url>
     @endforeach
 
+    @foreach ($pages as $page)
+    <url>
+        <loc>{{ route('pages.show', $page->slug) }}</loc>
+        <lastmod>{{ $page->updated_at->tz('UTC')->toAtomString() }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.4</priority>
+    </url>
+    @endforeach
+
     @foreach ($products as $product)
     <url>
         <loc>{{ route('product.show', $product->slug) }}</loc>

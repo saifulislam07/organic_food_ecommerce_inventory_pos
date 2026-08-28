@@ -14,7 +14,12 @@
         body { background: #f0f2f5; }
         .admin-sidebar {
             width: 260px;
-            min-height: 100vh;
+            /* Fixed, so it does not scroll with the page. The menu is taller than
+               a laptop viewport, and without its own scrolling the last items are
+               simply clipped away with no way to reach them. */
+            height: 100vh;
+            overflow-y: auto;
+            overscroll-behavior: contain;
             background: linear-gradient(180deg, #1b4332, #0d1b2a);
             position: fixed;
             left: 0;
@@ -23,6 +28,15 @@
             padding-top: 20px;
             transition: var(--transition);
         }
+        /* A thin scrollbar that does not fight the dark sidebar. */
+        .admin-sidebar::-webkit-scrollbar { width: 6px; }
+        .admin-sidebar::-webkit-scrollbar-track { background: transparent; }
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 3px;
+        }
+        .admin-sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+        .admin-sidebar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) transparent; }
         .admin-sidebar .brand {
             padding: 0 24px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -38,7 +52,7 @@
             gap: 8px;
         }
         .admin-sidebar .brand .highlight { color: var(--accent); }
-        .admin-nav { list-style: none; padding: 0; margin: 0; }
+        .admin-nav { list-style: none; padding: 0 0 24px; margin: 0; }
         .admin-nav li { margin-bottom: 2px; }
         .admin-nav a {
             display: flex;
@@ -61,6 +75,42 @@
             margin: 12px 24px;
             border-top: 1px solid rgba(255,255,255,0.08);
         }
+        /* Collapsible groups keep nineteen destinations down to nine visible rows. */
+        .admin-nav .nav-parent { cursor: pointer; }
+        .admin-nav .nav-parent .chevron {
+            margin-left: auto;
+            font-size: 0.75rem;
+            transition: transform 0.2s ease;
+            opacity: 0.6;
+        }
+        .admin-nav .nav-parent[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+        .admin-nav .nav-parent[aria-expanded="true"] { color: #fff; }
+
+        .admin-nav .nav-children { list-style: none; padding: 0; margin: 0; }
+        .admin-nav .nav-children a {
+            padding: 9px 24px 9px 58px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .admin-nav .nav-children a:hover,
+        .admin-nav .nav-children a.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        /* The dot marks a child row without competing with the parent icons. */
+        .admin-nav .nav-children a::before {
+            content: '';
+            position: absolute;
+            left: 34px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.45;
+        }
+        .admin-nav .nav-children a { position: relative; }
+        .admin-nav .nav-children a.active::before { opacity: 1; }
         .admin-content {
             margin-left: 260px;
             padding: 24px;
@@ -100,84 +150,108 @@
         <div class="brand">
             <a href="{{ route('admin.dashboard') }}">🥭 Mango<span class="highlight">Hut</span></a>
         </div>
+        @php
+            // A group opens on load when the page you are on lives inside it.
+            $groups = [
+                'sell' => [
+                    'label' => 'Sell',
+                    'icon' => 'bi-cart3',
+                    'patterns' => ['admin.pos.*', 'admin.orders.*', 'admin.customers.*'],
+                    'items' => [
+                        ['route' => 'admin.pos.index', 'active' => 'admin.pos.*', 'label' => 'POS System', 'can' => 'pos.view'],
+                        ['route' => 'admin.orders.index', 'active' => 'admin.orders.*', 'label' => 'Orders', 'can' => 'orders.view'],
+                        ['route' => 'admin.customers.index', 'active' => 'admin.customers.*', 'label' => 'Customers', 'can' => 'customers.view'],
+                    ],
+                ],
+                'catalogue' => [
+                    'label' => 'Catalogue',
+                    'icon' => 'bi-box-seam',
+                    'patterns' => ['admin.products.*', 'admin.categories.*', 'admin.units.*'],
+                    'items' => [
+                        ['route' => 'admin.products.index', 'active' => 'admin.products.*', 'label' => 'Products', 'can' => 'products.view'],
+                        ['route' => 'admin.categories.index', 'active' => 'admin.categories.*', 'label' => 'Categories', 'can' => 'categories.view'],
+                        ['route' => 'admin.combos.index', 'active' => 'admin.combos.*', 'label' => 'Combos', 'can' => 'combos.view'],
+                        ['route' => 'admin.units.index', 'active' => 'admin.units.*', 'label' => 'Units', 'can' => 'units.view'],
+                    ],
+                ],
+                'stock' => [
+                    'label' => 'Stock',
+                    'icon' => 'bi-clipboard-data',
+                    'patterns' => ['admin.inventory.*', 'admin.purchases.*', 'admin.suppliers.*', 'admin.adjustments.*'],
+                    'items' => [
+                        ['route' => 'admin.inventory.index', 'active' => 'admin.inventory.*', 'label' => 'Inventory', 'can' => 'inventory.view'],
+                        ['route' => 'admin.purchases.index', 'active' => 'admin.purchases.*', 'label' => 'Purchases', 'can' => 'purchases.view'],
+                        ['route' => 'admin.suppliers.index', 'active' => 'admin.suppliers.*', 'label' => 'Suppliers', 'can' => 'suppliers.view'],
+                        ['route' => 'admin.adjustments.index', 'active' => 'admin.adjustments.*', 'label' => 'Adjustments', 'can' => 'adjustments.view'],
+                    ],
+                ],
+                'settings' => [
+                    'label' => 'Settings',
+                    'icon' => 'bi-gear',
+                    'patterns' => ['admin.settings.*'],
+                    'items' => [
+                        ['route' => 'admin.settings.index', 'active' => 'admin.settings.index', 'label' => 'Site Settings', 'can' => 'settings.view'],
+                        ['route' => 'admin.settings.mail.edit', 'active' => 'admin.settings.mail.*', 'label' => 'Email / SMTP', 'can' => 'settings.view'],
+                        ['route' => 'admin.settings.sms.edit', 'active' => 'admin.settings.sms.*', 'label' => 'SMS Gateway', 'can' => 'settings.view'],
+                        ['route' => 'admin.settings.seo.edit', 'active' => 'admin.settings.seo.*', 'label' => 'SEO & Analytics', 'can' => 'settings.view'],
+                        ['route' => 'admin.users.index', 'active' => 'admin.users.*', 'label' => 'Users & Roles', 'can' => 'users.view'],
+                    ],
+                ],
+            ];
+        @endphp
+
         <ul class="admin-nav">
             <li>
                 <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
             </li>
-            <div class="nav-divider"></div>
-            <li>
-                <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
-                    <i class="bi bi-box-seam"></i> Products
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                    <i class="bi bi-tags"></i> Categories
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.units.index') }}" class="{{ request()->routeIs('admin.units.*') ? 'active' : '' }}">
-                    <i class="bi bi-rulers"></i> Units
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-                    <i class="bi bi-receipt"></i> Orders
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
-                    <i class="bi bi-people"></i> Customers
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.pos.index') }}" class="{{ request()->routeIs('admin.pos.*') ? 'active' : '' }}">
-                    <i class="bi bi-calculator"></i> POS System
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.inventory.index') }}" class="{{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}">
-                    <i class="bi bi-box-seam"></i> Inventory
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.suppliers.index') }}" class="{{ request()->routeIs('admin.suppliers.*') ? 'active' : '' }}">
-                    <i class="bi bi-truck"></i> Suppliers
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.purchases.index') }}" class="{{ request()->routeIs('admin.purchases.*') ? 'active' : '' }}">
-                    <i class="bi bi-cart-check"></i> Purchases
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.adjustments.index') }}" class="{{ request()->routeIs('admin.adjustments.*') ? 'active' : '' }}">
-                    <i class="bi bi-tools"></i> Adjustments
-                </a>
-            </li>
+
+            @foreach($groups as $key => $group)
+                @php
+                    // Hide anything this user has no view permission for, and drop
+                    // a whole group once nothing inside it is left.
+                    $items = collect($group['items'])
+                        ->filter(fn ($item) => ! isset($item['can']) || auth()->user()->can($item['can']))
+                        ->values();
+                @endphp
+                @continue($items->isEmpty())
+                @php $open = request()->routeIs(...$group['patterns']); @endphp
+                <li>
+                    <a href="#nav-{{ $key }}" class="nav-parent {{ $open ? 'active' : '' }}"
+                       data-bs-toggle="collapse" role="button"
+                       aria-expanded="{{ $open ? 'true' : 'false' }}" aria-controls="nav-{{ $key }}">
+                        <i class="bi {{ $group['icon'] }}"></i> {{ $group['label'] }}
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </a>
+                    <ul class="collapse nav-children {{ $open ? 'show' : '' }}" id="nav-{{ $key }}">
+                        @foreach($items as $item)
+                            <li>
+                                <a href="{{ route($item['route']) }}"
+                                   class="{{ request()->routeIs($item['active']) ? 'active' : '' }}">
+                                    {{ $item['label'] }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </li>
+            @endforeach
+
+            @can('expenses.view')
             <li>
                 <a href="{{ route('admin.expenses.index') }}" class="{{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}">
                     <i class="bi bi-cash-stack"></i> Expenses
                 </a>
             </li>
-            <div class="nav-divider"></div>
+            @endcan
+            @can('pages.view')
             <li>
                 <a href="{{ route('admin.pages.index') }}" class="{{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i> Static Pages
                 </a>
             </li>
-            <li>
-                <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
-                    <i class="bi bi-gear"></i> Site Settings
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.settings.mail.edit') }}" class="{{ request()->routeIs('admin.settings.mail.*') ? 'active' : '' }}">
-                    <i class="bi bi-envelope-gear"></i> Email / SMTP
-                </a>
-            </li>
+            @endcan
+
             <div class="nav-divider"></div>
             <li>
                 <a href="{{ route('home') }}" target="_blank">
@@ -205,6 +279,16 @@
                 <h4>@yield('page_title', 'Dashboard')</h4>
             </div>
             <div class="user-info">
+                @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
+                <a href="{{ route('admin.notifications.index') }}"
+                   class="position-relative text-decoration-none me-3"
+                   title="{{ $unread ? $unread.' unread notification(s)' : 'Notifications' }}">
+                    <i class="bi {{ $unread ? 'bi-bell-fill text-primary' : 'bi-bell' }}" style="font-size:1.35rem;"></i>
+                    @if($unread)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                              style="font-size:.65rem;">{{ $unread > 99 ? '99+' : $unread }}</span>
+                    @endif
+                </a>
                 <i class="bi bi-person-circle" style="font-size:1.5rem;"></i>
                 <span>{{ auth()->user()->name }}</span>
             </div>

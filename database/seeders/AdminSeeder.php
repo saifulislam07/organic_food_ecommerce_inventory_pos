@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Support\AdminModules;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 /**
  * Makes sure an administrator exists, without touching catalogue data.
@@ -32,12 +34,13 @@ class AdminSeeder extends Seeder
                 'email_verified_at' => $admin->email_verified_at ?? now(),
             ])->save();
 
+            $this->grantFullAccess($admin);
             $this->command?->info("Existing user {$email} promoted to admin.");
 
             return;
         }
 
-        User::create([
+        $admin = User::create([
             'name' => $name,
             'email' => $email,
             'password' => Hash::make($password),
@@ -46,6 +49,21 @@ class AdminSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        $this->grantFullAccess($admin);
+
         $this->command?->info("Admin {$email} created.");
+    }
+
+    /**
+     * Reaching the panel needs `role`, but doing anything inside it needs the
+     * Super Admin role — an administrator without it would see an empty panel.
+     */
+    private function grantFullAccess(User $admin): void
+    {
+        $role = Role::findOrCreate(AdminModules::SUPER_ADMIN, 'web');
+
+        if (! $admin->hasRole($role)) {
+            $admin->assignRole($role);
+        }
     }
 }

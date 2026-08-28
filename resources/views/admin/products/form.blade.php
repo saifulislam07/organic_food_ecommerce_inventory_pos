@@ -107,16 +107,31 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Product Image</label>
+                        <label class="form-label fw-bold">
+                            Product Images
+                            <span class="text-muted fw-normal small">(max {{ \App\Models\Product::MAX_IMAGES }})</span>
+                        </label>
+                        @php
+                            $galleryImages = isset($product)
+                                ? $product->images->map(fn ($img) => [
+                                    'id' => $img->id,
+                                    'url' => $img->url,
+                                ])->values()
+                                : collect();
+
+                            $currentThumbnailId = isset($product)
+                                ? optional($product->images->firstWhere('path', $product->getRawOriginal('image')))->id
+                                : null;
+                        @endphp
                         <div
-                            data-vue="ImageUpload"
+                            data-vue="ProductGallery"
                             data-props="{{ json_encode([
-                                'currentUrl' => isset($product) && $product->image ? $product->image_url : null,
-                                'name' => 'image',
-                                'maxKb' => 2048,
+                                'existing' => $galleryImages,
+                                'max' => \App\Models\Product::MAX_IMAGES,
+                                'thumbnailId' => $currentThumbnailId,
+                                'error' => $errors->first('images') ?: $errors->first('images.0'),
                             ], JSON_UNESCAPED_UNICODE) }}"
                         ></div>
-                        @error('image') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="mb-3">

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
+use App\Services\InventoryService;
+use App\Support\OrderNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -63,13 +65,8 @@ class AdminPOSController extends Controller
             $orderItems = [];
 
             foreach ($validated['items'] as $itemData) {
-                $variant = ProductVariant::with('product')
-                    ->lockForUpdate()
+                $variant = ProductVariant::with('product', 'comboItems.component')
                     ->find($itemData['variant_id']);
-
-                if ($variant->stock < $itemData['quantity']) {
-                    throw new \Exception("Insufficient stock for {$variant->product->name} ({$variant->name})");
-                }
 
                 $price = $variant->sale_price ?? $variant->price;
                 $lineTotal = $price * $itemData['quantity'];
@@ -85,7 +82,7 @@ class AdminPOSController extends Controller
                     'total' => $lineTotal,
                 ];
 
-                $variant->decrement('stock', $itemData['quantity']);
+                app(InventoryService::class)->deduct($variant, (int) $itemData['quantity']);
             }
 
             $order = Order::create([
@@ -105,6 +102,8 @@ class AdminPOSController extends Controller
                 $item['order_id'] = $order->id;
                 OrderItem::create($item);
             }
+
+            app(OrderNotifier::class)->placed($order->fresh('items'));
 
             return response()->json([
                 'success' => true,
@@ -127,7 +126,7 @@ class AdminPOSController extends Controller
             'name' => $variant->name,
             'sku' => $variant->sku,
             'price' => (float) ($variant->sale_price ?? $variant->price),
-            'stock' => (int) $variant->stock,
+            'stock' => $variant->available_stock,
             'product_name' => $variant->product->name,
             'image' => $variant->product->image_url,
         ];

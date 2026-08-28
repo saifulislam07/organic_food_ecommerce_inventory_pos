@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
+use App\Http\Controllers\Admin\Concerns\HandlesProductImages;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
@@ -13,7 +14,7 @@ use Illuminate\Support\Str;
 
 class AdminProductController extends Controller
 {
-    use GeneratesUniqueSlug;
+    use GeneratesUniqueSlug, HandlesProductImages;
 
     public function index(Request $request)
     {
@@ -46,7 +47,11 @@ class AdminProductController extends Controller
             'short_description_bn' => 'nullable|string',
             'description_en' => 'nullable|string',
             'description_bn' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
+            'images' => 'nullable|array|max:'.Product::MAX_IMAGES,
+            'images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'remove_images' => 'nullable|array',
+            'remove_images.*' => 'integer',
+            'thumbnail_id' => 'nullable|integer',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'is_bestseller' => 'boolean',
@@ -63,7 +68,7 @@ class AdminProductController extends Controller
             'variants.*.stock' => 'required|integer|min:0',
         ]);
 
-        $data = collect($validated)->except(['image', 'variants'])->toArray();
+        $data = collect($validated)->except(['images', 'remove_images', 'thumbnail_id', 'variants'])->toArray();
         // products.name is the non-localised fallback Product::getNameAttribute() reads.
         $data['name'] = $validated['name_en'];
         $data['slug'] = $this->uniqueSlug($validated['name_en'], 'products');
@@ -73,11 +78,11 @@ class AdminProductController extends Controller
         $data['is_trending'] = $request->boolean('is_trending');
         $data['is_preorder'] = $request->boolean('is_preorder');
 
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
-        }
+        $this->guardImageCount($request);
 
         $product = Product::create($data);
+
+        $this->syncProductImages($request, $product);
 
         foreach ($request->variants as $i => $variantData) {
             $product->variants()->create([
@@ -97,7 +102,7 @@ class AdminProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load('variants');
+        $product->load('variants', 'images');
         $categories = Category::active()->sorted()->get();
         $units = Unit::active()->sorted()->get(['id', 'name', 'short_code']);
 
@@ -114,7 +119,11 @@ class AdminProductController extends Controller
             'short_description_bn' => 'nullable|string',
             'description_en' => 'nullable|string',
             'description_bn' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
+            'images' => 'nullable|array|max:'.Product::MAX_IMAGES,
+            'images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'remove_images' => 'nullable|array',
+            'remove_images.*' => 'integer',
+            'thumbnail_id' => 'nullable|integer',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'is_bestseller' => 'boolean',
@@ -131,7 +140,7 @@ class AdminProductController extends Controller
             'variants.*.stock' => 'required|integer|min:0',
         ]);
 
-        $data = collect($validated)->except(['image', 'variants'])->toArray();
+        $data = collect($validated)->except(['images', 'remove_images', 'thumbnail_id', 'variants'])->toArray();
         $data['name'] = $validated['name_en'];
         $data['slug'] = $this->uniqueSlug($validated['name_en'], 'products', $product->id);
         $data['is_active'] = $request->boolean('is_active', true);
@@ -140,14 +149,11 @@ class AdminProductController extends Controller
         $data['is_trending'] = $request->boolean('is_trending');
         $data['is_preorder'] = $request->boolean('is_preorder');
 
-        if ($request->hasFile('image')) {
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
-            $data['image'] = $request->file('image')->store('products', 'public');
-        }
+        $this->guardImageCount($request, $product);
 
         $product->update($data);
+
+        $this->syncProductImages($request, $product);
 
         // Sync variants
         $product->variants()->delete();

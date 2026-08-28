@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\ProductVariant;
 use App\Models\Setting;
 use App\Services\CartService;
+use App\Services\InventoryService;
+use App\Support\OrderNotifier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
@@ -73,6 +77,27 @@ class CheckoutController extends Controller
         $deliveryCharge = $validated['delivery_type'] === 'pickup' ? 0 : $this->cart->getDeliveryCharge($validated['customer_area']);
         $subtotal = $this->cart->getSubtotal();
 
+        try {
+            $order = DB::transaction(fn () => $this->placeOrder($validated, $subtotal, $deliveryCharge));
+        } catch (\RuntimeException $e) {
+            return back()->withInput()->withErrors(['cart' => $e->getMessage()]);
+        }
+
+        $this->cart->clear();
+
+        app(OrderNotifier::class)->placed($order->fresh('items'));
+
+        return redirect()->route('checkout.success', $order->order_number);
+    }
+
+    /**
+     * Creates the order and takes the stock in one transaction, so a sold-out
+     * item cannot leave a half-written order behind.
+     */
+    private function placeOrder(array $validated, float $subtotal, float $deliveryCharge): Order
+    {
+        $inventory = app(InventoryService::class);
+
         $order = Order::create([
             'user_id' => auth()->id(),
             'customer_name' => $validated['customer_name'],
@@ -89,6 +114,16 @@ class CheckoutController extends Controller
         ]);
 
         foreach ($this->cart->getItems() as $item) {
+            $variant = ProductVariant::with('product', 'comboItems.component')->find($item['variant_id']);
+
+            if (! $variant) {
+                throw new \RuntimeException("{$item['product_name']} is no longer available.");
+            }
+
+            // Website orders never used to touch stock at all — they do now, and
+            // a combo draws its components down instead of itself.
+            $inventory->deduct($variant, (int) $item['quantity']);
+
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $item['product_id'],
@@ -101,9 +136,7 @@ class CheckoutController extends Controller
             ]);
         }
 
-        $this->cart->clear();
-
-        return redirect()->route('checkout.success', $order->order_number);
+        return $order;
     }
 
     public function success(string $orderNumber)

@@ -15,7 +15,7 @@ class CustomerListTest extends TestCase
 
     private function admin(): User
     {
-        return $this->admin ??= User::factory()->create(['role' => 'admin']);
+        return $this->admin ??= User::factory()->superAdmin()->create();
     }
 
     private function order(array $attributes = []): Order
@@ -136,7 +136,7 @@ class CustomerListTest extends TestCase
 
     public function test_the_detail_page_does_not_expose_another_admin(): void
     {
-        $other = User::factory()->create(['role' => 'admin']);
+        $other = User::factory()->superAdmin()->create();
 
         $this->actingAs($this->admin())
             ->get(route('admin.customers.show', $other))

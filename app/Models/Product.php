@@ -15,7 +15,7 @@ class Product extends Model
         'short_description', 'short_description_en', 'short_description_bn',
         'description', 'description_en', 'description_bn',
         'image', 'gallery', 'is_active', 'is_featured', 'is_bestseller',
-        'is_trending', 'is_preorder', 'meta_title', 'meta_description', 'sort_order',
+        'is_trending', 'is_preorder', 'is_combo', 'meta_title', 'meta_description', 'sort_order',
     ];
 
     /**
@@ -57,12 +57,22 @@ class Product extends Model
         'is_bestseller' => 'boolean',
         'is_trending' => 'boolean',
         'is_preorder' => 'boolean',
+        'is_combo' => 'boolean',
     ];
 
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
+
+    /** Up to MAX_IMAGES gallery photos, ordered as the admin arranged them. */
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /** How many photos one product may carry. */
+    public const MAX_IMAGES = 5;
 
     public function variants(): HasMany
     {
@@ -150,6 +160,6 @@ class Product extends Model
 
     public function getIsInStockAttribute(): bool
     {
-        return $this->variants->contains(fn ($v) => $v->stock > 0 && $v->is_active);
+        return $this->variants->contains(fn ($v) => $v->is_active && $v->available_stock > 0);
     }
 }

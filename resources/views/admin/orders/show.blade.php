@@ -135,7 +135,7 @@
                     <span class="text-muted" style="font-size: 0.9rem;">{{ $order->customer_address }}</span>
                 </div>
                 <div class="mt-2 pt-2 border-top">
-                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->customer_phone) }}" target="_blank" class="btn btn-sm btn-outline-success w-100">
+                    <a href="{{ \App\Support\Whatsapp::url($order->customer_phone) }}" target="_blank" class="btn btn-sm btn-outline-success w-100">
                         <i class="bi bi-whatsapp"></i> Chat on WhatsApp
                     </a>
                 </div>

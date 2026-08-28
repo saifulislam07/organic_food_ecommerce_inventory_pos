@@ -24,6 +24,8 @@ class AdminSettingController extends Controller
         'address' => ['type' => 'textarea', 'rules' => ['nullable', 'string', 'max:1000']],
         'facebook' => ['type' => 'text', 'rules' => ['nullable', 'url', 'max:255']],
         'youtube' => ['type' => 'text', 'rules' => ['nullable', 'url', 'max:255']],
+        'instagram' => ['type' => 'text', 'rules' => ['nullable', 'url', 'max:255']],
+        'tiktok' => ['type' => 'text', 'rules' => ['nullable', 'url', 'max:255']],
         'shipping_fee_inside' => ['type' => 'text', 'rules' => ['nullable', 'numeric', 'min:0']],
         'shipping_fee_outside' => ['type' => 'text', 'rules' => ['nullable', 'numeric', 'min:0']],
         'free_delivery_threshold' => ['type' => 'text', 'rules' => ['nullable', 'numeric', 'min:0']],

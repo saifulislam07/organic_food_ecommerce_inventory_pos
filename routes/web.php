@@ -2,18 +2,23 @@
 
 use App\Http\Controllers\Admin\AdminAdjustmentController;
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminComboController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminExpenseController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminMailSettingController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\AdminPOSController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminPurchaseController;
+use App\Http\Controllers\Admin\AdminSeoSettingController;
 use App\Http\Controllers\Admin\AdminSettingController;
+use App\Http\Controllers\Admin\AdminSmsSettingController;
 use App\Http\Controllers\Admin\AdminSupplierController;
 use App\Http\Controllers\Admin\AdminUnitController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -30,7 +35,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
-Route::get('/p/{slug}', [PageController::class, 'show'])->name('pages.show');
 Route::get('/about', fn () => view('pages.about'))->name('about');
 Route::get('/contact', fn () => view('pages.contact'))->name('contact');
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
@@ -58,10 +62,16 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
 });
 
 // Admin Routes
-Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('products', AdminProductController::class);
+    Route::get('combos', [AdminComboController::class, 'index'])->name('combos.index');
+    Route::get('combos/create', [AdminComboController::class, 'create'])->name('combos.create');
+    Route::post('combos', [AdminComboController::class, 'store'])->name('combos.store');
+    Route::get('combos/{product}/edit', [AdminComboController::class, 'edit'])->name('combos.edit');
+    Route::put('combos/{product}', [AdminComboController::class, 'update'])->name('combos.update');
+    Route::delete('combos/{product}', [AdminComboController::class, 'destroy'])->name('combos.destroy');
     Route::resource('categories', AdminCategoryController::class);
     Route::resource('units', AdminUnitController::class)->except(['show']);
     Route::resource('expenses', AdminExpenseController::class);
@@ -77,6 +87,10 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::resource('purchases', AdminPurchaseController::class)->except(['edit', 'update']);
     Route::resource('adjustments', AdminAdjustmentController::class)->except(['edit', 'update']);
 
+    Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::post('/notifications/{id}', [AdminNotificationController::class, 'read'])->name('notifications.read');
+
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
 
@@ -89,7 +103,13 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/settings/mail', [AdminMailSettingController::class, 'edit'])->name('settings.mail.edit');
     Route::post('/settings/mail', [AdminMailSettingController::class, 'update'])->name('settings.mail.update');
     Route::post('/settings/mail/test', [AdminMailSettingController::class, 'test'])->name('settings.mail.test');
+    Route::get('/settings/sms', [AdminSmsSettingController::class, 'edit'])->name('settings.sms.edit');
+    Route::post('/settings/sms', [AdminSmsSettingController::class, 'update'])->name('settings.sms.update');
+    Route::post('/settings/sms/test', [AdminSmsSettingController::class, 'test'])->name('settings.sms.test');
+    Route::get('/settings/seo', [AdminSeoSettingController::class, 'edit'])->name('settings.seo.edit');
+    Route::post('/settings/seo', [AdminSeoSettingController::class, 'update'])->name('settings.seo.update');
     Route::resource('pages', AdminPageController::class);
+    Route::resource('users', AdminUserController::class)->except(['show']);
 
     Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
 });
@@ -110,3 +130,14 @@ Route::get('/lang/{locale}', function ($locale) {
 })->name('lang.switch');
 
 require __DIR__.'/auth.php';
+
+/*
+ | Pretty page URLs: /about-us rather than /p/about-us.
+ |
+ | This is a catch-all, so it MUST stay the last route in the file. Registered
+ | any earlier it swallows every path declared below it — /cart and /checkout
+ | included — and hands them to PageController instead.
+ */
+Route::get('{slug}', [PageController::class, 'show'])
+    ->where('slug', '[a-z0-9-]+')
+    ->name('pages.show');

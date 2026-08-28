@@ -24,11 +24,9 @@ class VueIslandTest extends TestCase
 
     private function admin(): User
     {
-        return $this->admin ??= User::create([
+        return $this->admin ??= User::factory()->superAdmin()->create([
             'name' => 'Admin',
             'email' => 'admin@example.test',
-            'password' => 'password',
-            'role' => 'admin',
         ]);
     }
 

@@ -173,9 +173,20 @@
         <div class="row g-5">
             <!-- Product Image -->
             <div class="col-lg-6">
-                <div class="product-gallery-main">
-                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" id="mainImage">
-                </div>
+                @php
+                    // Thumbnail first, then the rest of the gallery.
+                    $galleryUrls = $product->images->pluck('url');
+                    $galleryUrls = $galleryUrls->isEmpty()
+                        ? collect([$product->image_url])
+                        : $galleryUrls->sortByDesc(fn ($url) => $url === $product->image_url)->values();
+                @endphp
+                <div
+                    data-vue="ProductGalleryViewer"
+                    data-props="{{ json_encode([
+                        'images' => $galleryUrls,
+                        'alt' => $product->name,
+                    ], JSON_UNESCAPED_UNICODE) }}"
+                ></div>
             </div>
 
             <!-- Product Info -->
@@ -216,7 +227,7 @@ Please provide delivery info.";
                                 'price' => (float) $v->price,
                                 'sale_price' => $v->sale_price === null ? null : (float) $v->sale_price,
                                 'display_price' => (float) $v->display_price,
-                                'stock' => (int) $v->stock,
+                                'stock' => $v->available_stock,
                             ])->values(),
                             'whatsappNumber' => \App\Models\Setting::get('whatsapp', '8801716952365'),
                             'whatsappTemplate' => $whatsappTemplate,
@@ -245,7 +256,7 @@ Please provide delivery info.";
                             <div class="col-6 text-end">
                                 <div class="meta-item">
                                     <span class="meta-label">{{ app()->getLocale() == 'bn' ? 'স্ট্যাটাস:' : 'Status:' }}</span>
-                                    @php $stock = $product->variants->sum('stock'); @endphp
+                                    @php $stock = $product->variants->sum(fn ($v) => $v->available_stock); @endphp
                                     <span class="meta-value {{ $stock > 0 ? 'text-green-600' : 'text-rose-500' }}">
                                         {{ $stock > 0 ? (app()->getLocale() == 'bn' ? 'স্টকে আছে' : 'In Stock') : (app()->getLocale() == 'bn' ? 'স্টক শেষ' : 'Out of Stock') }}
                                     </span>

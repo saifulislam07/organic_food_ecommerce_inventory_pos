@@ -24,7 +24,7 @@ class MailSettingsTest extends TestCase
 
     private function admin(): User
     {
-        return $this->admin ??= User::factory()->create(['role' => 'admin']);
+        return $this->admin ??= User::factory()->superAdmin()->create();
     }
 
     private function validPayload(array $overrides = []): array

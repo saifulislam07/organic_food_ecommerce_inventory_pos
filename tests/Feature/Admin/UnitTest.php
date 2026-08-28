@@ -19,7 +19,7 @@ class UnitTest extends TestCase
 
     private function admin(): User
     {
-        return $this->admin ??= User::factory()->create(['role' => 'admin']);
+        return $this->admin ??= User::factory()->superAdmin()->create();
     }
 
     public function test_the_seeder_installs_the_units_this_shop_sells_in(): void
