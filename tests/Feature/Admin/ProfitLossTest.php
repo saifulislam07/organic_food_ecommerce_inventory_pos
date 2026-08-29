@@ -220,6 +220,50 @@ class ProfitLossTest extends TestCase
         $this->assertSame(300.0, $report['revenue']);
     }
 
+    public function test_the_last_day_of_the_range_is_counted(): void
+    {
+        // Expenses, purchases and damage are filed against date columns rather
+        // than timestamps, and the last day of the range is where an off-by-one
+        // in the bounds hides: everything else in the month still adds up.
+        $supplier = Supplier::create(['name' => 'Chapai Traders']);
+
+        foreach (['2026-06-20' => 100, '2026-06-21' => 999] as $date => $amount) {
+            Expense::create([
+                'title' => 'Packaging',
+                'category' => 'supplies',
+                'amount' => $amount,
+                'expense_date' => $date,
+                'paid_from' => 'cash',
+            ]);
+
+            Purchase::create([
+                'supplier_id' => $supplier->id,
+                'product_variant_id' => $this->variant->id,
+                'purchase_price' => $amount,
+                'quantity' => 1,
+                'purchase_date' => $date,
+                'paid_from' => 'bank',
+            ]);
+
+            Adjustment::create([
+                'product_variant_id' => $this->variant->id,
+                'quantity' => 1,
+                'type' => 'damage',
+                'adjustment_date' => $date,
+            ]);
+        }
+
+        $report = $this->report('2026-06-10', '2026-06-20');
+
+        // The 20th is in; the 21st is a day past the end.
+        $this->assertSame(100.0, $report['expenses']);
+        $this->assertSame(100.0, $report['purchases']);
+        $this->assertSame(60.0, $report['damage']);
+        $this->assertSame(1, $report['damage_units']);
+        $this->assertSame(100.0, $report['accounts']['cash']['out']);
+        $this->assertSame(100.0, $report['accounts']['bank']['out']);
+    }
+
     public function test_a_range_typed_backwards_is_still_read_the_right_way_round(): void
     {
         $report = ProfitLossReport::between(now()->toDateString(), now()->subMonth()->toDateString());

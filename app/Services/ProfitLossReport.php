@@ -57,6 +57,22 @@ class ProfitLossReport
         return $this->to;
     }
 
+    /**
+     * The range as full-day bounds, for the date-only columns.
+     *
+     * expense_date, purchase_date and adjustment_date are declared date(), but
+     * Eloquent's date cast writes them through the connection's datetime
+     * format. MySQL truncates that back to a date; SQLite keeps the whole
+     * string. So a bare "2026-08-29" upper bound silently drops the last day of
+     * the range under SQLite, where "2026-08-29 00:00:00" sorts after it as a
+     * string. Spanning midnight to 23:59:59 reads the same on both drivers, and
+     * stays a plain range, so the index on these columns is still used.
+     */
+    private function dayRange(): array
+    {
+        return [$this->from->copy()->startOfDay(), $this->to->copy()->endOfDay()];
+    }
+
     /** Everything the page renders, in one call. */
     public function summary(): array
     {
@@ -132,7 +148,7 @@ class ProfitLossReport
     private function expenses(): array
     {
         $rows = Expense::query()
-            ->whereBetween('expense_date', [$this->from->toDateString(), $this->to->toDateString()]);
+            ->whereBetween('expense_date', $this->dayRange());
 
         return [
             'total' => (float) (clone $rows)->sum('amount'),
@@ -151,7 +167,7 @@ class ProfitLossReport
         $rows = Adjustment::query()
             ->leftJoin('product_variants', 'product_variants.id', '=', 'adjustments.product_variant_id')
             ->whereIn('adjustments.type', self::LOSSES)
-            ->whereBetween('adjustments.adjustment_date', [$this->from->toDateString(), $this->to->toDateString()]);
+            ->whereBetween('adjustments.adjustment_date', $this->dayRange());
 
         return [
             'total' => (float) (clone $rows)->sum(
@@ -164,7 +180,7 @@ class ProfitLossReport
     private function purchases(): array
     {
         $rows = Purchase::query()
-            ->whereBetween('purchase_date', [$this->from->toDateString(), $this->to->toDateString()]);
+            ->whereBetween('purchase_date', $this->dayRange());
 
         return [
             'total' => (float) (clone $rows)->sum(DB::raw('purchase_price * quantity')),
