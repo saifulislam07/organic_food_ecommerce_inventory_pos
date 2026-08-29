@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title', 'POS System')
-@section('page_title', 'Mango Hut Point of Sale')
+@section('page_title', 'MohiPure Point of Sale')
 
 @section('content')
     <div

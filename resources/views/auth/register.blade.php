@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-4">
     <h2 class="fw-black text-dark mb-1">{{ app()->getLocale() == 'bn' ? 'নতুন অ্যাকাউন্ট' : 'Create Account' }}</h2>
-    <p class="text-muted">{{ app()->getLocale() == 'bn' ? 'ম্যাংগো হাটে যোগ দিতে আপনার তথ্য দিন' : 'Join Mango Hut and start shopping today' }}</p>
+    <p class="text-muted">{{ app()->getLocale() == 'bn' ? 'MohiPure-এ যোগ দিতে আপনার তথ্য দিন' : 'Join MohiPure and start shopping today' }}</p>
 </div>
 
 <form method="POST" action="{{ route('register') }}">

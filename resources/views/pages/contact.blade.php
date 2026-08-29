@@ -1,5 +1,5 @@
 @extends('layouts.frontend')
-@section('title', 'Contact Us – Mango Hut')
+@section('title', 'Contact Us – MohiPure')
 @section('content')
 <div class="page-header">
     <div class="container">

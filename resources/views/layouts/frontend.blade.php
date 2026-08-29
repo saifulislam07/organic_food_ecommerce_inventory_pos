@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    @include('partials.favicon')
+
     @php
         $seoTitle = trim($__env->yieldContent('title', \App\Support\SeoSettings::get('seo_meta_title')
-            ?: \App\Models\Setting::get('site_title', 'Mango Hut')));
+            ?: \App\Models\Setting::get('site_title', 'MohiPure')));
         $seoDescription = trim($__env->yieldContent('meta_description', \App\Support\SeoSettings::get('seo_meta_description') ?: ''));
         $seoKeywords = \App\Support\SeoSettings::get('seo_meta_keywords');
         $seoImage = trim($__env->yieldContent('og_image', \App\Support\SeoSettings::ogImageUrl() ?: ''));
@@ -30,7 +32,7 @@
 
     {{-- Open Graph: what Facebook, WhatsApp and Messenger show when a link is shared --}}
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="{{ \App\Models\Setting::get('site_title', 'Mango Hut') }}">
+    <meta property="og:site_name" content="{{ \App\Models\Setting::get('site_title', 'MohiPure') }}">
     <meta property="og:locale" content="{{ app()->getLocale() === 'bn' ? 'bn_BD' : 'en_US' }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="{{ $seoTitle }}">
@@ -71,6 +73,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- Custom CSS -->
+    <link href="{{ asset('css/brand.css') }}" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     {{-- Runtime config for resources/js/storefront.js --}}
@@ -97,33 +100,22 @@
 
     @vite(['resources/js/storefront.js'])
     <style>
+        /* The brand palette lives in css/brand.css. Only the extra tokens this
+           layout needs on top of it are declared here — redeclaring the brand
+           colours would silently override the theme, since this block loads
+           after the stylesheet. */
         :root {
-            --primary: #2d6a4f;
-            --primary-light: #40916c;
-            --primary-dark: #1b4332;
-            --secondary: #f4a261;
-            --accent: #e76f51;
+            --secondary: var(--accent);
             --light: #f8f9fa;
-            --dark: #1a1a2e;
-            --gray-100: #f1f3f5;
-            --gray-200: #e9ecef;
             --gray-300: #dee2e6;
             --gray-400: #ced4da;
-            --gray-500: #adb5bd;
-            --white: #ffffff;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --radius-sm: 8px;
             --radius-md: 12px;
-            --radius-lg: 20px;
         }
 
         body {
             font-family: 'Hind Siliguri', sans-serif;
-            color: #333;
-            background-color: #fdfdfd;
+            color: var(--dark);
+            background-color: var(--cream);
             overflow-x: hidden;
             font-size: 0.95rem;
         }
@@ -394,15 +386,7 @@
     <nav class="navbar navbar-expand-lg sticky-top" id="mainNavbar">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                @if($logo = \App\Models\Setting::value('logo'))
-                    <img src="{{ \App\Support\ImageStore::url($logo) }}" alt="Logo" height="40" class="me-2">
-                @else
-                    <span class="brand-icon">🥭</span>
-                    <span class="brand-text">
-                        @php $title = \App\Models\Setting::get('site_title', 'Mango Hut'); @endphp
-                        {{ $title }}
-                    </span>
-                @endif
+                @include('partials.brand')
             </a>
 
             <div class="d-flex align-items-center d-lg-none">
@@ -601,7 +585,7 @@
             right: -100px;
             width: 400px;
             height: 400px;
-            background: radial-gradient(circle, rgba(45, 106, 79, 0.05) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(var(--primary-rgb), 0.05) 0%, transparent 70%);
             z-index: -1;
         }
         
@@ -617,8 +601,7 @@
             <div class="row g-4">
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-brand">
-                        <span class="brand-icon">🥭</span>
-                        <span class="brand-text">Mango<span class="brand-highlight">Hut</span></span>
+                        @include('partials.brand', ['size' => 'lg', 'onDark' => true])
                     </div>
                     <p class="footer-desc">
                         {{ app()->getLocale() == 'bn' 
@@ -674,7 +657,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; {{ date('Y') }} Mango Hut | {{ app()->getLocale() == 'bn' ? 'সর্বস্বত্ব সংরক্ষিত' : 'All Rights Reserved' }}</p>
+                <p>&copy; {{ date('Y') }} {{ \App\Models\Setting::get('site_title', 'MohiPure') }} | {{ app()->getLocale() == 'bn' ? 'সর্বস্বত্ব সংরক্ষিত' : 'All Rights Reserved' }}</p>
             </div>
         </div>
     </footer>

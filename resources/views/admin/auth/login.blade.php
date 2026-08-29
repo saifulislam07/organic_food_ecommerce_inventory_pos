@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Admin Gateway – {{ config('app.name', 'Mango Hut') }}</title>
+    <title>Admin Gateway – {{ \App\Models\Setting::get('site_title', 'MohiPure') }}</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,18 +16,20 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
+    @include('partials.favicon')
+
+    <link href="{{ asset('css/brand.css') }}" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #2d6a4f;
-            --primary-light: #40916c;
-            --primary-dark: #1b4332;
-            --dark: #081c15;
+            /* The gateway's near-black was its own colour; the brand's deepest
+               green reads just as solid and belongs to the logo. */
+            --dark: var(--primary-darker);
             --gray-100: #f1f3f5;
             --gray-200: #e9ecef;
             --gray-300: #dee2e6;
             --gray-400: #ced4da;
             --gray-500: #adb5bd;
-            --white: #ffffff;
             --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
@@ -139,7 +141,7 @@
 
         .form-control:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 5px rgba(45, 106, 79, 0.08);
+            box-shadow: 0 0 0 5px rgba(var(--primary-rgb), 0.08);
             background: white;
         }
 
@@ -195,10 +197,10 @@
     <div class="auth-container">
         <!-- Visual Layered Info -->
         <div class="auth-image-side">
-            <img src="{{ asset('images/admin-auth-bg.png') }}" alt="Mango Hut Admin">
+            <img src="{{ asset('images/admin-auth-bg.png') }}" alt="{{ \App\Models\Setting::get('site_title', 'MohiPure') }} Admin">
             <div class="auth-overlay-content">
                 <h1 class="display-3 fw-black text-white pe-5 mb-4">স্বাগতম এডমিন পোর্টাল</h1>
-                <p class="lead text-white-50 opacity-75">নিরাপদ এবং দক্ষভাবে আপনার ব্যবসা পরিচালনা করুন। ম্যাংগো হাট ড্যাশবোর্ডে লগইন করুন।</p>
+                <p class="lead text-white-50 opacity-75">নিরাপদ এবং দক্ষভাবে আপনার ব্যবসা পরিচালনা করুন। MohiPure ড্যাশবোর্ডে লগইন করুন।</p>
                 
                 <div class="d-flex gap-4 mt-5">
                     <div class="text-white">
@@ -217,8 +219,7 @@
         <!-- Secure Form Side -->
         <div class="auth-form-side">
             <a href="{{ route('home') }}" class="auth-brand">
-                <span class="brand-icon">🥭</span>
-                <span class="brand-text">Mango<span class="brand-highlight">Hut</span></span>
+                @include('partials.brand')
             </a>
 
             <div class="auth-form-wrapper">

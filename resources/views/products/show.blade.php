@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', $product->meta_title ?? $product->name . ' – Mango Hut')
+@section('title', $product->meta_title ?? $product->name . ' – MohiPure')
 @section('meta_description', $product->meta_description ?? $product->short_description ?? $product->name)
 
 @push('styles')

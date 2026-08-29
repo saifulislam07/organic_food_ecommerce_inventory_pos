@@ -20,7 +20,7 @@
     <div class="col-xl-3 col-md-6">
         <div class="admin-stat-card bg-gradient-warning">
             <i class="bi bi-clock stat-icon"></i>
-            <div class="stat-value text-danger">{{ $stats['low_stock_count'] }}</div>
+            <div class="stat-value">{{ $stats['low_stock_count'] }}</div>
             <div class="stat-label">Low Stock Alerts</div>
         </div>
     </div>
@@ -92,7 +92,7 @@
         <div class="card admin-card p-4">
             <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">Quick Actions</h5>
             <div class="d-grid gap-2">
-                <a href="{{ route('admin.pos.index') }}" class="btn btn-primary"><i class="bi bi-calculator"></i> POS system</a>
+                <a href="{{ route('admin.pos.index') }}" class="btn btn-brand"><i class="bi bi-calculator"></i> POS system</a>
                 <a href="{{ route('admin.purchases.create') }}" class="btn btn-outline-success"><i class="bi bi-cart-plus"></i> New Purchase</a>
                 <a href="{{ route('admin.adjustments.create') }}" class="btn btn-outline-warning"><i class="bi bi-tools"></i> Adjust Stock</a>
                 <a href="{{ route('admin.products.create') }}" class="btn btn-outline-dark"><i class="bi bi-plus-circle"></i> Add Product</a>

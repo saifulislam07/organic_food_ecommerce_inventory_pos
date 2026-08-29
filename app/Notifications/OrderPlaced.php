@@ -30,7 +30,7 @@ class OrderPlaced extends Notification implements ShouldQueue
     public function toSms(object $notifiable): string
     {
         return sprintf(
-            'Mango Hut: order %s received. Total Tk %s. We will call you to confirm.',
+            'MohiPure: order %s received. Total Tk %s. We will call you to confirm.',
             $this->order->order_number,
             number_format($this->order->total)
         );

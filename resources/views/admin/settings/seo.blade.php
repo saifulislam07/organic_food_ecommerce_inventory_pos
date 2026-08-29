@@ -24,7 +24,7 @@
                         <input type="text" name="seo_meta_title" maxlength="70"
                                class="form-control @error('seo_meta_title') is-invalid @enderror"
                                value="{{ old('seo_meta_title', $seo['seo_meta_title'] ?? '') }}"
-                               placeholder="Mango Hut — খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার">
+                               placeholder="MohiPure — খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার">
                         @error('seo_meta_title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         <div class="form-text">Google shows about 70 characters.</div>
                     </div>

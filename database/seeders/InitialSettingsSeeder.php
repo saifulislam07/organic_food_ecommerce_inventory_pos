@@ -13,7 +13,7 @@ class InitialSettingsSeeder extends Seeder
     {
         // Settings
         $settings = [
-            ['key' => 'site_title', 'value_en' => 'Mango Hut', 'value_bn' => 'ম্যাঙ্গো হাট', 'type' => 'text'],
+            ['key' => 'site_title', 'value_en' => 'MohiPure', 'value_bn' => 'MohiPure', 'type' => 'text'],
             ['key' => 'phone', 'value_en' => '01716-952365', 'value_bn' => '01716-952365', 'type' => 'text'],
             ['key' => 'whatsapp', 'value_en' => '01716-952365', 'value_bn' => '01716-952365', 'type' => 'text'],
             ['key' => 'address', 'value_en' => 'Chapainawabganj, Rajshahi, Bangladesh', 'value_bn' => 'চাঁপাই নবাবগঞ্জ, রাজশাহী, বাংলাদেশ', 'type' => 'textarea'],
@@ -56,8 +56,8 @@ class InitialSettingsSeeder extends Seeder
                 'slug' => 'about-us',
                 'title_en' => 'About Us',
                 'title_bn' => 'আমাদের সম্পর্কে',
-                'content_en' => 'Welcome to Mango Hut. We provide the best organic products from Chapainawabganj.',
-                'content_bn' => 'ম্যাঙ্গো হাটে আপনাকে স্বাগতম। আমরা সরাসরি চাঁপাই নবাবগঞ্জ থেকে সেরা অর্গানিক পণ্য সরবরাহ করি।',
+                'content_en' => 'Welcome to MohiPure. We provide the best organic products from Chapainawabganj.',
+                'content_bn' => 'MohiPure-এ আপনাকে স্বাগতম। আমরা সরাসরি চাঁপাই নবাবগঞ্জ থেকে সেরা অর্গানিক পণ্য সরবরাহ করি।',
             ],
             [
                 'slug' => 'terms-and-conditions',

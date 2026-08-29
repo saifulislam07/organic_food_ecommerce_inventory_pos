@@ -103,12 +103,12 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 .admin-toast i:first-child { font-size: 1.15rem; }
 
 /* The panel's own greens and reds, not Bootstrap's defaults. */
-.toast-success { border-left-color: #2d6a4f; color: #1b4332; }
-.toast-success i:first-child { color: #2d6a4f; }
+.toast-success { border-left-color: #3d8202; color: #1e4a01; }
+.toast-success i:first-child { color: #3d8202; }
 .toast-danger { border-left-color: #c1121f; color: #6a040f; }
 .toast-danger i:first-child { color: #c1121f; }
-.toast-warning { border-left-color: #f4a261; color: #7f4f24; }
-.toast-warning i:first-child { color: #e76f51; }
+.toast-warning { border-left-color: #fda102; color: #6d4a02; }
+.toast-warning i:first-child { color: #b85600; }
 .toast-info { border-left-color: #457b9d; color: #1d3557; }
 .toast-info i:first-child { color: #457b9d; }
 
@@ -161,8 +161,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 }
 
 .tone-danger { background: #fde8e9; color: #c1121f; }
-.tone-warning { background: #fdf0e3; color: #e76f51; }
-.tone-primary { background: #e6f2ec; color: #2d6a4f; }
+.tone-warning { background: #fef2d9; color: #b85600; }
+.tone-primary { background: #eaf4dc; color: #3d8202; }
 
 .dialog-enter-active, .dialog-leave-active { transition: opacity 0.2s ease; }
 .dialog-enter-from, .dialog-leave-to { opacity: 0; }

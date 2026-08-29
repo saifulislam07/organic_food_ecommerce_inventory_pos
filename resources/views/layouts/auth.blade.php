@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Authentication') – {{ \App\Models\Setting::get('site_title', 'Mango Hut') }}</title>
+    <title>@yield('title', 'Authentication') – {{ \App\Models\Setting::get('site_title', 'MohiPure') }}</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,21 +16,20 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
+    @include('partials.favicon')
+
+    <link href="{{ asset('css/brand.css') }}" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #2d6a4f;
-            --primary-light: #40916c;
-            --primary-dark: #1b4332;
-            --secondary: #f4a261;
-            --accent: #e76f51;
+            --secondary: var(--accent);
+            --accent-strong: var(--accent-dark);
             --light: #f8f9fa;
-            --dark: #1a1a2e;
             --gray-100: #f1f3f5;
             --gray-200: #e9ecef;
             --gray-300: #dee2e6;
             --gray-400: #ced4da;
             --gray-500: #adb5bd;
-            --white: #ffffff;
             --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
@@ -130,7 +129,7 @@
 
         .form-control:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.1);
+            box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
         }
 
         .btn-primary-custom {
@@ -146,13 +145,13 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            box-shadow: 0 4px 15px rgba(45, 106, 79, 0.2);
+            box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);
         }
 
         .btn-primary-custom:hover {
             background: var(--primary-light);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(45, 106, 79, 0.3);
+            box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.3);
             color: white;
         }
 
@@ -189,6 +188,11 @@
             pointer-events: none;
             z-index: 0;
         }
+        .auth-chip {
+            background: var(--accent);
+            color: var(--primary-darker);
+            letter-spacing: 0.08em;
+        }
     </style>
     @stack('styles')
 </head>
@@ -197,9 +201,9 @@
     <div class="auth-container">
         <!-- Left Side: Visual -->
         <div class="auth-image-side">
-            <img src="{{ asset('images/auth-bg.png') }}" alt="Mango Orchard">
+            <img src="{{ asset('images/auth-bg.png') }}" alt="Orchard">
             <div class="auth-overlay-content">
-                <span class="badge bg-secondary mb-3 px-3 py-2 text-uppercase tracking-wider fw-bold">Premium Quality</span>
+                <span class="badge mb-3 px-3 py-2 text-uppercase tracking-wider fw-bold auth-chip">Premium Quality</span>
                 <h1 class="display-4 fw-black text-white mb-3">খাঁটি ও তাজা আমের জাদুকরী স্বাদ।</h1>
                 <p class="lead text-white-50">চাঁপাই নবাবগঞ্জের বিখ্যাত বাগান থেকে সরাসরি সংগ্রহ করা শতভাগ অর্গানিক পণ্য এখন আপনার দোরগোড়ায়।</p>
             </div>
@@ -208,8 +212,7 @@
         <!-- Right Side: Form -->
         <div class="auth-form-side">
             <a href="{{ route('home') }}" class="auth-brand">
-                <span class="brand-icon">🥭</span>
-                <span class="brand-text">Mango<span class="brand-highlight">Hut</span></span>
+                @include('partials.brand')
             </a>
 
             <div class="auth-form-wrapper">
@@ -218,7 +221,7 @@
 
             <!-- Footer Small -->
             <div class="mt-5 text-center text-muted small">
-                <p>&copy; {{ date('Y') }} Mango Hut. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} {{ \App\Models\Setting::get('site_title', 'MohiPure') }}. All rights reserved.</p>
             </div>
         </div>
     </div>

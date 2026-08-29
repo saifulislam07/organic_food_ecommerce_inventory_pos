@@ -1,32 +1,7 @@
-/* === MANGO HUT - Custom CSS Theme === */
-/* Natural Green & Golden Yellow Organic Theme */
-
-:root {
-    --primary: #2d6a4f;
-    --primary-dark: #1b4332;
-    --primary-light: #40916c;
-    --accent: #f4a261;
-    --accent-dark: #e76f51;
-    --accent-light: #f4c584;
-    --cream: #fefae0;
-    --cream-dark: #f5f0d0;
-    --white: #ffffff;
-    --dark: #1a1a2e;
-    --gray-100: #f8f9fa;
-    --gray-200: #e9ecef;
-    --gray-500: #6c757d;
-    --success: #2d6a4f;
-    --danger: #e63946;
-    --warning: #f4a261;
-    --font-primary: 'Hind Siliguri', sans-serif;
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
-    --radius: 12px;
-    --radius-sm: 8px;
-    --radius-lg: 20px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* === MOHIPURE — Storefront & admin styles === */
+/* The brand palette and logo rules live in css/brand.css, which every
+   layout links ahead of this file. Kept separate so the standalone auth,
+   admin-login and error pages share one palette with the shop. */
 
 * { box-sizing: border-box; }
 
@@ -60,7 +35,7 @@ body {
     -webkit-backdrop-filter: blur(20px);
     padding: 12px 0;
     transition: var(--transition);
-    border-bottom: 1px solid rgba(45,106,79,0.08);
+    border-bottom: 1px solid rgba(var(--primary-rgb), 0.08);
     z-index: 1050;
 }
 .navbar.scrolled {
@@ -92,7 +67,7 @@ body {
 }
 .nav-link:hover, .nav-link.active {
     color: var(--primary) !important;
-    background: rgba(45,106,79,0.06);
+    background: rgba(var(--primary-rgb), 0.06);
 }
 .nav-link.active::after {
     content: '';
@@ -112,7 +87,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(45,106,79,0.08);
+    background: rgba(var(--primary-rgb), 0.08);
     color: var(--primary-dark);
     border-radius: 50%;
     font-size: 1.3rem;
@@ -149,7 +124,7 @@ body {
 
 /* === HERO SECTION === */
 .hero-section {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+    background: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-dark) 55%, var(--primary) 100%);
     padding: 80px 0;
     position: relative;
     overflow: hidden;
@@ -164,7 +139,7 @@ body {
     right: -20%;
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(244,162,97,0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(var(--accent-rgb), 0.15) 0%, transparent 70%);
     border-radius: 50%;
     animation: heroFloat 8s ease-in-out infinite;
 }
@@ -175,7 +150,7 @@ body {
     left: -10%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(244,162,97,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(var(--accent-rgb), 0.1) 0%, transparent 70%);
     border-radius: 50%;
     animation: heroFloat 6s ease-in-out infinite reverse;
 }
@@ -190,7 +165,7 @@ body {
     gap: 6px;
     background: rgba(255,255,255,0.15);
     backdrop-filter: blur(10px);
-    color: var(--accent-light);
+    color: var(--accent-gold);
     padding: 8px 20px;
     border-radius: 50px;
     font-size: 0.85rem;
@@ -205,7 +180,7 @@ body {
     line-height: 1.2;
     margin-bottom: 20px;
 }
-.hero-title span { color: var(--accent); }
+.hero-title span { color: var(--accent-gold); }
 .hero-desc {
     font-size: 1.15rem;
     color: rgba(255,255,255,0.85);
@@ -230,7 +205,7 @@ body {
     background: var(--accent-dark);
     color: white;
     transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(244,162,97,0.4);
+    box-shadow: 0 10px 30px rgba(var(--accent-rgb), 0.4);
 }
 .hero-btn i { font-size: 1.2rem; }
 .hero-image-wrapper {
@@ -257,7 +232,7 @@ body {
 .hero-stat-num {
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--accent);
+    color: var(--accent-gold);
 }
 .hero-stat-label {
     font-size: 0.85rem;
@@ -275,7 +250,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(45,106,79,0.08);
+    background: rgba(var(--primary-rgb), 0.08);
     color: var(--primary);
     padding: 6px 18px;
     border-radius: 50px;
@@ -477,7 +452,7 @@ body {
     background: linear-gradient(135deg, var(--primary-dark), var(--primary));
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(45,106,79,0.3);
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.3);
 }
 .btn-add-cart:disabled {
     background: var(--gray-200);
@@ -503,7 +478,10 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 100%);
+    /* A deep-green scrim rather than a neutral black one: it ties the cards to
+       the brand and, being carried further up the card, keeps the white
+       heading legible over pale artwork and placeholders alike. */
+    background: linear-gradient(to top, rgba(20, 48, 1, 0.88) 0%, rgba(20, 48, 1, 0.55) 55%, rgba(20, 48, 1, 0.18) 100%);
     z-index: 1;
 }
 .category-promo:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
@@ -543,7 +521,7 @@ body {
 }
 
 /* Category color overlays */
-.cat-green { background: linear-gradient(135deg, #2d6a4f, #40916c); }
+.cat-green { background: linear-gradient(135deg, var(--primary), var(--primary-brand)); }
 .cat-brown { background: linear-gradient(135deg, #6b4423, #8b6914); }
 .cat-gold { background: linear-gradient(135deg, #b5651d, #e6a817); }
 
@@ -634,7 +612,7 @@ body {
     color: var(--primary-dark);
 }
 .free-delivery-badge {
-    background: rgba(45,106,79,0.1);
+    background: rgba(var(--primary-rgb), 0.1);
     color: var(--primary);
     padding: 4px 12px;
     border-radius: 50px;
@@ -652,7 +630,7 @@ body {
 }
 .checkout-form .form-control:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(45,106,79,0.1);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
 }
 
 /* === SHOP PAGE === */
@@ -684,7 +662,7 @@ body {
 }
 .category-filter-list a:hover,
 .category-filter-list a.active {
-    background: rgba(45,106,79,0.08);
+    background: rgba(var(--primary-rgb), 0.08);
     color: var(--primary);
 }
 .category-count {
@@ -741,7 +719,7 @@ body {
 .variant-btn:hover,
 .variant-btn.active {
     border-color: var(--primary);
-    background: rgba(45,106,79,0.05);
+    background: rgba(var(--primary-rgb), 0.05);
     color: var(--primary);
 }
 .variant-btn .variant-price {
@@ -789,12 +767,12 @@ body {
     background: linear-gradient(135deg, var(--primary-dark), var(--primary));
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(45,106,79,0.3);
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.3);
 }
 
 /* === FOOTER === */
 .site-footer {
-    background: linear-gradient(135deg, var(--primary-dark), #0d1b2a);
+    background: linear-gradient(135deg, var(--primary-dark), #122e01);
     color: white;
     padding: 60px 0 0;
 }
@@ -947,7 +925,7 @@ body {
 .success-icon {
     width: 120px;
     height: 120px;
-    background: rgba(45,106,79,0.1);
+    background: rgba(var(--primary-rgb), 0.1);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -969,7 +947,9 @@ body {
     padding: 40px 0;
     color: white;
 }
-.page-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+/* The layout sets a dark colour on bare h1, which would otherwise win here and
+   leave the title unreadable against the green band. */
+.page-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; color: #fff; }
 .breadcrumb-custom { display: flex; gap: 8px; align-items: center; list-style: none; padding: 0; margin: 0; }
 .breadcrumb-custom a { color: var(--accent-light); text-decoration: none; }
 .breadcrumb-custom span { color: rgba(255,255,255,0.5); }
@@ -1020,10 +1000,14 @@ body {
 }
 .admin-stat-card .stat-value { font-size: 2rem; font-weight: 700; }
 .admin-stat-card .stat-label { font-size: 0.85rem; opacity: 0.8; }
-.bg-gradient-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
-.bg-gradient-warning { background: linear-gradient(135deg, #e76f51, #f4a261); }
-.bg-gradient-info { background: linear-gradient(135deg, #2196f3, #03a9f4); }
-.bg-gradient-success { background: linear-gradient(135deg, #2d6a4f, #52b788); }
+/* Stat-card fills. Each stays dark enough at its lightest stop for the white
+   numerals to keep clear of the background. */
+.bg-gradient-primary { background: linear-gradient(135deg, var(--primary-darker), var(--primary)); }
+.bg-gradient-warning { background: linear-gradient(135deg, var(--accent-text), var(--accent-dark)); }
+/* The one non-brand stat card, muted to a slate-teal so it reads as a distinct
+   metric without Bootstrap blue shouting next to the greens. */
+.bg-gradient-info { background: linear-gradient(135deg, #2f4858, #3d6b7d); }
+.bg-gradient-success { background: linear-gradient(135deg, var(--primary-dark), var(--primary-brand)); }
 
 /* === EMPTY STATE === */
 .empty-state {

@@ -55,7 +55,7 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body text-center p-3">
                         <div class="text-muted small text-uppercase fw-bold" style="font-size:.7rem;">Lifetime</div>
-                        <h3 class="mb-0 fw-bold" style="color:#2d6a4f;">৳{{ number_format($paidOrders->sum('total')) }}</h3>
+                        <h3 class="mb-0 fw-bold" style="color:#3d8202;">৳{{ number_format($paidOrders->sum('total')) }}</h3>
                     </div>
                 </div>
             </div>

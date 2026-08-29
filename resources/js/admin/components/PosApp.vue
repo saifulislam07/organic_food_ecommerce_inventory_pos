@@ -250,7 +250,7 @@ onBeforeUnmount(() => {
                         <div ref="searchBox" class="position-relative mb-4">
                             <div class="input-group input-group-lg border rounded-pill overflow-hidden bg-light">
                                 <span class="input-group-text bg-transparent border-0 ps-4">
-                                    <i class="bi" :class="searching ? 'bi-hourglass-split' : 'bi-search'" style="color:#2d6a4f;"></i>
+                                    <i class="bi" :class="searching ? 'bi-hourglass-split' : 'bi-search'" style="color:#3d8202;"></i>
                                 </span>
                                 <input
                                     v-model="query"
@@ -311,7 +311,7 @@ onBeforeUnmount(() => {
                                         <h6 class="mb-1 fw-bold text-truncate small">{{ item.product_name }}</h6>
                                         <small class="text-muted d-block mb-2" style="font-size:.75rem;">{{ item.name }}</small>
                                         <div class="d-flex justify-content-between align-items-center bg-light rounded px-2 py-1">
-                                            <span class="fw-bold small" style="color:#2d6a4f;">{{ money(item.price) }}</span>
+                                            <span class="fw-bold small" style="color:#3d8202;">{{ money(item.price) }}</span>
                                             <small
                                                 class="badge bg-white border"
                                                 :class="stockLeft(item) < 5 ? 'text-danger' : 'text-success'"
@@ -393,7 +393,7 @@ onBeforeUnmount(() => {
                         <hr>
                         <div class="d-flex justify-content-between mb-4">
                             <h5 class="fw-bold mb-0">Total:</h5>
-                            <h5 class="fw-bold mb-0" style="color:#2d6a4f;">{{ money(grandTotal) }}</h5>
+                            <h5 class="fw-bold mb-0" style="color:#3d8202;">{{ money(grandTotal) }}</h5>
                         </div>
 
                         <button
@@ -448,7 +448,7 @@ onBeforeUnmount(() => {
 
                                     <div class="d-flex justify-content-between mb-3 fw-bold">
                                         <span>Payable:</span>
-                                        <span style="color:#2d6a4f;">{{ money(grandTotal) }}</span>
+                                        <span style="color:#3d8202;">{{ money(grandTotal) }}</span>
                                     </div>
 
                                     <button type="submit" class="btn btn-success w-100 py-3 fw-bold" :disabled="submitting">
@@ -478,7 +478,7 @@ onBeforeUnmount(() => {
 .pos-product-card:hover:not(:disabled) {
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
-    border-color: #2d6a4f;
+    border-color: #3d8202;
 }
 
 .pos-product-card:disabled {

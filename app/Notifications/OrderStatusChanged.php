@@ -42,7 +42,7 @@ class OrderStatusChanged extends Notification implements ShouldQueue
 
     public function toSms(object $notifiable): string
     {
-        return "Mango Hut: {$this->headline()} (order {$this->order->order_number}).";
+        return "MohiPure: {$this->headline()} (order {$this->order->order_number}).";
     }
 
     public function toArray(object $notifiable): array

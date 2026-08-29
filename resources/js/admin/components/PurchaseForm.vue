@@ -112,7 +112,7 @@ function error(field) {
             <div class="border rounded p-3 bg-light">
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-muted small">Total purchase cost</span>
-                    <span class="fw-bold" style="color:#2d6a4f;">{{ money(total) }}</span>
+                    <span class="fw-bold" style="color:#3d8202;">{{ money(total) }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-muted small">Stock after this purchase</span>

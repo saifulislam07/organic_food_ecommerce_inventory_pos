@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', (app()->getLocale() == 'bn' ? 'অর্ডার ডিটেইলস' : 'Order Details') . ' – Mango Hut')
+@section('title', (app()->getLocale() == 'bn' ? 'অর্ডার ডিটেইলস' : 'Order Details') . ' – MohiPure')
 
 @push('styles')
 <style>
@@ -32,7 +32,7 @@
         font-size: 1.2rem;
     }
     .sidebar-link:hover, .sidebar-link.active {
-        background-color: rgba(45, 106, 79, 0.05);
+        background-color: rgba(var(--primary-rgb), 0.05);
         color: var(--primary);
     }
 

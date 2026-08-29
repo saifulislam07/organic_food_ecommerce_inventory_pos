@@ -99,17 +99,17 @@ class PageSeeder extends Seeder
 
             [
                 'slug' => 'about-us',
-                'title_en' => 'About Mango Hut',
-                'title_bn' => 'ম্যাংগো হাট সম্পর্কে',
-                'content_en' => '<h3>Our Journey</h3><p>At Mango Hut, we believe in the purity of nature. Born in the heart of Chapainawabganj, the mango capital of Bangladesh, we started with a simple mission: to bring the authentic, garden-fresh taste of premium mangoes directly to your table.</p><h3>Why Choose Us?</h3><ul><li><strong>100% Organic:</strong> No formalin or harmful chemicals.</li><li><strong>Direct Sourcing:</strong> Straight from our monitored orchards.</li><li><strong>Premium Quality:</strong> Every fruit is hand-picked for perfection.</li></ul>',
-                'content_bn' => '<h3>আমাদের যাত্রা</h3><p>ম্যাংগো হাটে আমরা প্রকৃতির বিশুদ্ধতায় বিশ্বাস করি। বাংলাদেশের আমের রাজধানী চাঁপাইনবাবগঞ্জের প্রাণকেন্দ্রে আমাদের যাত্রা শুরু। আমাদের লক্ষ্য ছিল সাধারণ: প্রিমিয়াম আমের আসল, বাগান-তাজা স্বাদ সরাসরি আপনার টেবিলে পৌঁছে দেওয়া।</p><h3>কেন আমাদের বেছে নেবেন?</h3><ul><li><strong>১০০% অর্গানিক:</strong> কোনো ফরমালিন বা ক্ষতিকারক রাসায়নিক নেই।</li><li><strong>সরাসরি সংগ্রহ:</strong> আমাদের নিজস্ব তত্ত্বাবধানে থাকা বাগান থেকে সরাসরি।</li><li><strong>সেরা মান:</strong> প্রতিটি ফল নিখুঁতভাবে হাতে বাছাই করা হয়।</li></ul>',
+                'title_en' => 'About MohiPure',
+                'title_bn' => 'MohiPure সম্পর্কে',
+                'content_en' => '<h3>Our Journey</h3><p>At MohiPure, we believe in the purity of nature. Born in the heart of Chapainawabganj, the mango capital of Bangladesh, we started with a simple mission: to bring the authentic, garden-fresh taste of premium mangoes directly to your table.</p><h3>Why Choose Us?</h3><ul><li><strong>100% Organic:</strong> No formalin or harmful chemicals.</li><li><strong>Direct Sourcing:</strong> Straight from our monitored orchards.</li><li><strong>Premium Quality:</strong> Every fruit is hand-picked for perfection.</li></ul>',
+                'content_bn' => '<h3>আমাদের যাত্রা</h3><p>MohiPure-এ আমরা প্রকৃতির বিশুদ্ধতায় বিশ্বাস করি। বাংলাদেশের আমের রাজধানী চাঁপাইনবাবগঞ্জের প্রাণকেন্দ্রে আমাদের যাত্রা শুরু। আমাদের লক্ষ্য ছিল সাধারণ: প্রিমিয়াম আমের আসল, বাগান-তাজা স্বাদ সরাসরি আপনার টেবিলে পৌঁছে দেওয়া।</p><h3>কেন আমাদের বেছে নেবেন?</h3><ul><li><strong>১০০% অর্গানিক:</strong> কোনো ফরমালিন বা ক্ষতিকারক রাসায়নিক নেই।</li><li><strong>সরাসরি সংগ্রহ:</strong> আমাদের নিজস্ব তত্ত্বাবধানে থাকা বাগান থেকে সরাসরি।</li><li><strong>সেরা মান:</strong> প্রতিটি ফল নিখুঁতভাবে হাতে বাছাই করা হয়।</li></ul>',
             ],
             [
                 'slug' => 'terms-and-conditions',
                 'title_en' => 'Terms & Conditions',
                 'title_bn' => 'টার্মস ও কন্ডিশন',
-                'content_en' => '<h3>1. Agreement to Terms</h3><p>By using Mango Hut, you agree to comply with our service policies. We strive to provide the best organic products, but availability depends on seasonal harvests.</p><h3>2. Ordering & Payment</h3><p>Orders are confirmed after verification. Payments can be made via Cash on Delivery or digital payment gateways.</p>',
-                'content_bn' => '<h3>১. শর্তাবলী সম্মতি</h3><p>ম্যাংগো হাট ব্যবহারের মাধ্যমে আপনি আমাদের পরিষেবা নীতি মেনে চলতে সম্মত হন। আমরা সেরা অর্গানিক পণ্য প্রদানের চেষ্টা করি, তবে প্রাপ্যতা মৌসুমী ফসলের ওপর নির্ভর করে।</p><h3>২. অর্ডার এবং পেমেন্ট</h3><p>যাচাইকরণের পরে অর্ডার নিশ্চিত করা হয়। পেমেন্ট ক্যাশ অন ডেলিভারি বা ডিজিটাল পেমেন্ট গেটওয়ের মাধ্যমে করা যেতে পারে।</p>',
+                'content_en' => '<h3>1. Agreement to Terms</h3><p>By using MohiPure, you agree to comply with our service policies. We strive to provide the best organic products, but availability depends on seasonal harvests.</p><h3>2. Ordering & Payment</h3><p>Orders are confirmed after verification. Payments can be made via Cash on Delivery or digital payment gateways.</p>',
+                'content_bn' => '<h3>১. শর্তাবলী সম্মতি</h3><p>MohiPure ব্যবহারের মাধ্যমে আপনি আমাদের পরিষেবা নীতি মেনে চলতে সম্মত হন। আমরা সেরা অর্গানিক পণ্য প্রদানের চেষ্টা করি, তবে প্রাপ্যতা মৌসুমী ফসলের ওপর নির্ভর করে।</p><h3>২. অর্ডার এবং পেমেন্ট</h3><p>যাচাইকরণের পরে অর্ডার নিশ্চিত করা হয়। পেমেন্ট ক্যাশ অন ডেলিভারি বা ডিজিটাল পেমেন্ট গেটওয়ের মাধ্যমে করা যেতে পারে।</p>',
             ],
             [
                 'slug' => 'privacy-policy',

@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', 'Order Confirmed – Mango Hut')
+@section('title', 'Order Confirmed – MohiPure')
 
 @section('content')
 <section class="success-page">

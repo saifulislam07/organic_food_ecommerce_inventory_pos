@@ -1,5 +1,20 @@
 @extends('layouts.frontend')
-@section('title', 'About Us – Mango Hut')
+@section('title', 'About Us – MohiPure')
+
+@push('styles')
+<style>
+    .about-brand-panel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 56px 32px;
+        border-radius: var(--radius-lg);
+        background: linear-gradient(135deg, var(--leaf-tint), var(--gold-tint));
+        box-shadow: var(--shadow-sm);
+    }
+    .about-brand-panel .brand-logo { height: clamp(48px, 12vw, 96px); }
+</style>
+@endpush
 @section('content')
 <div class="page-header">
     <div class="container">
@@ -15,13 +30,15 @@
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-6">
-                <div style="font-size: 10rem; text-align: center;">🥭</div>
+                <div class="about-brand-panel">
+                    @include('partials.brand', ['size' => 'lg'])
+                </div>
             </div>
             <div class="col-lg-6">
                 <div class="section-badge"><i class="bi bi-info-circle"></i> About Us</div>
                 <h2 class="section-title text-start">আমাদের সম্পর্কে</h2>
                 <p class="text-muted" style="line-height: 1.8;">
-                    <strong>Mango Hut</strong> একটি অনলাইন প্ল্যাটফর্ম যেখানে আপনি পাবেন চাঁপাই নবাবগঞ্জের সেরা আম,
+                    <strong>MohiPure</strong> একটি অনলাইন প্ল্যাটফর্ম যেখানে আপনি পাবেন চাঁপাই নবাবগঞ্জের সেরা আম,
                     রাজশাহীর খাঁটি খেজুর গুড়, সুন্দরবনের মধু, ঘানিভাঙ্গা সরিষার তেল এবং আরও অনেক প্রাকৃতিক ও অর্গানিক পণ্য।
                 </p>
                 <p class="text-muted" style="line-height: 1.8;">

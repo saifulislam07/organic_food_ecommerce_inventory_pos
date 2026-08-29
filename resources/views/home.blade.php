@@ -14,7 +14,7 @@
 </style>
 @endpush
 
-@section('title', 'Mango Hut – খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার')
+@section('title', 'MohiPure – খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার')
 
 @section('content')
     <!-- Hero Section -->

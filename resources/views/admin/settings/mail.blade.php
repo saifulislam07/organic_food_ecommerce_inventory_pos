@@ -74,7 +74,7 @@
                         <div class="col-md-4">
                             <label class="form-label fw-bold">From Name *</label>
                             <input type="text" name="mail_from_name" class="form-control @error('mail_from_name') is-invalid @enderror"
-                                   value="{{ old('mail_from_name', $mail['mail_from_name'] ?? 'Mango Hut') }}" required>
+                                   value="{{ old('mail_from_name', $mail['mail_from_name'] ?? 'MohiPure') }}" required>
                             @error('mail_from_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>

@@ -52,7 +52,7 @@ class AdminSmsSettingController extends Controller
             return back()->withErrors(['test_number' => 'That does not look like a mobile number.']);
         }
 
-        $result = $this->sms->send($number, 'Mango Hut test message. If you received this, SMS is working.');
+        $result = $this->sms->send($number, 'MohiPure test message. If you received this, SMS is working.');
 
         if (! $result->sent) {
             return back()->withErrors(['test_number' => $result->error]);

@@ -1,0 +1,214 @@
+/* === MOHIPURE — Custom CSS Theme === */
+/* Palette sampled straight off the MohiPure logo: leaf green + mango gold */
+
+:root {
+    /* Greens, lifted from the "Mohi" wordmark. --primary is deepened just far
+       enough to clear 4.5:1 on white, so it is safe for text as well as fills. */
+    --primary: #3d8202;
+    --primary-brand: #59a202;   /* the logo's own mid green — gradients, graphics */
+    --primary-light: #70b502;   /* the logo's lightest green — highlights, hovers */
+    --primary-dark: #2f6b02;    /* headings on light grounds */
+    --primary-darker: #1e4a01;  /* footer, sidebar, deep panels */
+    --primary-rgb: 61, 130, 2;
+
+    /* Mango golds, lifted from the "Pure" wordmark. --accent is the graphic
+       orange; --accent-text is the darkened one to use when it must be read. */
+    --accent: #fda102;
+    --accent-gold: #fbcf02;     /* the logo's gold — sings on dark grounds */
+    --accent-dark: #f07b00;
+    --accent-light: #ffd97a;
+    --accent-text: #b85600;
+    --accent-rgb: 253, 161, 2;
+
+    /* Grounds: a green-tinted ivory rather than the old flat cream */
+    --cream: #fcfdf5;
+    --cream-dark: #f0f6e2;
+    --leaf-tint: #e7f2d3;
+    --gold-tint: #fef6dc;
+
+    --white: #ffffff;
+    --dark: #1c2415;
+    --gray-100: #f7f9f4;
+    --gray-200: #e7ecdf;
+    --gray-500: #6c757d;
+    --success: #3d8202;
+    --danger: #e63946;
+    --warning: #f07b00;
+    --font-primary: 'Hind Siliguri', sans-serif;
+    --shadow-sm: 0 2px 8px rgba(30, 74, 1, 0.07);
+    --shadow-md: 0 4px 16px rgba(30, 74, 1, 0.11);
+    --shadow-lg: 0 8px 32px rgba(30, 74, 1, 0.15);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 20px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* The logo's two halves, reusable as one gradient */
+    --brand-gradient: linear-gradient(100deg, #3d8202 0%, #59a202 38%, #fda102 72%, #f07b00 100%);
+}
+
+
+/* === BRAND LOGO === */
+/* One treatment for the MohiPure wordmark everywhere it appears, so the navbar,
+   the footer, the auth screens and the admin sidebar all show it identically. */
+.brand-logo {
+    width: auto;
+    max-width: 100%;
+    height: 44px;
+    display: block;
+    object-fit: contain;
+}
+.brand-logo-sm { height: 34px; }
+.brand-logo-lg { height: 64px; }
+/* The wordmark's green half sits close to the deep green of the footer and the
+   admin sidebar. Lifting it a little and adding a faint halo separates it from
+   the panel without recolouring the logo or flattening its gradient. */
+.brand-logo-on-dark {
+    filter: brightness(1.2) saturate(1.08)
+            drop-shadow(0 0 1px rgba(255, 255, 255, 0.5))
+            drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+.navbar-brand .brand-logo { height: 46px; }
+.navbar.scrolled .navbar-brand .brand-logo { height: 38px; }
+@media (max-width: 575.98px) {
+    .navbar-brand .brand-logo,
+    .navbar.scrolled .navbar-brand .brand-logo { height: 34px; }
+}
+
+/* === BOOTSTRAP, RETUNED TO THE BRAND === */
+/* Bootstrap ships a blue "primary" and a teal "success". Left alone they turn
+   up as blue buttons and links right across the admin, beside a green panel.
+   Remapping Bootstrap's own variables recolours every component that reads them
+   — buttons, links, badges, focus rings, form controls — in one place, rather
+   than chasing 200 individual class usages through the views. */
+:root,
+[data-bs-theme="light"] {
+    --bs-primary: #3d8202;
+    --bs-primary-rgb: 61, 130, 2;
+    --bs-primary-text-emphasis: #2f6b02;
+    --bs-primary-bg-subtle: #eaf4dc;
+    --bs-primary-border-subtle: #c6e19a;
+
+    --bs-success: #3d8202;
+    --bs-success-rgb: 61, 130, 2;
+    --bs-success-text-emphasis: #2f6b02;
+    --bs-success-bg-subtle: #eaf4dc;
+    --bs-success-border-subtle: #c6e19a;
+
+    --bs-warning: #f07b00;
+    --bs-warning-rgb: 240, 123, 0;
+    --bs-warning-text-emphasis: #b85600;
+    --bs-warning-bg-subtle: #fef2d9;
+    --bs-warning-border-subtle: #fbd9a0;
+
+    --bs-link-color: #3d8202;
+    --bs-link-color-rgb: 61, 130, 2;
+    --bs-link-hover-color: #2f6b02;
+    --bs-link-hover-color-rgb: 47, 107, 2;
+
+    --bs-body-color: #1c2415;
+    --bs-emphasis-color: #143001;
+    --bs-border-color: #e2e9d8;
+}
+
+/* Bootstrap 5.3 bakes its blue into these component variables, so they need
+   naming explicitly rather than inheriting from --bs-primary. */
+.btn-primary {
+    --bs-btn-bg: #3d8202;
+    --bs-btn-border-color: #3d8202;
+    --bs-btn-hover-bg: #2f6b02;
+    --bs-btn-hover-border-color: #2f6b02;
+    --bs-btn-active-bg: #265702;
+    --bs-btn-active-border-color: #265702;
+    --bs-btn-disabled-bg: #3d8202;
+    --bs-btn-disabled-border-color: #3d8202;
+    --bs-btn-focus-shadow-rgb: 61, 130, 2;
+}
+.btn-outline-primary {
+    --bs-btn-color: #3d8202;
+    --bs-btn-border-color: #3d8202;
+    --bs-btn-hover-bg: #3d8202;
+    --bs-btn-hover-border-color: #3d8202;
+    --bs-btn-active-bg: #2f6b02;
+    --bs-btn-active-border-color: #2f6b02;
+    --bs-btn-focus-shadow-rgb: 61, 130, 2;
+}
+.btn-success {
+    --bs-btn-bg: #3d8202;
+    --bs-btn-border-color: #3d8202;
+    --bs-btn-hover-bg: #2f6b02;
+    --bs-btn-hover-border-color: #2f6b02;
+    --bs-btn-active-bg: #265702;
+    --bs-btn-active-border-color: #265702;
+    --bs-btn-focus-shadow-rgb: 61, 130, 2;
+}
+.btn-outline-success {
+    --bs-btn-color: #3d8202;
+    --bs-btn-border-color: #3d8202;
+    --bs-btn-hover-bg: #3d8202;
+    --bs-btn-hover-border-color: #3d8202;
+    --bs-btn-focus-shadow-rgb: 61, 130, 2;
+}
+/* Bootstrap's warning button keeps dark text, so it can stay the brand orange. */
+.btn-warning {
+    --bs-btn-bg: #fda102;
+    --bs-btn-border-color: #fda102;
+    --bs-btn-hover-bg: #f07b00;
+    --bs-btn-hover-border-color: #f07b00;
+    --bs-btn-active-bg: #d96a00;
+    --bs-btn-active-border-color: #d96a00;
+    --bs-btn-color: #1e4a01;
+    --bs-btn-hover-color: #1e4a01;
+    --bs-btn-focus-shadow-rgb: 253, 161, 2;
+}
+
+/* The brand's own button, for the places that want the full logo sweep. */
+.btn-brand {
+    background: linear-gradient(120deg, #3d8202, #59a202);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+}
+.btn-brand:hover,
+.btn-brand:focus {
+    background: linear-gradient(120deg, #2f6b02, #4c9a02);
+    color: #fff;
+}
+
+/* Focus rings and checked controls follow the brand rather than Bootstrap blue. */
+.form-control:focus,
+.form-select:focus {
+    border-color: #70b502;
+    box-shadow: 0 0 0 0.2rem rgba(61, 130, 2, 0.18);
+}
+.form-check-input:checked {
+    background-color: #3d8202;
+    border-color: #3d8202;
+}
+.form-check-input:focus {
+    border-color: #70b502;
+    box-shadow: 0 0 0 0.2rem rgba(61, 130, 2, 0.18);
+}
+.nav-pills {
+    --bs-nav-pills-link-active-bg: #3d8202;
+}
+.page-item.active .page-link {
+    background-color: #3d8202;
+    border-color: #3d8202;
+}
+.page-link { color: #3d8202; }
+.page-link:focus { box-shadow: 0 0 0 0.2rem rgba(61, 130, 2, 0.18); }
+
+/* Bootstrap's outline-warning inherits the fill colour for its text, which at
+   the brand orange is too light to read on white. Darken just the text. */
+.btn-outline-warning {
+    --bs-btn-color: #b85600;
+    --bs-btn-border-color: #fda102;
+    --bs-btn-hover-bg: #fda102;
+    --bs-btn-hover-border-color: #fda102;
+    --bs-btn-hover-color: #1e4a01;
+    --bs-btn-active-bg: #f07b00;
+    --bs-btn-active-color: #1e4a01;
+    --bs-btn-focus-shadow-rgb: 253, 161, 2;
+}
+.text-warning { color: #b85600 !important; }

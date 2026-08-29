@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', $page->title . ' – ' . \App\Models\Setting::get('site_title', 'Mango Hut'))
+@section('title', $page->title . ' – ' . \App\Models\Setting::get('site_title', 'MohiPure'))
 
 @section('content')
 <div class="page-header py-5" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">

@@ -14,7 +14,7 @@ class SmtpTestMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Mango Hut SMTP test');
+        return new Envelope(subject: 'MohiPure SMTP test');
     }
 
     public function content(): Content

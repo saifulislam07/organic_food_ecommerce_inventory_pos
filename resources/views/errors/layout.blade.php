@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') – {{ \App\Models\Setting::get('site_title', 'Mango Hut') }}</title>
+    <title>@yield('title') – {{ \App\Models\Setting::get('site_title', 'MohiPure') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
+    @include('partials.favicon')
+
+    <link href="{{ asset('css/brand.css') }}" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #2d6a4f;
-            --primary-light: #40916c;
-            --primary-dark: #1b4332;
-            --dark: #1a1a2e;
             --gray-100: #f1f3f5;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -92,13 +92,13 @@
             align-items: center;
             gap: 10px;
             transition: var(--transition);
-            box-shadow: 0 10px 25px rgba(45, 106, 79, 0.2);
+            box-shadow: 0 10px 25px rgba(var(--primary-rgb), 0.2);
         }
 
         .btn-premium:hover {
             background: var(--primary-light);
             transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(45, 106, 79, 0.3);
+            box-shadow: 0 15px 35px rgba(var(--primary-rgb), 0.3);
             color: white;
         }
     </style>

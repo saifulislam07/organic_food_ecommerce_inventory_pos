@@ -1,12 +1,16 @@
 @extends('layouts.frontend')
 
-@section('title', 'Shop – Mango Hut')
+@section('title', 'Shop – MohiPure')
 @section('meta_description', 'Browse our collection of organic products - mangoes, ghee, honey, mustard oil and more.')
 
 @push('styles')
 <style>
     .page-header {
-        background: linear-gradient(rgba(27, 67, 50, 0.8), rgba(27, 67, 50, 0.8)), url('/images/header-bg.jpg');
+        /* header-bg.jpg is optional. Layering the scrim over the brand gradient
+           means the band looks deliberate with or without the photograph. */
+        background: linear-gradient(rgba(30, 74, 1, 0.72), rgba(30, 74, 1, 0.72)),
+                    url('/images/header-bg.jpg'),
+                    linear-gradient(135deg, var(--primary-darker), var(--primary));
         background-size: cover;
         background-position: center;
         padding: 60px 0;

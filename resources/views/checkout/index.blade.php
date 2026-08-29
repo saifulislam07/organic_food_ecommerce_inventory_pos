@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', 'Checkout – Mango Hut')
+@section('title', 'Checkout – MohiPure')
 
 @push('styles')
 <style>
@@ -85,7 +85,7 @@
     }
     .custom-radio:has(input:checked) {
         border-color: var(--primary);
-        background: rgba(45, 106, 79, 0.05);
+        background: rgba(var(--primary-rgb), 0.05);
     }
     .custom-radio input { margin: 0; }
     .custom-radio label { margin: 0; cursor: pointer; flex-grow: 1; }
@@ -106,11 +106,11 @@
     }
     .address-card:hover {
         border-color: var(--primary-light);
-        background: rgba(45, 106, 79, 0.02);
+        background: rgba(var(--primary-rgb), 0.02);
     }
     .address-card.active {
         border-color: var(--primary);
-        background: rgba(45, 106, 79, 0.05);
+        background: rgba(var(--primary-rgb), 0.05);
     }
     .address-card.active::after {
         content: "\F272";

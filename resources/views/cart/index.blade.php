@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', 'Cart – Mango Hut')
+@section('title', 'Cart – MohiPure')
 
 @push('styles')
 <style>
