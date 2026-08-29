@@ -26,6 +26,12 @@ const onSale = computed(
     () => !!selected.value && selected.value.sale_price !== null && selected.value.sale_price < selected.value.price
 );
 
+const discount = computed(() =>
+    onSale.value
+        ? Math.round(((selected.value.price - selected.value.sale_price) / selected.value.price) * 100)
+        : 0
+);
+
 const inStock = computed(() => !!selected.value && selected.value.stock > 0);
 
 const whatsappHref = computed(() => {
@@ -69,13 +75,11 @@ async function submit() {
 
 <template>
     <div>
-        <div class="product-detail-price">
-            <template v-if="selected && onSale">
-                <span class="price-original" style="font-size:1.2rem;">{{ money(selected.price) }}</span>
-                {{ money(selected.sale_price) }}
-            </template>
-            <template v-else-if="selected">
-                {{ money(selected.price) }}
+        <div v-if="selected" class="product-detail-price">
+            <span class="price-now">{{ money(selected.display_price) }}</span>
+            <template v-if="onSale">
+                <span class="price-original">{{ money(selected.price) }}</span>
+                <span class="price-off">{{ discount }}% {{ label('discount', 'off') }}</span>
             </template>
         </div>
 

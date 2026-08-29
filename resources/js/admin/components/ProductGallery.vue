@@ -30,9 +30,10 @@ function onFiles(event) {
         added.value.push({ file, url: URL.createObjectURL(file) });
     }
 
-    // The input only carries files for one pick; a DataTransfer keeps the full set.
+    // A pick replaces whatever the input held, so the running set is written
+    // back over it. Clearing the input here instead would throw the files away
+    // — it is the same element, and value = '' empties its FileList.
     syncInput();
-    event.target.value = '';
 }
 
 function syncInput() {
@@ -108,14 +109,18 @@ onBeforeUnmount(() => added.value.forEach((item) => URL.revokeObjectURL(item.url
 
         <input type="hidden" name="thumbnail_id" :value="chosenThumbnail ?? ''">
 
+        <!--
+            Hidden rather than disabled once the slots are full: a disabled
+            input posts nothing, which would drop the photos just picked.
+        -->
         <input
+            v-show="remaining > 0"
             ref="fileInput"
             type="file"
             name="images[]"
             multiple
             accept="image/*"
             class="form-control"
-            :disabled="remaining === 0"
             @change="onFiles"
         >
 

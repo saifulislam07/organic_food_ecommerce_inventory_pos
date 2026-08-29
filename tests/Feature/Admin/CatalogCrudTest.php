@@ -129,6 +129,56 @@ class CatalogCrudTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_update_a_category(): void
+    {
+        $category = $this->category();
+
+        $this->actingAs($this->admin())
+            ->put(route('admin.categories.update', $category), [
+                'name_en' => 'Seasonal Fruits',
+                'name_bn' => 'মৌসুমি ফল',
+                'sort_order' => 4,
+                'is_active' => '1',
+            ])
+            ->assertRedirect(route('admin.categories.index'));
+
+        $category->refresh();
+
+        $this->assertSame('Seasonal Fruits', $category->name_en);
+        $this->assertSame('মৌসুমি ফল', $category->name_bn);
+        $this->assertSame(4, $category->sort_order);
+    }
+
+    /**
+     * categories.sort_order is NOT NULL, and an empty number box arrives as
+     * null — which used to abort the whole save with a driver error.
+     */
+    public function test_a_category_saves_with_the_sort_order_box_left_empty(): void
+    {
+        $category = $this->category();
+
+        $this->actingAs($this->admin())
+            ->put(route('admin.categories.update', $category), [
+                'name_en' => 'Seasonal Fruits',
+                'name_bn' => 'মৌসুমি ফল',
+                'sort_order' => '',
+                'is_active' => '1',
+            ])
+            ->assertRedirect(route('admin.categories.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(0, $category->refresh()->sort_order);
+    }
+
+    public function test_the_category_form_no_longer_asks_for_a_description(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('admin.categories.edit', $this->category()))
+            ->assertOk()
+            ->assertDontSee('name="description_en"', false)
+            ->assertDontSee('name="description_bn"', false);
+    }
+
     public function test_two_categories_can_share_a_name_without_colliding_on_slug(): void
     {
         foreach (range(1, 2) as $ignored) {

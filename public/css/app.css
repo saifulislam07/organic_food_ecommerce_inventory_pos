@@ -337,6 +337,134 @@ body {
     font-size: 0.72rem;
     font-weight: 700;
 }
+.badge-combo {
+    background: var(--primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+/* === COMBO CONTENTS (product detail) === */
+.combo-contents {
+    margin-top: 26px;
+    padding: 22px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+}
+.combo-contents-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+}
+.combo-contents-count {
+    margin-left: auto;
+    padding: 2px 10px;
+    border-radius: 50px;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+.combo-parts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.combo-part {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--gray-200);
+}
+.combo-part:last-child { border-bottom: 0; }
+.combo-part-image {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    background: white;
+    flex-shrink: 0;
+}
+.combo-part-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+.combo-part-name {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--dark);
+}
+.combo-part-name a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition);
+}
+.combo-part-name a:hover { color: var(--primary); }
+.combo-part-measure {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+}
+.combo-part-qty {
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: var(--primary-dark);
+    white-space: nowrap;
+}
+.combo-part-price {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--dark);
+    white-space: nowrap;
+    min-width: 72px;
+    text-align: right;
+}
+.combo-totals {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--gray-200);
+}
+.combo-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: var(--gray-500);
+}
+.combo-total-struck { text-decoration: line-through; }
+.combo-total-row-final {
+    margin-top: 4px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+}
+.combo-savings {
+    margin-top: 12px;
+    padding: 8px 14px;
+    border-radius: 50px;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-dark);
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-align: center;
+}
+.combo-savings span { font-weight: 600; opacity: 0.8; }
+
 .product-quick-actions {
     position: absolute;
     bottom: 12px;
@@ -682,11 +810,42 @@ body {
 }
 .sort-select:focus { border-color: var(--primary); }
 
-/* === PRODUCT DETAIL === */
+/* === PRODUCT DETAIL ===
+   Quiet by design: white ground, thin grey rules, and green used only where it
+   carries meaning — the price, the chosen size, the buy button. The photo and
+   the price are meant to be the only loud things on the page. */
+.product-detail { padding: 28px 0 70px; }
+
+.product-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+.product-breadcrumb a {
+    color: var(--gray-500);
+    text-decoration: none;
+    transition: var(--transition);
+}
+.product-breadcrumb a:hover { color: var(--primary); }
+.product-breadcrumb [aria-current] { color: var(--dark); font-weight: 600; }
+
+/* Sticky only where there is room beside it to scroll. */
+@media (min-width: 992px) {
+    .product-gallery-col {
+        position: sticky;
+        top: 96px;
+    }
+}
+
 .product-gallery-main {
     border-radius: var(--radius);
     overflow: hidden;
     background: var(--gray-100);
+    border: 1px solid var(--gray-200);
     aspect-ratio: 1;
 }
 .product-gallery-main img {
@@ -694,40 +853,161 @@ body {
     height: 100%;
     object-fit: cover;
 }
-.product-detail-info h1 {
+
+.product-eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: var(--gray-500);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    transition: var(--transition);
+}
+.product-eyebrow:hover { color: var(--primary); }
+
+.product-title {
+    font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--primary-dark);
+    margin: 0 0 12px;
+}
+.product-blurb {
+    color: var(--gray-500);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 24px;
+    max-width: 52ch;
+}
+
+.product-detail-price {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
     font-size: 2rem;
     font-weight: 700;
     color: var(--primary-dark);
-    margin-bottom: 12px;
+    padding-bottom: 22px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--gray-200);
 }
-.product-detail-price {
-    font-size: 1.8rem;
-    font-weight: 700;
+.product-detail-price .price-original { font-size: 1.1rem; font-weight: 600; }
+.product-detail-price .price-off {
+    padding: 3px 10px;
+    border-radius: 50px;
+    background: rgba(var(--primary-rgb), 0.1);
     color: var(--primary);
-    margin-bottom: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
-.variant-options { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+
+.variant-options { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 .variant-btn {
-    padding: 10px 20px;
-    border: 2px solid var(--gray-200);
+    min-width: 96px;
+    padding: 10px 18px;
+    border: 1px solid var(--gray-200);
     border-radius: var(--radius-sm);
     background: white;
     cursor: pointer;
     transition: var(--transition);
-    font-weight: 500;
+    font-weight: 600;
+    color: var(--dark);
+    text-align: center;
 }
-.variant-btn:hover,
+.variant-btn:hover { border-color: var(--primary-light); }
 .variant-btn.active {
     border-color: var(--primary);
-    background: rgba(var(--primary-rgb), 0.05);
-    color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.06);
+    color: var(--primary-dark);
+    box-shadow: inset 0 0 0 1px var(--primary);
 }
+.variant-btn .variant-name { display: block; font-size: 0.9rem; }
 .variant-btn .variant-price {
     display: block;
-    font-size: 0.85rem;
-    color: var(--primary);
-    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    font-weight: 600;
     margin-top: 2px;
+}
+.variant-btn.active .variant-price { color: var(--primary); }
+
+/* Labels above the size and quantity pickers. Block, or the quantity stepper
+   would sit on the same line as its own label. */
+.product-detail-info .form-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+    margin-bottom: 6px;
+}
+
+.product-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    list-style: none;
+    margin: 0;
+    padding: 18px 0 0;
+    border-top: 1px solid var(--gray-200);
+    font-size: 0.9rem;
+    color: var(--gray-500);
+}
+.product-facts li { display: inline-flex; align-items: center; gap: 7px; }
+.product-facts a { color: inherit; text-decoration: none; }
+.product-facts a:hover { color: var(--primary); }
+.product-facts .is-good { color: var(--primary); font-weight: 600; }
+.product-facts .is-bad { color: var(--danger); font-weight: 600; }
+.product-facts .is-note { color: var(--accent-text); font-weight: 600; }
+
+/* Long-form blocks below the fold — description today, anything similar later. */
+.product-panel {
+    margin-top: 56px;
+    padding: 32px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+}
+.product-panel-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin: 0 0 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--gray-200);
+}
+/* Capped so a long description keeps a readable line rather than running the
+   full width of the panel. */
+.product-prose { max-width: 72ch; color: var(--gray-500); line-height: 1.85; }
+.product-prose :where(h1, h2, h3, h4) { color: var(--dark); font-size: 1.05rem; margin: 22px 0 10px; }
+.product-prose :where(p, ul, ol) { margin-bottom: 14px; }
+.product-prose :where(ul, ol) { padding-left: 20px; }
+.product-prose img { border-radius: var(--radius-sm); }
+.product-prose table { width: 100%; }
+
+/* A quieter heading than the home page's centred banners — this is a footnote
+   to the product above it, not a section of its own. */
+.product-related { margin-top: 64px; }
+.product-related .section-header {
+    text-align: left;
+    margin-bottom: 26px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--gray-200);
+}
+.product-related .section-badge { display: none; }
+.product-related .section-title { font-size: 1.15rem; margin-bottom: 0; }
+
+/* A product with no photo of its own falls back to the brand mark, which is
+   wide — cropping it to a square would slice the logo in half. */
+.product-gallery-col.is-placeholder .product-gallery-main img {
+    object-fit: contain;
+    padding: 18%;
 }
 
 .btn-whatsapp {
@@ -1038,7 +1318,19 @@ body {
     .hero-stat-num { font-size: 1.3rem; }
     .section { padding: 40px 0; }
     .section-title { font-size: 1.5rem; }
-    .product-detail-info h1 { font-size: 1.5rem; }
+    .product-detail { padding: 20px 0 50px; }
+    .product-breadcrumb { margin-bottom: 20px; font-size: 0.8rem; }
+    .product-detail-price { font-size: 1.7rem; }
+    .product-panel { margin-top: 40px; padding: 22px; }
+    .product-related { margin-top: 48px; }
+    .combo-contents { padding: 16px; }
+    /* Two buttons will not sit side by side on a phone without one of them
+       being clipped, so each takes a full row. */
+    .product-detail-info .btn-primary-custom,
+    .product-detail-info .btn-whatsapp {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
     .chat-float { bottom: 80px; gap: 10px; }
     .chat-float--right { right: 16px; }
     .chat-float--left { left: 16px; }

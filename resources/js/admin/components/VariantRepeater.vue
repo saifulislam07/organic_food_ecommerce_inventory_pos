@@ -12,12 +12,15 @@ const props = defineProps({
 });
 
 function blankRow() {
-    return { name: '', unit_id: '', unit_value: '', price: '', sale_price: '', stock: 0 };
+    return { id: '', name: '', unit_id: '', unit_value: '', price: '', sale_price: '', stock: 0 };
 }
 
 const variants = ref(
     props.rows.length
         ? props.rows.map((row) => ({
+              // A saved row carries its id back so the server edits that row
+              // rather than replacing it; a new row posts an empty one.
+              id: row.id ?? '',
               name: row.name ?? '',
               unit_id: row.unit_id ?? '',
               unit_value: row.unit_value ?? '',
@@ -42,7 +45,8 @@ function removeRow(index) {
 }
 
 function duplicateRow(index) {
-    variants.value.splice(index + 1, 0, { ...variants.value[index], name: '' });
+    // A copy is a new row, so it must not carry the original's id.
+    variants.value.splice(index + 1, 0, { ...variants.value[index], id: '', name: '' });
 }
 
 function error(index, field) {
@@ -60,6 +64,7 @@ function saleAbovePrice(row) {
 <template>
     <div>
         <div v-for="(row, index) in variants" :key="index" class="variant-row border rounded p-3 mb-2">
+            <input type="hidden" :name="`variants[${index}][id]`" :value="row.id">
             <div class="row g-2 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label">Variant Name *</label>

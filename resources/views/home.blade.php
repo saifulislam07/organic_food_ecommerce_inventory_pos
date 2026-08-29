@@ -78,6 +78,26 @@
         </div>
     </section>
 
+    <!-- Combo Offers -->
+    @if($combos->count())
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge"><i class="bi bi-box2-fill"></i> {{ app()->getLocale() == 'bn' ? 'কম্বো' : 'Combo' }}</div>
+                <h2 class="section-title">{{ app()->getLocale() == 'bn' ? 'কম্বো অফার' : 'Combo Offers' }}</h2>
+                <p class="section-subtitle">{{ app()->getLocale() == 'bn' ? 'একসাথে কিনলে দাম কম' : 'Buy them together and pay less' }}</p>
+            </div>
+            <div class="row g-4">
+                @foreach($combos as $product)
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-6">
+                        @include('partials.product-card', ['product' => $product])
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
     <!-- Category Promo Section -->
     <section class="section section-alt">
         <div class="container">
@@ -91,7 +111,6 @@
                     <div class="category-promo" style="background-image: url('{{ $category->image_url }}');">
                         <div class="category-promo-content">
                             <h3>{{ $category->name }}</h3>
-                            <p>{{ Str::limit(strip_tags($category->description ?? ''), 90) }}</p>
                             <a href="{{ route('shop', ['category' => $category->slug]) }}" class="promo-btn">
                                 {{ app()->getLocale() == 'bn' ? 'বিস্তারিত দেখুন' : 'Shop Now' }} <i class="bi bi-arrow-right"></i>
                             </a>

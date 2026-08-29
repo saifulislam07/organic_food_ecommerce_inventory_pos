@@ -8,7 +8,6 @@ use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Support\ImageStore;
-use App\Support\RichText;
 use Illuminate\Http\Request;
 
 class AdminCategoryController extends Controller
@@ -34,21 +33,15 @@ class AdminCategoryController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name_en' => 'required|string|max:255',
-            'name_bn' => 'required|string|max:255',
-            'description_en' => 'nullable|string',
-            'description_bn' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
-            'is_active' => 'boolean',
-            'sort_order' => 'nullable|integer',
-        ]);
+        $validated = $request->validate($this->rules());
 
-        $data = RichText::cleanKeys($validated, ['description_en', 'description_bn']);
+        $data = $validated;
         // categories.name is the non-localised fallback Category::getNameAttribute() reads.
         $data['name'] = $validated['name_en'];
         $data['slug'] = $this->uniqueSlug($validated['name_en'], 'categories');
         $data['is_active'] = $request->boolean('is_active', true);
+        // The column is NOT NULL: a cleared box has to land as 0, not null.
+        $data['sort_order'] = (int) $request->input('sort_order', 0);
 
         if ($request->hasFile('image')) {
             $data['image'] = ImageStore::put($request->file('image'), 'categories');
@@ -66,20 +59,13 @@ class AdminCategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        $validated = $request->validate([
-            'name_en' => 'required|string|max:255',
-            'name_bn' => 'required|string|max:255',
-            'description_en' => 'nullable|string',
-            'description_bn' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
-            'is_active' => 'boolean',
-            'sort_order' => 'nullable|integer',
-        ]);
+        $validated = $request->validate($this->rules());
 
-        $data = RichText::cleanKeys($validated, ['description_en', 'description_bn']);
+        $data = $validated;
         $data['name'] = $validated['name_en'];
         $data['slug'] = $this->uniqueSlug($validated['name_en'], 'categories', $category->id);
         $data['is_active'] = $request->boolean('is_active', true);
+        $data['sort_order'] = (int) $request->input('sort_order', 0);
 
         if ($request->hasFile('image')) {
             // Replacing the picture should not leave the old file behind.
@@ -111,5 +97,17 @@ class AdminCategoryController extends Controller
         );
 
         return $this->bulkResponse($result, 'categories', 'admin.categories.index');
+    }
+
+    /** A category is a name and a picture — the shop never prints a description. */
+    private function rules(): array
+    {
+        return [
+            'name_en' => 'required|string|max:255',
+            'name_bn' => 'required|string|max:255',
+            'image' => 'nullable|image|max:2048',
+            'is_active' => 'boolean',
+            'sort_order' => 'nullable|integer|min:0',
+        ];
     }
 }

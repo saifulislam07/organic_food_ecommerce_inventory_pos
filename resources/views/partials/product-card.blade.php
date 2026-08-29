@@ -3,6 +3,9 @@
     <div class="product-card-image">
         <img src="{{ $product->image_url }}" alt="{{ $product->name }}" loading="lazy">
         <div class="product-badge">
+            @if($product->is_combo)
+                <span class="badge-combo"><i class="bi bi-box2-fill"></i> {{ app()->getLocale() == 'bn' ? 'কম্বো' : 'Combo' }}</span>
+            @endif
             @if($product->is_on_sale)
                 <span class="badge-sale"><i class="bi bi-tag-fill"></i> {{ app()->getLocale() == 'bn' ? 'ছাড়' : 'Sale' }}</span>
             @endif

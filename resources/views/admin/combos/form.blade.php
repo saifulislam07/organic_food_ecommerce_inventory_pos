@@ -132,14 +132,24 @@
 
         @if($product)
             @can('combos.delete')
-                <form action="{{ route('admin.combos.destroy', $product) }}" method="POST" class="ms-auto"
-                      data-confirm="Delete this combo? The products inside are not affected.">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Delete Combo</button>
-                </form>
+                {{-- The form itself sits outside this one; a nested <form> is
+                     dropped by the browser, and its @method('DELETE') would then
+                     override the PUT and delete the combo on every save. --}}
+                <button type="submit" form="delete-combo" class="btn btn-outline-danger ms-auto">
+                    <i class="bi bi-trash"></i> Delete Combo
+                </button>
             @endcan
         @endif
     </div>
 </form>
+
+@if($product)
+    @can('combos.delete')
+        <form id="delete-combo" action="{{ route('admin.combos.destroy', $product) }}" method="POST"
+              data-confirm="Delete this combo? The products inside are not affected.">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endcan
+@endif
 @endsection

@@ -55,6 +55,9 @@
                     @php
                         $variantRows = old('variants', isset($product)
                             ? $product->variants->map(fn ($v) => [
+                                // Posted back so the row is updated in place and
+                                // keeps the id combos and past orders point at.
+                                'id' => $v->id,
                                 'name' => $v->name,
                                 'unit_id' => $v->unit_id,
                                 'unit_value' => $v->unit_value,

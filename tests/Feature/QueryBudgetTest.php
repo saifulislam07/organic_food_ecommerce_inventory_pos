@@ -109,7 +109,9 @@ class QueryBudgetTest extends TestCase
     public static function storefrontPages(): array
     {
         return [
-            'home' => ['/', 18],
+            // Raised with the combo section: one more product query plus its own
+            // eager loads for the category, variants and combo parts.
+            'home' => ['/', 23],
             'shop' => ['/shop', 12],
             'cart' => ['/cart', 8],
         ];
@@ -130,6 +132,7 @@ class QueryBudgetTest extends TestCase
         );
     }
 
+    /** Also guards the parts breakdown, which names and pictures each component. */
     public function test_the_product_page_does_not_query_per_variant(): void
     {
         $this->get('/product/combo-1')->assertOk();

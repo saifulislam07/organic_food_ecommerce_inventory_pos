@@ -298,6 +298,207 @@ class ComboBuilderTest extends TestCase
         $this->assertModelExists($mango);
     }
 
+    /**
+     * The delete button used to sit in a <form> nested inside the update form.
+     * Browsers drop the inner tag and keep its inputs, so the page posted
+     * _method=PUT and then _method=DELETE — PHP takes the last one, and every
+     * save deleted the combo instead of updating it.
+     */
+    public function test_the_edit_page_posts_only_one_method_override(): void
+    {
+        $combo = $this->combo($this->variant('Mango', 20, 500));
+
+        $html = $this->actingAs($this->admin())
+            ->get(route('admin.combos.edit', $combo))
+            ->assertOk()
+            ->getContent();
+
+        // What the browser builds: everything from the update form's action to
+        // the first close, since a nested <form> tag is thrown away.
+        $open = strpos($html, 'action="'.route('admin.combos.update', $combo).'"');
+        $updateForm = substr($html, $open, strpos($html, '</form>', $open) - $open);
+
+        $this->assertSame(
+            1,
+            preg_match_all('/name="_method"/', $updateForm),
+            'A second _method would win and turn the save into a delete.'
+        );
+        $this->assertSame(0, substr_count($updateForm, '<form'), 'No form may be nested in the update form.');
+    }
+
+    /* ------------------------------------------- kept out of the products screen */
+
+    private function combo(ProductVariant ...$components): Product
+    {
+        $this->actingAs($this->admin())->post(route('admin.combos.store'), $this->payload(
+            array_map(fn (ProductVariant $v) => ['variant_id' => $v->id, 'quantity' => 1], $components)
+        ))->assertSessionHasNoErrors();
+
+        // Every layout prints the flash, and "Combo X created." would satisfy
+        // an assertSee for the combo's own name on the next page.
+        $this->flushSession();
+
+        return Product::where('is_combo', true)->firstOrFail();
+    }
+
+    /** @param  array<string, mixed>  $overrides */
+    private function productPayload(Product $product, array $overrides = []): array
+    {
+        return array_merge([
+            'name_en' => $product->name_en ?? $product->getRawOriginal('name'),
+            'name_bn' => $product->name_bn ?? $product->getRawOriginal('name'),
+            'category_id' => $product->category_id,
+            'variants' => $product->variants->map(fn (ProductVariant $v) => [
+                'id' => $v->id,
+                'name' => $v->name,
+                'price' => $v->price,
+                'stock' => $v->stock,
+            ])->all(),
+        ], $overrides);
+    }
+
+    public function test_combos_are_not_listed_among_the_products(): void
+    {
+        $mango = $this->variant('Mango', 20, 500);
+        $combo = $this->combo($mango);
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.products.index'))
+            ->assertOk()
+            ->assertSee('Mango')
+            ->assertDontSee($combo->name_en);
+    }
+
+    public function test_opening_a_combo_from_the_products_screen_lands_on_the_combo_editor(): void
+    {
+        $combo = $this->combo($this->variant('Mango', 20, 500));
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.products.edit', $combo))
+            ->assertRedirect(route('admin.combos.edit', $combo));
+    }
+
+    /**
+     * The product form used to delete every variant and write fresh rows, which
+     * cascaded the combo's parts away and left the bundle unsellable.
+     */
+    public function test_saving_a_combo_through_the_product_form_cannot_empty_it(): void
+    {
+        $combo = $this->combo($this->variant('Mango', 20, 500), $this->variant('Ghee', 10, 500));
+
+        $this->actingAs($this->admin())
+            ->put(route('admin.products.update', $combo), $this->productPayload($combo->load('variants')))
+            ->assertRedirect(route('admin.combos.edit', $combo));
+
+        $this->assertSame(2, ComboItem::count());
+    }
+
+    public function test_editing_a_component_product_keeps_the_combo_intact(): void
+    {
+        $mango = $this->variant('Mango', 20, 500);
+        $this->combo($mango);
+
+        $product = $mango->product->load('variants');
+
+        $this->actingAs($this->admin())
+            ->put(route('admin.products.update', $product), $this->productPayload($product, [
+                'variants' => [['id' => $mango->id, 'name' => '1 unit', 'price' => 650, 'stock' => 30]],
+            ]))
+            ->assertRedirect(route('admin.products.index'))
+            ->assertSessionHasNoErrors();
+
+        $mango->refresh();
+
+        $this->assertSame('650.00', $mango->price, 'The row is edited in place.');
+        $this->assertSame(30, $mango->stock);
+        $this->assertSame(1, ComboItem::count(), 'The combo still knows what is in it.');
+    }
+
+    public function test_a_variant_inside_a_combo_cannot_be_dropped_from_the_product_form(): void
+    {
+        $mango = $this->variant('Mango', 20, 500);
+        $product = $mango->product;
+
+        $spare = ProductVariant::create([
+            'product_id' => $product->id,
+            'name' => '2 units',
+            'price' => 900,
+            'stock' => 5,
+        ]);
+
+        $this->combo($mango);
+
+        // Posting only the spare row asks for the combo's component to go.
+        $this->actingAs($this->admin())
+            ->put(route('admin.products.update', $product), $this->productPayload($product, [
+                'name_en' => 'Renamed Mango',
+                'variants' => [['id' => $spare->id, 'name' => '2 units', 'price' => 900, 'stock' => 5]],
+            ]))
+            ->assertSessionHasErrors('variants');
+
+        $this->assertModelExists($mango);
+        $this->assertSame(1, ComboItem::count());
+        $this->assertNull($product->refresh()->name_en, 'The refused save must not half-apply.');
+    }
+
+    /* -------------------------------------------------------- storefront */
+
+    public function test_a_combo_has_its_own_section_on_the_home_page(): void
+    {
+        $combo = $this->combo($this->variant('Mango', 20, 500));
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Combo Offers')
+            ->assertSee($combo->name_en);
+    }
+
+    public function test_the_detail_page_lists_what_the_combo_is_made_of(): void
+    {
+        $mango = $this->variant('Mango', 20, 500);
+        $ghee = $this->variant('Ghee', 10, 400);
+
+        $this->actingAs($this->admin())->post(route('admin.combos.store'), $this->payload([
+            ['variant_id' => $mango->id, 'quantity' => 2],
+            ['variant_id' => $ghee->id, 'quantity' => 1],
+        ]))->assertSessionHasNoErrors();
+
+        $this->flushSession();
+
+        $combo = Product::where('is_combo', true)->firstOrFail();
+
+        $this->get(route('product.show', $combo->slug))
+            ->assertOk()
+            ->assertSee('Inside this combo', false)
+            ->assertSee('Mango')
+            ->assertSee('Ghee')
+            ->assertSee('&times;2', false)
+            // 2 × 500 for the mangoes, 400 for the ghee, 1,400 in total.
+            ->assertSee('৳1,000')
+            ->assertSee('৳400')
+            ->assertSee('৳1,400')
+            // The combo itself sells for 1,200, so 200 is saved.
+            ->assertSee('৳1,200')
+            ->assertSee('You save');
+    }
+
+    public function test_an_ordinary_product_gets_no_combo_breakdown(): void
+    {
+        $mango = $this->variant('Mango', 20, 500);
+
+        $this->get(route('product.show', $mango->product->slug))
+            ->assertOk()
+            ->assertDontSee('Inside this combo', false);
+    }
+
+    public function test_an_inactive_combo_stays_off_the_home_page(): void
+    {
+        $combo = $this->combo($this->variant('Mango', 20, 500));
+        $combo->update(['is_active' => false]);
+
+        $this->get('/')->assertOk()->assertDontSee($combo->name_en);
+    }
+
     /* -------------------------------------------------------- permissions */
 
     public function test_the_combos_menu_needs_its_own_permission(): void

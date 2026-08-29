@@ -1,177 +1,29 @@
 @extends('layouts.frontend')
 
-@section('title', $product->meta_title ?? $product->name . ' – MohiPure')
+@section('title', $product->meta_title ?? $product->name.' – MohiPure')
 @section('meta_description', $product->meta_description ?? $product->short_description ?? $product->name)
 
-@push('styles')
-<style>
-    .page-header {
-        background-color: var(--primary-dark);
-        padding: 60px 0;
-        color: white;
-    }
-    .page-header h1 {
-        color: white !important;
-        margin-bottom: 10px;
-    }
-    .breadcrumb-custom {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        font-size: 0.9rem;
-    }
-    .breadcrumb-custom a {
-        color: rgba(255, 255, 255, 0.8);
-        text-decoration: none;
-        transition: var(--transition);
-    }
-    .breadcrumb-custom a:hover {
-        color: white;
-    }
-    .breadcrumb-custom span {
-        color: rgba(255, 255, 255, 0.5);
-    }
-    .breadcrumb-custom li:last-child {
-        color: white;
-        font-weight: 600;
-    }
-
-    /* Product Meta Modern Styles */
-    .product-meta-section {
-        border-top: 1px solid rgba(0,0,0,0.05);
-    }
-    .meta-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    .meta-label {
-        font-size: 0.7rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #94a3b8;
-    }
-    .meta-value {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #334155;
-        text-decoration: none;
-    }
-    .link-primary-custom {
-        color: var(--primary);
-        transition: var(--transition);
-        position: relative;
-    }
-    .link-primary-custom::after {
-        content: "";
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: var(--primary-light);
-        transition: var(--transition);
-        border-radius: 2px;
-    }
-    .link-primary-custom:hover::after {
-        width: 100%;
-    }
-
-    /* Modern Variant Selection */
-    .variant-options {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 10px;
-    }
-
-    .variant-btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-width: 120px;
-        padding: 12px 16px;
-        background: white;
-        border: 2px solid #e2e8f0;
-        border-radius: 16px;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .variant-btn:hover {
-        border-color: var(--primary-light);
-        background: var(--primary-50);
-        transform: translateY(-2px);
-    }
-
-    .variant-btn.active {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white !important;
-        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
-    }
-
-    .variant-btn .variant-name {
-        font-size: 0.95rem;
-        font-weight: 800;
-        margin-bottom: 2px;
-    }
-
-    .variant-btn .variant-price {
-        font-size: 0.85rem;
-        font-weight: 600;
-        opacity: 0.9;
-    }
-
-    .variant-btn.active .variant-price {
-        color: white;
-        opacity: 1;
-    }
-
-    /* Selection Badge */
-    .variant-btn::before {
-        content: "\F272"; /* bootstrap-icons check-circle-fill */
-        font-family: "bootstrap-icons";
-        position: absolute;
-        top: -20px;
-        right: 8px;
-        font-size: 1.2rem;
-        transition: all 0.3s ease;
-        opacity: 0;
-    }
-
-    .variant-btn.active::before {
-        top: 6px;
-        opacity: 1;
-    }
-</style>
-@endpush
-
 @section('content')
-<div class="page-header">
-    <div class="container">
-        <h1>{{ $product->name }}</h1>
-        <ul class="breadcrumb-custom">
-            <li><a href="{{ route('home') }}">{{ app()->getLocale() == 'bn' ? 'হোম' : 'Home' }}</a></li>
-            <li><span>/</span></li>
-            <li><a href="{{ route('shop') }}">{{ app()->getLocale() == 'bn' ? 'শপ' : 'Shop' }}</a></li>
-            <li><span>/</span></li>
-            <li>{{ $product->name }}</li>
-        </ul>
-    </div>
-</div>
+@php
+    $bn = app()->getLocale() == 'bn';
+    $stock = $product->variants->sum(fn ($v) => $v->available_stock);
+@endphp
 
-<section class="section">
+<section class="product-detail">
     <div class="container">
-        <div class="row g-5">
-            <!-- Product Image -->
+        {{-- A slim trail rather than a banner: the title below is the page's
+             one heading, and repeating it in a coloured band only crowded it. --}}
+        <nav class="product-breadcrumb" aria-label="{{ $bn ? 'পথ' : 'Breadcrumb' }}">
+            <a href="{{ route('home') }}">{{ $bn ? 'হোম' : 'Home' }}</a>
+            <span aria-hidden="true">/</span>
+            <a href="{{ route('shop') }}">{{ $bn ? 'শপ' : 'Shop' }}</a>
+            <span aria-hidden="true">/</span>
+            <a href="{{ route('shop', ['category' => $product->category->slug]) }}">{{ $product->category->name }}</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{{ $product->name }}</span>
+        </nav>
+
+        <div class="row g-4 g-lg-5">
             <div class="col-lg-6">
                 @php
                     // Thumbnail first, then the rest of the gallery.
@@ -179,28 +31,37 @@
                     $galleryUrls = $galleryUrls->isEmpty()
                         ? collect([$product->image_url])
                         : $galleryUrls->sortByDesc(fn ($url) => $url === $product->image_url)->values();
+
+                    // No photo at all means the shared placeholder, which needs
+                    // fitting rather than cropping.
+                    $hasPhoto = $product->images->isNotEmpty() || filled($product->getRawOriginal('image'));
                 @endphp
-                <div
-                    data-vue="ProductGalleryViewer"
-                    data-props="{{ json_encode([
-                        'images' => $galleryUrls,
-                        'alt' => $product->name,
-                    ], JSON_UNESCAPED_UNICODE) }}"
-                ></div>
+                {{-- Stays in view while the details column scrolls past it. --}}
+                <div class="product-gallery-col {{ $hasPhoto ? '' : 'is-placeholder' }}">
+                    <div
+                        data-vue="ProductGalleryViewer"
+                        data-props="{{ json_encode([
+                            'images' => $galleryUrls,
+                            'alt' => $product->name,
+                        ], JSON_UNESCAPED_UNICODE) }}"
+                    ></div>
+                </div>
             </div>
 
-            <!-- Product Info -->
             <div class="col-lg-6">
                 <div class="product-detail-info">
-                    <span class="section-badge mb-2">{{ $product->category->name }}</span>
-                    <h1>{{ $product->name }}</h1>
+                    <a class="product-eyebrow" href="{{ route('shop', ['category' => $product->category->slug]) }}">
+                        {{ $product->category->name }}
+                    </a>
+
+                    <h1 class="product-title">{{ $product->name }}</h1>
 
                     @if($product->short_description)
-                        <p class="text-muted mb-3">{{ $product->short_description }}</p>
+                        <p class="product-blurb">{{ $product->short_description }}</p>
                     @endif
 
                     @php
-                        $whatsappTemplate = app()->getLocale() == 'bn'
+                        $whatsappTemplate = $bn
                             ? "হ্যালো! আমি এই প্রোডাক্টটি অর্ডার করতে চাই:
 
 পণ্য: {product}
@@ -232,82 +93,64 @@ Please provide delivery info.";
                             'whatsappNumber' => \App\Models\Setting::get('whatsapp', '8801716952365'),
                             'whatsappTemplate' => $whatsappTemplate,
                             'labels' => [
-                                'selectLabel' => app()->getLocale() == 'bn' ? 'অপশন সিলেক্ট করুন:' : 'Select Option:',
-                                'quantityLabel' => app()->getLocale() == 'bn' ? 'পরিমান:' : 'Quantity:',
-                                'addToCart' => app()->getLocale() == 'bn' ? 'কার্টে যোগ করুন' : 'Add to Cart',
-                                'outOfStock' => app()->getLocale() == 'bn' ? 'স্টক শেষ' : 'Out of Stock',
-                                'whatsapp' => app()->getLocale() == 'bn' ? 'WhatsApp এ অর্ডার করুন' : 'Order via WhatsApp',
-                                'selectOption' => app()->getLocale() == 'bn' ? 'একটি অপশন সিলেক্ট করুন' : 'Please select an option',
+                                'selectLabel' => $bn ? 'অপশন সিলেক্ট করুন' : 'Select option',
+                                'quantityLabel' => $bn ? 'পরিমান' : 'Quantity',
+                                'addToCart' => $bn ? 'কার্টে যোগ করুন' : 'Add to Cart',
+                                'outOfStock' => $bn ? 'স্টক শেষ' : 'Out of Stock',
+                                'whatsapp' => $bn ? 'WhatsApp এ অর্ডার' : 'Order via WhatsApp',
+                                'selectOption' => $bn ? 'একটি অপশন সিলেক্ট করুন' : 'Please select an option',
+                                'discount' => $bn ? 'ছাড়' : 'off',
                             ],
                         ], JSON_UNESCAPED_UNICODE) }}"
                     ></div>
 
-                    <!-- Product Meta -->
-                    <div class="product-meta-section mt-5 pt-4 border-top">
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="meta-item">
-                                    <span class="meta-label">{{ app()->getLocale() == 'bn' ? 'ক্যাটাগরি:' : 'Category:' }}</span>
-                                    <a href="{{ route('shop', ['category' => $product->category->slug]) }}" class="meta-value link-primary-custom">
-                                        {{ $product->category->name }}
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="col-6 text-end">
-                                <div class="meta-item">
-                                    <span class="meta-label">{{ app()->getLocale() == 'bn' ? 'স্ট্যাটাস:' : 'Status:' }}</span>
-                                    @php $stock = $product->variants->sum(fn ($v) => $v->available_stock); @endphp
-                                    <span class="meta-value {{ $stock > 0 ? 'text-green-600' : 'text-rose-500' }}">
-                                        {{ $stock > 0 ? (app()->getLocale() == 'bn' ? 'স্টকে আছে' : 'In Stock') : (app()->getLocale() == 'bn' ? 'স্টক শেষ' : 'Out of Stock') }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
+                    <ul class="product-facts">
+                        <li class="{{ $stock > 0 ? 'is-good' : 'is-bad' }}">
+                            <i class="bi {{ $stock > 0 ? 'bi-check-circle-fill' : 'bi-x-circle-fill' }}"></i>
+                            {{ $stock > 0
+                                ? ($bn ? 'স্টকে আছে' : 'In stock')
+                                : ($bn ? 'স্টক শেষ' : 'Out of stock') }}
+                        </li>
+                        <li>
+                            <i class="bi bi-tag"></i>
+                            <a href="{{ route('shop', ['category' => $product->category->slug]) }}">{{ $product->category->name }}</a>
+                        </li>
                         @if($product->is_preorder)
-                        <div class="mt-3">
-                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 text-xs font-bold uppercase tracking-wider">
+                            <li class="is-note">
                                 <i class="bi bi-clock-history"></i>
-                                {{ app()->getLocale() == 'bn' ? 'প্রি-অর্ডার পাওয়া যাবে' : 'Pre-order Available' }}
-                            </span>
-                        </div>
+                                {{ $bn ? 'প্রি-অর্ডার পাওয়া যাবে' : 'Pre-order available' }}
+                            </li>
                         @endif
-                    </div>
+                    </ul>
+
+                    @if($product->is_combo)
+                        @include('products._combo-contents', ['product' => $product])
+                    @endif
                 </div>
             </div>
         </div>
 
-        <!-- Description -->
         @if($product->description)
-        <div class="row mt-5">
-            <div class="col-lg-8">
-                <div class="card admin-card p-4">
-                    <h4 class="mb-3" style="color: var(--primary-dark);">
-                        <i class="bi bi-info-circle"></i> {{ app()->getLocale() == 'bn' ? 'পণ্যের বিবরণ' : 'Product Description' }}
-                    </h4>
-                    <div class="text-muted" style="line-height: 1.8;">
-                        {!! \App\Support\RichText::display($product->description) !!}
-                    </div>
-                </div>
+            <div class="product-panel">
+                <h2 class="product-panel-title">{{ $bn ? 'পণ্যের বিবরণ' : 'Product Description' }}</h2>
+                <div class="product-prose">{!! \App\Support\RichText::display($product->description) !!}</div>
             </div>
-        </div>
         @endif
 
-        <!-- Related Products -->
         @if($related->count())
-        <div class="mt-5">
-            <div class="section-header">
-                <div class="section-badge"><i class="bi bi-grid"></i> {{ app()->getLocale() == 'bn' ? 'সংশ্লিষ্ট' : 'Related' }}</div>
-                <h2 class="section-title">{{ app()->getLocale() == 'bn' ? 'সংশ্লিষ্ট পণ্যসমূহ' : 'Related Products' }}</h2>
+            <div class="product-related">
+                <div class="section-header">
+                    <div class="section-badge"><i class="bi bi-grid"></i> {{ $bn ? 'সংশ্লিষ্ট' : 'Related' }}</div>
+                    <h2 class="section-title">{{ $bn ? 'সংশ্লিষ্ট পণ্যসমূহ' : 'Related Products' }}</h2>
+                </div>
+                <div class="row g-4">
+                    @foreach($related as $rProduct)
+                        <div class="col-xl-3 col-md-6 col-6">
+                            @include('partials.product-card', ['product' => $rProduct])
+                        </div>
+                    @endforeach
+                </div>
             </div>
-            <div class="row g-4">
-                @foreach($related as $rProduct)
-                    <div class="col-xl-3 col-md-6 col-6">
-                        @include('partials.product-card', ['product' => $rProduct])
-                    </div>
-                @endforeach
-            </div>
-        </div>
         @endif
     </div>
 </section>

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class Product extends Model
@@ -100,6 +101,23 @@ class Product extends Model
     }
 
     /**
+     * What this bundle is made of, gathered off its variants. Empty for an
+     * ordinary product.
+     *
+     * @return Collection<int, ComboItem>
+     */
+    public function comboParts(): Collection
+    {
+        // The unit rides along because each part prints its measure.
+        $this->loadMissing('variants.comboItems.component.product', 'variants.comboItems.component.unit');
+
+        return $this->variants
+            ->flatMap(fn (ProductVariant $variant) => $variant->comboItems)
+            ->filter(fn (ComboItem $item) => $item->component?->product !== null)
+            ->values();
+    }
+
+    /**
      * Everything a product card reads, in three queries instead of one per
      * variant: is_in_stock walks the variants, and a combo variant's stock is
      * worked out from its components.
@@ -127,6 +145,11 @@ class Product extends Model
     public function scopeTrending($query)
     {
         return $query->where('is_trending', true);
+    }
+
+    public function scopeCombo($query)
+    {
+        return $query->where('is_combo', true);
     }
 
     public function getLowestPriceAttribute()

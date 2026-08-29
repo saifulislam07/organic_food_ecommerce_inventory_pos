@@ -7,11 +7,13 @@ use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Admin\Concerns\HandlesProductImages;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\ComboItem;
 use App\Models\Product;
 use App\Models\Unit;
 use App\Support\RichText;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AdminProductController extends Controller
 {
@@ -19,7 +21,9 @@ class AdminProductController extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::with('category', 'variants');
+        // Combos are products too, but they are built and edited on their own
+        // screen — saving one here would strip the parts out of the bundle.
+        $query = Product::where('is_combo', false)->with('category', 'variants');
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%'.$request->search.'%');
@@ -61,6 +65,7 @@ class AdminProductController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'variants' => 'required|array|min:1',
+            'variants.*.id' => 'nullable|integer',
             'variants.*.name' => 'required|string|max:255',
             'variants.*.unit_id' => 'nullable|exists:units,id',
             'variants.*.unit_value' => 'nullable|numeric|min:0',
@@ -86,24 +91,17 @@ class AdminProductController extends Controller
 
         $this->syncProductImages($request, $product);
 
-        foreach ($request->variants as $i => $variantData) {
-            $product->variants()->create([
-                'name' => $variantData['name'],
-                'unit_id' => ($variantData['unit_id'] ?? null) ?: null,
-                'unit_value' => ($variantData['unit_value'] ?? null) ?: null,
-                'price' => $variantData['price'],
-                'sale_price' => $variantData['sale_price'] ?? null,
-                'stock' => $variantData['stock'],
-                'sku' => strtoupper(Str::slug($data['slug'].'-'.($i + 1))),
-                'sort_order' => $i,
-            ]);
-        }
+        $this->syncVariants($product, $request->variants);
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully!');
     }
 
     public function edit(Product $product)
     {
+        if ($product->is_combo) {
+            return redirect()->route('admin.combos.edit', $product);
+        }
+
         $product->load('variants', 'images');
         $categories = Category::active()->sorted()->get();
         $units = Unit::active()->sorted()->get(['id', 'name', 'short_code']);
@@ -113,6 +111,10 @@ class AdminProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        if ($product->is_combo) {
+            return redirect()->route('admin.combos.edit', $product);
+        }
+
         $validated = $request->validate([
             'name_en' => 'required|string|max:255',
             'name_bn' => 'required|string|max:255',
@@ -134,6 +136,7 @@ class AdminProductController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'variants' => 'required|array|min:1',
+            'variants.*.id' => 'nullable|integer',
             'variants.*.name' => 'required|string|max:255',
             'variants.*.unit_id' => 'nullable|exists:units,id',
             'variants.*.unit_value' => 'nullable|numeric|min:0',
@@ -153,25 +156,13 @@ class AdminProductController extends Controller
         $data['is_preorder'] = $request->boolean('is_preorder');
 
         $this->guardImageCount($request, $product);
+        $this->guardVariantRemovals($product, $request->variants);
 
         $product->update($data);
 
         $this->syncProductImages($request, $product);
 
-        // Sync variants
-        $product->variants()->delete();
-        foreach ($request->variants as $i => $variantData) {
-            $product->variants()->create([
-                'name' => $variantData['name'],
-                'unit_id' => ($variantData['unit_id'] ?? null) ?: null,
-                'unit_value' => ($variantData['unit_value'] ?? null) ?: null,
-                'price' => $variantData['price'],
-                'sale_price' => $variantData['sale_price'] ?? null,
-                'stock' => $variantData['stock'],
-                'sku' => strtoupper(Str::slug($data['slug'].'-'.($i + 1))),
-                'sort_order' => $i,
-            ]);
-        }
+        $this->syncVariants($product, $request->variants);
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
     }
@@ -191,5 +182,85 @@ class AdminProductController extends Controller
         );
 
         return $this->bulkResponse($result, 'products', 'admin.products.index');
+    }
+
+    /**
+     * Writes the posted rows onto the product's variants.
+     *
+     * Rows are matched by the id the form posts back and updated in place. The
+     * old delete-everything-and-recreate emptied combo_items (which cascades
+     * from the variant) and blanked product_variant_id on past order lines, so
+     * simply editing a price used to break bundles and order history.
+     *
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    private function syncVariants(Product $product, array $rows): void
+    {
+        $kept = [];
+
+        foreach (array_values($rows) as $i => $row) {
+            $attributes = [
+                'name' => $row['name'],
+                'unit_id' => ($row['unit_id'] ?? null) ?: null,
+                'unit_value' => ($row['unit_value'] ?? null) ?: null,
+                'price' => $row['price'],
+                'sale_price' => $row['sale_price'] ?? null,
+                'stock' => $row['stock'],
+                'sort_order' => $i,
+            ];
+
+            $variant = ($row['id'] ?? null)
+                ? $product->variants()->whereKey($row['id'])->first()
+                : null;
+
+            if ($variant) {
+                $variant->update($attributes);
+            } else {
+                $variant = $product->variants()->create($attributes + [
+                    'sku' => strtoupper(Str::slug($product->slug.'-'.($i + 1))),
+                ]);
+            }
+
+            $kept[] = $variant->id;
+        }
+
+        $product->variants()->whereNotIn('id', $kept)->get()->each->delete();
+    }
+
+    /**
+     * Refuses a save that would drop a variant some combo is built on.
+     *
+     * combo_items restricts that delete at the database level, so without this
+     * the driver raises a 500 halfway through the save. Checked before anything
+     * is written, like guardImageCount.
+     *
+     * @param  array<int, array<string, mixed>>  $rows
+     *
+     * @throws ValidationException
+     */
+    private function guardVariantRemovals(Product $product, array $rows): void
+    {
+        $posted = collect($rows)->pluck('id')->filter()->map(fn ($id) => (int) $id)->all();
+
+        $dropped = $product->variants()->whereNotIn('id', $posted)->pluck('id');
+
+        if ($dropped->isEmpty()) {
+            return;
+        }
+
+        $combos = ComboItem::whereIn('component_variant_id', $dropped)
+            ->with('combo.product')
+            ->get()
+            ->map(fn (ComboItem $item) => $item->combo?->product?->name)
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($combos->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'variants' => 'That variant is part of the combo "'.$combos->implode('", "').'". '
+                    .'Take it out of the combo before removing it here.',
+            ]);
+        }
     }
 }
