@@ -64,7 +64,7 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-graph-up"></i> Google</h5>
                 </div>
@@ -88,6 +88,25 @@
                                value="{{ old('seo_google_site_verification', $seo['seo_google_site_verification'] ?? '') }}"
                                placeholder="The content value of the meta tag Google gives you">
                         @error('seo_google_site_verification') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-facebook"></i> Meta Pixel</h5>
+                </div>
+                <div class="card-body p-4">
+                    <label class="form-label fw-bold">Pixel ID</label>
+                    <input type="text" name="seo_facebook_pixel"
+                           class="form-control @error('seo_facebook_pixel') is-invalid @enderror"
+                           value="{{ old('seo_facebook_pixel', $seo['seo_facebook_pixel'] ?? '') }}"
+                           placeholder="123456789012345">
+                    @error('seo_facebook_pixel') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <div class="form-text">
+                        From Meta Events Manager — a plain number. Used across the shop and by
+                        every landing page that does not set a pixel of its own.
+                        Leave blank to load no Facebook script at all.
                     </div>
                 </div>
             </div>

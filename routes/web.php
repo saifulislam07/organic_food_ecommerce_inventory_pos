@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminComboController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminExpenseController;
 use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminLandingPageController;
 use App\Http\Controllers\Admin\AdminMailSettingController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminOrderController;
@@ -27,6 +28,8 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Customer\CustomerDashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LandingOrderController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -57,6 +60,26 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/order-success/{orderNumber}', [CheckoutController::class, 'success'])->name('checkout.success');
 
+/*
+ | Campaign landing pages.
+ |
+ | Under their own prefix so a campaign slug can never collide with the
+ | catch-all page route at the bottom of this file. Ordering here does not
+ | matter for that reason, but they are registered early anyway.
+ */
+Route::prefix(config('landing.prefix', 'lp'))->name('landing.')->group(function () {
+    Route::get('{slug}', [LandingPageController::class, 'show'])->name('show');
+
+    // Public, unauthenticated and writes to the database — ad traffic brings
+    // bots, so the one route that creates an order is rate limited.
+    Route::post('{slug}/order', [LandingOrderController::class, 'store'])
+        ->middleware('throttle:'.config('landing.order_rate_limit', 8).',1')
+        ->name('order');
+
+    Route::get('{slug}/thank-you/{orderNumber}', [LandingOrderController::class, 'thankYou'])
+        ->name('thankyou');
+});
+
 // Customer Routes
 Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
@@ -76,6 +99,7 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::delete('suppliers/bulk', [AdminSupplierController::class, 'bulkDestroy'])->name('suppliers.bulkDestroy');
     Route::delete('expenses/bulk', [AdminExpenseController::class, 'bulkDestroy'])->name('expenses.bulkDestroy');
     Route::delete('pages/bulk', [AdminPageController::class, 'bulkDestroy'])->name('pages.bulkDestroy');
+    Route::delete('landing-pages/bulk', [AdminLandingPageController::class, 'bulkDestroy'])->name('landing-pages.bulkDestroy');
     Route::delete('combos/bulk', [AdminComboController::class, 'bulkDestroy'])->name('combos.bulkDestroy');
     Route::delete('purchases/bulk', [AdminPurchaseController::class, 'bulkDestroy'])->name('purchases.bulkDestroy');
     Route::delete('adjustments/bulk', [AdminAdjustmentController::class, 'bulkDestroy'])->name('adjustments.bulkDestroy');
@@ -128,6 +152,12 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::get('/settings/chat', [AdminChatSettingController::class, 'edit'])->name('settings.chat.edit');
     Route::post('/settings/chat', [AdminChatSettingController::class, 'update'])->name('settings.chat.update');
     Route::resource('pages', AdminPageController::class)->except(['show']);
+
+    // Copying a running campaign is how the next one gets built, so it is a
+    // first-class action rather than something done by hand.
+    Route::post('landing-pages/{landing_page}/duplicate', [AdminLandingPageController::class, 'duplicate'])
+        ->name('landing-pages.duplicate');
+    Route::resource('landing-pages', AdminLandingPageController::class)->except(['show']);
     Route::resource('users', AdminUserController::class)->except(['show']);
     Route::resource('roles', AdminRoleController::class)->except(['show']);
 

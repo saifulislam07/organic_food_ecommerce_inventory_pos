@@ -17,6 +17,7 @@ class SeoSettings
         'seo_meta_keywords',
         'seo_og_image',
         'seo_google_analytics',
+        'seo_facebook_pixel',
         'seo_google_site_verification',
         'seo_robots',
     ];
@@ -75,6 +76,19 @@ class SeoSettings
     public static function analyticsId(): ?string
     {
         $id = self::get('seo_google_analytics');
+
+        return blank($id) ? null : trim($id);
+    }
+
+    /**
+     * Meta Pixel ID — a plain number from Events Manager.
+     *
+     * Shop-wide default; a landing page may report to a different pixel of its
+     * own, see LandingPage::pixelId().
+     */
+    public static function facebookPixelId(): ?string
+    {
+        $id = self::get('seo_facebook_pixel');
 
         return blank($id) ? null : trim($id);
     }

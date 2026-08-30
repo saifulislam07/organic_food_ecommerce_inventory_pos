@@ -112,10 +112,31 @@
                     <span class="text-muted small d-block">Order Source</span>
                     @if($order->source === 'pos')
                         <span class="badge" style="background-color: #6f42c1;">POS System</span>
+                    @elseif($order->source === 'landing')
+                        <span class="badge" style="background-color: #d6336c;">Landing Page</span>
                     @else
                         <span class="badge" style="background-color: #0d6efd;">Website Order</span>
                     @endif
                 </div>
+
+                @if($order->landingPage || $order->utm_campaign || $order->utm_source)
+                <div>
+                    <span class="text-muted small d-block">Campaign</span>
+                    @if($order->landingPage)
+                        <a href="{{ route('admin.landing-pages.edit', $order->landingPage) }}" class="fw-bold text-decoration-none">
+                            {{ $order->landingPage->internal_name }}
+                        </a>
+                    @endif
+                    <div class="small text-muted">
+                        @if($order->utm_campaign)
+                            <div><i class="bi bi-megaphone"></i> {{ $order->utm_campaign }}</div>
+                        @endif
+                        @if($order->utm_source)
+                            <div>{{ $order->utm_source }}{{ $order->utm_medium ? ' / '.$order->utm_medium : '' }}</div>
+                        @endif
+                    </div>
+                </div>
+                @endif
                 <div>
                     <span class="text-muted small d-block">Delivery Type</span>
                     @if($order->pickup_point)

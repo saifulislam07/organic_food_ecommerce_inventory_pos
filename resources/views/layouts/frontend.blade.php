@@ -63,6 +63,8 @@
         </script>
     @endif
 
+    @include('partials.meta-pixel', ['pixelId' => \App\Support\SeoSettings::facebookPixelId()])
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">

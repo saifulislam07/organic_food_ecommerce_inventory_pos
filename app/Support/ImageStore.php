@@ -103,6 +103,29 @@ class ImageStore
         return asset($fallback);
     }
 
+    /**
+     * Copies a stored file and returns the new path.
+     *
+     * Two records must never share one path: deleting either would take the
+     * picture out from under the other. Anything this class did not write — an
+     * external URL, a missing file — is handed back unchanged, because there is
+     * nothing to copy and nothing that will be deleted either.
+     */
+    public static function duplicate(?string $path, string $folder): ?string
+    {
+        if (! self::exists((string) $path)) {
+            return $path;
+        }
+
+        $stem = Str::limit(pathinfo($path, PATHINFO_FILENAME), 40, '') ?: 'image';
+        $extension = pathinfo($path, PATHINFO_EXTENSION) ?: 'webp';
+        $target = self::path($folder, $stem.'-'.Str::random(8).'.'.$extension);
+
+        self::disk()->put($target, self::disk()->get($path));
+
+        return $target;
+    }
+
     /** Removes a file this class wrote. Anything else is left alone. */
     public static function delete(?string $path): void
     {

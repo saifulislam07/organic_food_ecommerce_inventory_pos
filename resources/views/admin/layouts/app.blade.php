@@ -170,12 +170,13 @@
                 'catalogue' => [
                     'label' => 'Catalogue',
                     'icon' => 'bi-box-seam',
-                    'patterns' => ['admin.products.*', 'admin.categories.*', 'admin.units.*'],
+                    'patterns' => ['admin.products.*', 'admin.categories.*', 'admin.units.*', 'admin.landing-pages.*'],
                     'items' => [
                         ['route' => 'admin.products.index', 'active' => 'admin.products.*', 'label' => 'Products', 'can' => 'products.view'],
                         ['route' => 'admin.categories.index', 'active' => 'admin.categories.*', 'label' => 'Categories', 'can' => 'categories.view'],
                         ['route' => 'admin.combos.index', 'active' => 'admin.combos.*', 'label' => 'Combos', 'can' => 'combos.view'],
                         ['route' => 'admin.units.index', 'active' => 'admin.units.*', 'label' => 'Units', 'can' => 'units.view'],
+                        ['route' => 'admin.landing-pages.index', 'active' => 'admin.landing-pages.*', 'label' => 'Landing Pages', 'can' => 'landing-pages.view'],
                     ],
                 ],
                 'stock' => [

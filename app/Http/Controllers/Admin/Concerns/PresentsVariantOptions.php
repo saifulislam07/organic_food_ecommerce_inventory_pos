@@ -25,6 +25,9 @@ trait PresentsVariantOptions
                 'sku' => $variant->sku,
                 'stock' => (int) $variant->stock,
                 'cost_price' => $variant->cost_price === null ? null : (float) $variant->cost_price,
+                // What the shop sells it for, so a form can offer that as the
+                // default before anyone types a campaign price.
+                'price' => (float) $variant->display_price,
             ])
             ->values();
     }

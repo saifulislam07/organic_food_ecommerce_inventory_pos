@@ -13,6 +13,12 @@
             <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Delivered</option>
             <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
         </select>
+        <select name="source" class="form-select" onchange="this.form.submit()">
+            <option value="">All Channels</option>
+            @foreach(\App\Models\Order::SOURCES as $key => $label)
+                <option value="{{ $key }}" @selected(request('source') === $key)>{{ $label }}</option>
+            @endforeach
+        </select>
         <input type="text" name="search" class="form-control" placeholder="Order ID, Name or Phone" value="{{ request('search') }}">
         <button class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
     </form>
@@ -53,9 +59,17 @@
                     </td>
                     <td>
                         @if($order->source === 'pos')
-                            <span class="badge bg-purple" style="background-color: #6f42c1;">POS</span>
+                            <span class="badge" style="background-color: #6f42c1;">POS</span>
+                        @elseif($order->source === 'landing')
+                            <span class="badge" style="background-color: #d6336c;">Landing</span>
+                            @if($order->landingPage)
+                                <br><small class="text-muted">{{ Str::limit($order->landingPage->internal_name, 22) }}</small>
+                            @endif
+                            @if($order->utm_campaign)
+                                <br><small class="text-muted"><i class="bi bi-megaphone"></i> {{ Str::limit($order->utm_campaign, 22) }}</small>
+                            @endif
                         @else
-                            <span class="badge bg-blue" style="background-color: #0d6efd;">Web</span>
+                            <span class="badge" style="background-color: #0d6efd;">Web</span>
                         @endif
                     </td>
                     <td>{!! $order->status_badge !!}</td>

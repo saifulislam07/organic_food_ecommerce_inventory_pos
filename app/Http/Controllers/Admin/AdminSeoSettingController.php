@@ -25,6 +25,7 @@ class AdminSeoSettingController extends Controller
             'seo_meta_description' => ['nullable', 'string', 'max:180'],
             'seo_meta_keywords' => ['nullable', 'string', 'max:255'],
             'seo_google_analytics' => ['nullable', 'string', 'max:32', 'regex:/^(G-[A-Z0-9]+|UA-\d+-\d+)$/i'],
+            'seo_facebook_pixel' => ['nullable', 'string', 'max:32', 'regex:/^\d{10,20}$/'],
             'seo_google_site_verification' => ['nullable', 'string', 'max:255'],
             // The values contain commas, so Rule::in is the only safe way to express this.
             'seo_robots' => ['nullable', Rule::in(['index, follow', 'noindex, nofollow'])],

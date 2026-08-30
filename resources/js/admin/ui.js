@@ -92,6 +92,32 @@ export function interceptConfirmForms(root = document) {
     );
 }
 
+/**
+ * Copy-to-clipboard buttons: put data-copy="…" on anything clickable.
+ *
+ * Campaign URLs are meant to be pasted into Facebook's ad composer, and
+ * selecting one out of a table cell by hand is where typos come from.
+ */
+export function initCopyButtons(root = document) {
+    root.addEventListener('click', async (event) => {
+        const trigger = event.target.closest('[data-copy]');
+
+        if (!trigger) return;
+
+        event.preventDefault();
+
+        const value = trigger.dataset.copy;
+
+        try {
+            await navigator.clipboard.writeText(value);
+            toast('লিংক কপি হয়েছে', 'success', 2500);
+        } catch (error) {
+            // Clipboard access needs HTTPS or localhost; show it to copy by hand.
+            window.prompt('লিংকটি কপি করুন:', value);
+        }
+    });
+}
+
 /** Laravel's flash messages, handed over as JSON by the admin layout. */
 export function flashToasts() {
     const el = document.getElementById('admin-flash');

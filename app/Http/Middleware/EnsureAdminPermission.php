@@ -23,6 +23,8 @@ class EnsureAdminPermission
     private const WRITE_ACTIONS = [
         'create' => AdminModules::CREATE,
         'store' => AdminModules::CREATE,
+        // Copying a page makes a new one, so it is a create rather than an edit.
+        'duplicate' => AdminModules::CREATE,
         'edit' => AdminModules::EDIT,
         'update' => AdminModules::EDIT,
         'updateStatus' => AdminModules::EDIT,

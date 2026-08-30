@@ -13,6 +13,9 @@ export default defineConfig({
             input: [
                 'resources/js/admin.js',
                 'resources/js/storefront.js',
+                // Landing pages carry paid traffic and load none of the
+                // storefront's bundle, so they get an entry of their own.
+                'resources/js/landing.js',
             ],
             refresh: true,
         }),

@@ -11,10 +11,16 @@ class AdminOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with('items');
+        $query = Order::with('items', 'landingPage');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        // Which channel the order came through: the website, the counter, or a
+        // campaign landing page.
+        if ($request->filled('source') && array_key_exists($request->source, Order::SOURCES)) {
+            $query->where('source', $request->source);
         }
 
         if ($request->filled('search')) {
@@ -33,7 +39,7 @@ class AdminOrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load('items');
+        $order->load('items', 'landingPage');
 
         return view('admin.orders.show', compact('order'));
     }
