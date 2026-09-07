@@ -190,6 +190,20 @@
                         ['route' => 'admin.adjustments.index', 'active' => 'admin.adjustments.*', 'label' => 'Adjustments', 'can' => 'adjustments.view'],
                     ],
                 ],
+                'money' => [
+                    'label' => 'Money',
+                    'icon' => 'bi-cash-coin',
+                    'patterns' => [
+                        'admin.expenses.*', 'admin.investors.*',
+                        'admin.investments.*', 'admin.withdrawals.*',
+                    ],
+                    'items' => [
+                        ['route' => 'admin.expenses.index', 'active' => 'admin.expenses.*', 'label' => 'Expenses', 'can' => 'expenses.view'],
+                        ['route' => 'admin.investments.index', 'active' => 'admin.investments.*', 'label' => 'Investments', 'can' => 'investments.view'],
+                        ['route' => 'admin.withdrawals.index', 'active' => 'admin.withdrawals.*', 'label' => 'Withdrawals', 'can' => 'withdrawals.view'],
+                        ['route' => 'admin.investors.index', 'active' => 'admin.investors.*', 'label' => 'Investors', 'can' => 'investors.view'],
+                    ],
+                ],
                 'settings' => [
                     'label' => 'Settings',
                     'icon' => 'bi-gear',
@@ -244,13 +258,6 @@
                 </li>
             @endforeach
 
-            @can('expenses.view')
-            <li>
-                <a href="{{ route('admin.expenses.index') }}" class="{{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}">
-                    <i class="bi bi-cash-stack"></i> Expenses
-                </a>
-            </li>
-            @endcan
             @can('reports.view')
             <li>
                 <a href="{{ route('admin.reports.profitLoss') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">

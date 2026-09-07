@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 /**
  * The parts of a landing page that repeat: selling points, reviews, questions —
@@ -14,6 +14,21 @@ const props = defineProps({
     features: { type: Array, default: () => [] },
     faqs: { type: Array, default: () => [] },
     reviews: { type: Array, default: () => [] },
+    specs: { type: Array, default: () => [] },
+
+    /*
+     * Whether the reviews repeater is offered at all. A category's starting
+     * draft can carry selling points and questions, but not testimonials —
+     * those belong to a product, not to a whole shelf of them.
+     */
+    withReviews: { type: Boolean, default: true },
+
+    /*
+     * Each category's starting draft, keyed by id. Held here rather than
+     * fetched so that applying one is instant and offline; the page is already
+     * carrying every category in the select.
+     */
+    defaults: { type: Object, default: () => ({}) },
 });
 
 const allKeys = Object.keys(props.blocks);
@@ -59,6 +74,7 @@ const faqRows = ref(props.faqs.length ? props.faqs.map((row) => ({ ...row })) : 
 const reviewRows = ref(
     props.reviews.length ? props.reviews.map((row) => ({ ...row })) : [{ name: '', text: '', rating: 5 }]
 );
+const specRows = ref(props.specs.length ? props.specs.map((row) => ({ ...row })) : [{ label: '', value: '' }]);
 
 /*
  * One pair of functions per repeater rather than a generic add(list, blank):
@@ -97,6 +113,48 @@ function removeFaq(index) {
 
     if (!faqRows.value.length) addFaq();
 }
+
+function addSpec() {
+    specRows.value.push({ label: '', value: '' });
+}
+
+function removeSpec(index) {
+    specRows.value.splice(index, 1);
+
+    if (!specRows.value.length) addSpec();
+}
+
+/* -------------------------------------------------------------- defaults */
+
+/*
+ * Filling the form from a category's starting draft.
+ *
+ * Driven by an event rather than a watched prop because the category select
+ * lives in Blade, in a different card, and neither owns the other. The button
+ * over there decides when; this decides what, and only ever on an explicit
+ * click — a page whose copy is already written must never be overwritten
+ * because someone corrected the category.
+ */
+function applyDefaults(event) {
+    const draft = props.defaults[event.detail?.categoryId];
+
+    if (!draft) return;
+
+    if (draft.sections?.length) {
+        enabled.value = new Set(draft.sections);
+        order.value = [
+            ...draft.sections.filter((key) => allKeys.includes(key)),
+            ...allKeys.filter((key) => !draft.sections.includes(key)),
+        ];
+    }
+
+    if (draft.features?.length) featureRows.value = [...draft.features];
+    if (draft.faqs?.length) faqRows.value = draft.faqs.map((row) => ({ ...row }));
+    if (draft.specs?.length) specRows.value = draft.specs.map((row) => ({ ...row }));
+}
+
+onMounted(() => document.addEventListener('landing:apply-defaults', applyDefaults));
+onBeforeUnmount(() => document.removeEventListener('landing:apply-defaults', applyDefaults));
 </script>
 
 <template>
@@ -143,8 +201,26 @@ function removeFaq(index) {
             </button>
         </div>
 
-        <!-- Reviews -->
+        <!-- Specs -->
         <div class="mb-4">
+            <label class="form-label fw-bold">স্পেসিফিকেশন</label>
+            <p class="text-muted small mb-2">ওয়ারেন্টি, মডেল, ওজন — যেগুলো ক্রেতা মিলিয়ে দেখে।</p>
+            <div v-for="(row, index) in specRows" :key="`spec-${index}`" class="d-flex gap-2 mb-2">
+                <input v-model="row.label" type="text" :name="`specs[${index}][label]`" class="form-control"
+                       maxlength="100" placeholder="যেমন: ওয়ারেন্টি">
+                <input v-model="row.value" type="text" :name="`specs[${index}][value]`" class="form-control"
+                       maxlength="255" placeholder="যেমন: ১ বছর">
+                <button type="button" class="btn btn-outline-danger" @click="removeSpec(index)">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-success" @click="addSpec()">
+                <i class="bi bi-plus-circle"></i> সারি যোগ করুন
+            </button>
+        </div>
+
+        <!-- Reviews -->
+        <div v-if="withReviews" class="mb-4">
             <label class="form-label fw-bold">কাস্টমার রিভিউ</label>
             <div v-for="(row, index) in reviewRows" :key="`review-${index}`" class="row g-2 align-items-start mb-2">
                 <div class="col-md-3">

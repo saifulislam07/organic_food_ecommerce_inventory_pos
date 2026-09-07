@@ -19,7 +19,7 @@ class LandingPageController extends Controller
      */
     public function show(Request $request, string $slug)
     {
-        $page = LandingPage::with(['items.product', 'items.variant.comboItems.component'])
+        $page = LandingPage::with(['category', 'items.product', 'items.variant.comboItems.component'])
             ->where('slug', $slug)
             ->firstOrFail();
 

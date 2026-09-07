@@ -127,6 +127,8 @@
                             'features' => old('features', $page?->featureList() ?? []),
                             'faqs' => old('faqs', $page?->faqList() ?? []),
                             'reviews' => old('reviews', $page?->reviewList() ?? []),
+                            'specs' => old('specs', $page?->specList() ?? []),
+                            'defaults' => $categoryDefaults,
                         ], JSON_UNESCAPED_UNICODE) }}"
                     ></div>
 
@@ -285,6 +287,69 @@
                 </div>
             @endif
 
+            {{-- Category and theme --}}
+            <div class="card admin-card mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-palette"></i> ক্যাটাগরি ও থিম</h6>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ক্যাটাগরি</label>
+                        <select name="category_id" class="form-select @error('category_id') is-invalid @enderror"
+                                data-lp-category>
+                            <option value="">— বাছাই করা হয়নি —</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}"
+                                        @selected((string) old('category_id', $page->category_id ?? '') === (string) $category->id)>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="form-text">
+                            পেজের রঙ এখান থেকেই আসে। ক্যাটাগরির থিম ও ডিফল্ট কনটেন্ট ঠিক করুন
+                            <a href="{{ route('admin.categories.index') }}" target="_blank" rel="noopener">ক্যাটাগরি</a> পাতা থেকে।
+                        </div>
+
+                        {{-- Never automatic: the same click on a page whose copy
+                             is already written would throw the copy away. --}}
+                        <button type="button" class="btn btn-sm btn-outline-success mt-2 w-100"
+                                data-lp-apply-defaults hidden>
+                            <i class="bi bi-magic"></i> এই ক্যাটাগরির ডিফল্ট কনটেন্ট বসান
+                        </button>
+                        <div class="form-text" data-lp-apply-note hidden>
+                            নিচের ব্লক, বুলেট পয়েন্ট, স্পেসিফিকেশন ও প্রশ্নগুলো ক্যাটাগরির ডিফল্ট দিয়ে বদলে যাবে।
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">থিম</label>
+                        <select name="theme" class="form-select @error('theme') is-invalid @enderror" data-lp-theme>
+                            <option value="">ক্যাটাগরি অনুযায়ী</option>
+                            @foreach(\App\Models\LandingPage::THEMES as $key => $label)
+                                <option value="{{ $key }}" @selected(old('theme', $page->theme ?? '') === $key)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('theme') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="form-text">শুধু এই ক্যাম্পেইনে অন্য রঙ চাইলে বেছে নিন।</div>
+                    </div>
+
+                    {{-- The colours themselves, read straight out of
+                         landing-themes.css, so this can never drift from what
+                         the live page renders. --}}
+                    <div class="lp-swatch d-flex align-items-center gap-2 border rounded p-2"
+                         data-lp-preview
+                         data-categories="{{ json_encode($categories->pluck('theme', 'id'), JSON_UNESCAPED_UNICODE) }}"
+                         data-has-defaults="{{ json_encode(array_keys($categoryDefaults)) }}"
+                         data-ctas="{{ json_encode(array_filter(array_map(fn ($d) => $d['cta_text'], $categoryDefaults))) }}"
+                         data-labels="{{ json_encode(\App\Models\LandingPage::THEMES, JSON_UNESCAPED_UNICODE) }}">
+                        <span class="lp-swatch-dot" style="background: var(--primary);"></span>
+                        <span class="lp-swatch-dot" style="background: var(--accent);"></span>
+                        <span class="lp-swatch-dot" style="background: var(--cream-dark);"></span>
+                        <span class="small text-muted ms-1" data-lp-preview-name></span>
+                    </div>
+                </div>
+            </div>
+
             {{-- Status --}}
             <div class="card admin-card mb-4">
                 <div class="card-body p-4">
@@ -428,3 +493,102 @@
     </div>
 </form>
 @endsection
+
+{{-- The theme classes are pure custom-property declarations, so loading them
+     here colours the swatch and touches nothing else on the admin screen. --}}
+@push('styles')
+    <link href="{{ asset('css/landing-themes.css') }}" rel="stylesheet">
+    <style>
+        .lp-swatch-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, .12);
+            flex: none;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+<script>
+/*
+    Keeps the swatch honest about what the page will actually look like: the
+    theme the page names, or failing that the one its category carries, or the
+    brand. The same three-step fallback LandingPage::themeKey() does — worth
+    the duplication, because an admin who cannot see the answer until they save
+    picks a category and hopes.
+*/
+(function () {
+    const preview = document.querySelector('[data-lp-preview]');
+
+    if (! preview) {
+        return;
+    }
+
+    const categorySelect = document.querySelector('[data-lp-category]');
+    const themeSelect = document.querySelector('[data-lp-theme]');
+    const name = preview.querySelector('[data-lp-preview-name]');
+    const inherit = themeSelect.querySelector('option[value=""]');
+
+    const categoryThemes = JSON.parse(preview.dataset.categories || '{}');
+    const labels = JSON.parse(preview.dataset.labels || '{}');
+
+    function paint() {
+        const inherited = categoryThemes[categorySelect.value] || 'default';
+        const key = themeSelect.value || inherited;
+
+        inherit.textContent = 'ক্যাটাগরি অনুযায়ী — ' + (labels[inherited] || labels.default);
+
+        preview.className = preview.className.replace(/\blp-theme-\S+/g, '').trim()
+            + ' lp-theme-' + key;
+        name.textContent = labels[key] || labels.default;
+    }
+
+    /*
+        The prefill button, which only exists for a category that actually has
+        a starting draft. It hands the id to the content island and stops
+        there — what gets replaced is that component's business, and it will
+        not act unless a human clicked here.
+    */
+    const applyButton = document.querySelector('[data-lp-apply-defaults]');
+    const applyNote = document.querySelector('[data-lp-apply-note]');
+    const withDefaults = new Set(JSON.parse(preview.dataset.hasDefaults || '[]').map(String));
+
+    function offerDefaults() {
+        const available = withDefaults.has(categorySelect.value);
+
+        applyButton.hidden = ! available;
+        applyNote.hidden = ! available;
+    }
+
+    applyButton.addEventListener('click', function () {
+        document.dispatchEvent(new CustomEvent('landing:apply-defaults', {
+            detail: { categoryId: categorySelect.value },
+        }));
+
+        const ctaText = document.querySelector('[name="cta_text"]');
+        const cta = (JSON.parse(preview.dataset.ctas || '{}'))[categorySelect.value];
+
+        if (ctaText && cta) {
+            ctaText.value = cta;
+        }
+
+        applyButton.disabled = true;
+        applyButton.innerHTML = '<i class="bi bi-check2"></i> বসানো হয়েছে';
+    });
+
+    categorySelect.addEventListener('change', function () {
+        paint();
+        offerDefaults();
+
+        applyButton.disabled = false;
+        applyButton.innerHTML = '<i class="bi bi-magic"></i> এই ক্যাটাগরির ডিফল্ট কনটেন্ট বসান';
+    });
+
+    themeSelect.addEventListener('change', paint);
+
+    paint();
+    offerDefaults();
+})();
+</script>
+@endpush

@@ -1,0 +1,174 @@
+/* === LANDING PAGE THEMES === */
+/*
+   One class per theme, nothing but custom properties inside it.
+
+   The campaign layout draws every colour, corner and font through var(), so
+   redefining a handful of properties on <body> reskins the whole page without a
+   single new rule. Custom properties inherit and the nearest ancestor wins, so
+   a theme on <body> beats brand.css's :root without any specificity contest —
+   which is why this file must load after brand.css and why nothing in here
+   should ever be a plain declaration.
+
+   Adding a theme is this file plus one line in LandingPage::THEMES. No Blade.
+*/
+
+/* Every theme starts from the brand and changes only what it must, so a half
+   written one still renders a coherent page. */
+.lp-theme-default {
+    --lp-hero-band: linear-gradient(160deg, var(--leaf-tint) 0%, var(--cream) 70%);
+    --lp-tick: '✓';
+}
+
+/* ------------------------------------------------------------------ food */
+
+/* আম — ripe skin: saffron over leaf, the colours of the fruit cut open. */
+.lp-theme-mango {
+    --primary: #c2410c;
+    --primary-light: #f97316;
+    --primary-dark: #9a3412;
+    --primary-darker: #7c2d12;
+    --primary-rgb: 194, 65, 12;
+    --accent: #fbbf24;
+    --accent-gold: #fcd34d;
+    --accent-text: #92400e;
+    --cream: #fffbf2;
+    --cream-dark: #fde9c8;
+    --radius: 16px;
+    --lp-hero-band: linear-gradient(160deg, #fef0d3 0%, #fffbf2 70%);
+    --lp-tick: '✓';
+}
+
+/* খেজুর গুড় — molasses: the dark caramel of a fresh patali, on warm sand. */
+.lp-theme-dates {
+    --primary: #92400e;
+    --primary-light: #b45309;
+    --primary-dark: #78350f;
+    --primary-darker: #451a03;
+    --primary-rgb: 146, 64, 14;
+    --accent: #d97706;
+    --accent-gold: #f59e0b;
+    --accent-text: #7c2d12;
+    --cream: #fdfaf4;
+    --cream-dark: #f1e4d0;
+    --radius: 12px;
+    --lp-hero-band: linear-gradient(160deg, #f3e3cc 0%, #fdfaf4 70%);
+    --lp-tick: '✓';
+}
+
+/* মধু — amber in a jar, lit from behind. */
+.lp-theme-honey {
+    --primary: #a16207;
+    --primary-light: #ca8a04;
+    --primary-dark: #854d0e;
+    --primary-darker: #713f12;
+    --primary-rgb: 161, 98, 7;
+    --accent: #f59e0b;
+    --accent-gold: #fcd34d;
+    --accent-text: #854d0e;
+    --cream: #fffdf4;
+    --cream-dark: #fbeec4;
+    --radius: 18px;
+    --lp-hero-band: linear-gradient(160deg, #fdf0c4 0%, #fffdf4 70%);
+    --lp-tick: '✓';
+}
+
+/* ঘি ও সরিষার তেল — butter and mustard: soft gold, nothing shouting. */
+.lp-theme-ghee {
+    --primary: #b45309;
+    --primary-light: #eab308;
+    --primary-dark: #92400e;
+    --primary-darker: #713f12;
+    --primary-rgb: 180, 83, 9;
+    --accent: #facc15;
+    --accent-gold: #fde047;
+    --accent-text: #854d0e;
+    --cream: #fffef5;
+    --cream-dark: #f7edc9;
+    --radius: 14px;
+    --lp-hero-band: linear-gradient(160deg, #fbf3d0 0%, #fffef5 70%);
+    --lp-tick: '✓';
+}
+
+/* মৌসুমী ফল — orchard green with a berry accent. */
+.lp-theme-fruits {
+    --primary: #15803d;
+    --primary-light: #22c55e;
+    --primary-dark: #166534;
+    --primary-darker: #14532d;
+    --primary-rgb: 21, 128, 61;
+    --accent: #e11d48;
+    --accent-gold: #fb7185;
+    --accent-text: #9f1239;
+    --lp-badge-text: #ffffff;
+    --cream: #f8fdf7;
+    --cream-dark: #d9f0d8;
+    --radius: 16px;
+    --lp-hero-band: linear-gradient(160deg, #d9f0d8 0%, #f8fdf7 70%);
+    --lp-tick: '✓';
+}
+
+/* মশলা — turmeric and dried chilli. */
+.lp-theme-spice {
+    --primary: #b91c1c;
+    --primary-light: #dc2626;
+    --primary-dark: #991b1b;
+    --primary-darker: #7f1d1d;
+    --primary-rgb: 185, 28, 28;
+    --accent: #ea580c;
+    --accent-gold: #f59e0b;
+    --accent-text: #9a3412;
+    --cream: #fffaf7;
+    --cream-dark: #fadfd0;
+    --radius: 12px;
+    --lp-hero-band: linear-gradient(160deg, #fadfd0 0%, #fffaf7 70%);
+    --lp-tick: '✓';
+}
+
+/* --------------------------------------------------------------- non-food */
+
+/*
+   কিডস — the two departures from the food themes are deliberate. Corners go
+   noticeably rounder and the accent goes hot pink; on a phone that reads as a
+   different shop before a word has been.
+*/
+.lp-theme-kids {
+    --primary: #7c3aed;
+    --primary-light: #a78bfa;
+    --primary-dark: #6d28d9;
+    --primary-darker: #4c1d95;
+    --primary-rgb: 124, 58, 237;
+    --accent: #ec4899;
+    --accent-gold: #f9a8d4;
+    --accent-text: #9d174d;
+    --cream: #fdfaff;
+    --cream-dark: #ece2fd;
+    --radius: 24px;
+    --lp-badge-text: #ffffff;
+    --lp-hero-band: linear-gradient(160deg, #ece2fd 0%, #fde7f3 55%, #fdfaff 100%);
+    --lp-tick: '★';
+}
+
+/*
+   গেজেট — slate and cyan, corners nearly square. Warm cream under a phone
+   charger looks like a grocery; this is the one theme that has to stop
+   resembling the rest of the shop.
+*/
+.lp-theme-gadget {
+    --primary: #0f172a;
+    --primary-light: #38bdf8;
+    --primary-dark: #1e293b;
+    --primary-darker: #020617;
+    --primary-rgb: 15, 23, 42;
+    --accent: #0ea5e9;
+    --accent-gold: #38bdf8;
+    --accent-text: #0369a1;
+    --cream: #f8fafc;
+    --cream-dark: #e2e8f0;
+    --radius: 8px;
+    --lp-badge-text: #082f49;
+    --lp-hero-band: linear-gradient(160deg, #e2e8f0 0%, #f8fafc 70%);
+    --lp-tick: '⚡';
+    /* A spec sheet is read in Latin numerals and model names; Hind Siliguri
+       sets those loosely. Bengali copy still falls through to it. */
+    --lp-font: 'Inter', 'Hind Siliguri', system-ui, sans-serif;
+}

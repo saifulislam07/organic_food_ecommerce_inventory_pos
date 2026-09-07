@@ -6,6 +6,7 @@ use App\Models\Concerns\CleansUpImages;
 use App\Support\ImageStore;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -24,6 +25,7 @@ class LandingPage extends Model
     public const BLOCKS = [
         'video' => 'ভিডিও',
         'features' => 'কেন কিনবেন',
+        'specs' => 'স্পেসিফিকেশন',
         'body' => 'বিস্তারিত বর্ণনা',
         'gallery' => 'ছবির গ্যালারি',
         'reviews' => 'কাস্টমার রিভিউ',
@@ -54,10 +56,30 @@ class LandingPage extends Model
 
     public const TEMPLATES = ['classic' => 'Classic'];
 
+    /**
+     * The skins a page can wear: colours, corners, a hero band — never layout.
+     *
+     * Each key is a class in public/css/landing-themes.css and nothing more, so
+     * a new theme is a block of CSS plus a line here. Which blocks render and
+     * in what order stays TEMPLATES' business; conflating the two is how a
+     * colour change ends up needing a new Blade file.
+     */
+    public const THEMES = [
+        'default' => 'ব্র্যান্ড (সবুজ)',
+        'mango' => 'আম',
+        'dates' => 'খেজুর ও গুড়',
+        'honey' => 'মধু',
+        'ghee' => 'ঘি ও তেল',
+        'fruits' => 'মৌসুমী ফল',
+        'spice' => 'মশলা',
+        'kids' => 'কিডস আইটেম',
+        'gadget' => 'গেজেট আইটেম',
+    ];
+
     protected $fillable = [
-        'slug', 'internal_name', 'template',
+        'slug', 'internal_name', 'category_id', 'template', 'theme',
         'headline', 'subheadline', 'badge_text', 'hero_image', 'video_url', 'body',
-        'features', 'faqs', 'reviews', 'sections',
+        'features', 'faqs', 'reviews', 'specs', 'sections',
         'selection_mode', 'bundle_price',
         'delivery_mode', 'delivery_inside', 'delivery_outside',
         'payment_mode', 'advance_amount', 'payment_note',
@@ -72,6 +94,7 @@ class LandingPage extends Model
         'features' => 'array',
         'faqs' => 'array',
         'reviews' => 'array',
+        'specs' => 'array',
         'sections' => 'array',
         'form_fields' => 'array',
         'bundle_price' => 'decimal:2',
@@ -108,6 +131,35 @@ class LandingPage extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    /* --------------------------------------------------------------- theme */
+
+    /**
+     * Which skin this page wears.
+     *
+     * The page's own column wins, the category answers when it is null, and
+     * anything unrecognised — a theme deleted from the CSS, a category nobody
+     * ever themed — lands on the brand rather than on a page with no colours.
+     */
+    public function themeKey(): string
+    {
+        $key = filled($this->theme) ? $this->theme : $this->category?->theme;
+
+        return array_key_exists((string) $key, self::THEMES) ? $key : 'default';
+    }
+
+    /** What the theme dropdown should call the inherited option. */
+    public function inheritedThemeLabel(): string
+    {
+        $key = (string) $this->category?->theme;
+
+        return self::THEMES[$key] ?? self::THEMES['default'];
     }
 
     /* --------------------------------------------------------------- state */
@@ -228,6 +280,15 @@ class LandingPage extends Model
         return array_values(array_filter(
             is_array($this->reviews) ? $this->reviews : [],
             fn ($row) => is_array($row) && filled($row['text'] ?? null)
+        ));
+    }
+
+    /** @return array<int, array{label: string, value: string}> */
+    public function specList(): array
+    {
+        return array_values(array_filter(
+            is_array($this->specs) ? $this->specs : [],
+            fn ($row) => is_array($row) && filled($row['label'] ?? null)
         ));
     }
 

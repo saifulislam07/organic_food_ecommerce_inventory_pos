@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Adjustment;
 use App\Models\Expense;
+use App\Models\Investment;
 use App\Models\Order;
 use App\Models\Purchase;
+use App\Models\Withdrawal;
 use App\Support\PaymentAccounts;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +23,10 @@ use Illuminate\Support\Facades\DB;
  *                    and only becomes a cost when that stock is sold.
  *
  *   Cash movement    money in and out per account head. A purchase IS counted
- *                    here, because the cash really left.
+ *                    here, because the cash really left. So is an investor's
+ *                    capital, in either direction — it moves real cash without
+ *                    being either revenue or a cost, which is exactly the
+ *                    distinction these two stories exist to keep.
  */
 class ProfitLossReport
 {
@@ -80,6 +85,7 @@ class ProfitLossReport
         $expenses = $this->expenses();
         $damage = $this->damage();
         $purchases = $this->purchases();
+        $capital = $this->capital();
 
         $grossProfit = $sales['revenue'] - $sales['cost'];
         $netProfit = $grossProfit - $expenses['total'] - $damage['total'];
@@ -99,7 +105,17 @@ class ProfitLossReport
             'net_profit' => $netProfit,
             'net_margin' => $sales['revenue'] > 0 ? $netProfit / $sales['revenue'] * 100 : 0.0,
             'purchases' => $purchases['total'],
-            'accounts' => $this->accounts($purchases['by_account'], $expenses['by_account'], $sales['by_account']),
+            // Deliberately outside net_profit: capital in is not earned and
+            // capital out is not spent. Reported beside it, never inside it.
+            'invested' => $capital['invested'],
+            'withdrawn' => $capital['withdrawn'],
+            'accounts' => $this->accounts(
+                $purchases['by_account'],
+                $expenses['by_account'],
+                $sales['by_account'],
+                $capital['invested_by_account'],
+                $capital['withdrawn_by_account'],
+            ),
         ];
     }
 
@@ -191,44 +207,76 @@ class ProfitLossReport
     }
 
     /**
+     * Capital an investor moved in or out of the shop.
+     *
+     * Kept apart from expenses on purpose: it is real cash, so the account
+     * table wants it, and it is neither earned nor spent, so the profit figure
+     * must not have it.
+     */
+    private function capital(): array
+    {
+        $in = Investment::query()->whereBetween('invested_at', $this->dayRange());
+        $out = Withdrawal::query()->whereBetween('withdrawn_at', $this->dayRange());
+
+        return [
+            'invested' => (float) (clone $in)->sum('amount'),
+            'invested_by_account' => (clone $in)->groupBy('received_in')
+                ->pluck(DB::raw('COALESCE(SUM(amount), 0)'), 'received_in')
+                ->all(),
+            'withdrawn' => (float) (clone $out)->sum('amount'),
+            'withdrawn_by_account' => (clone $out)->groupBy('paid_from')
+                ->pluck(DB::raw('COALESCE(SUM(amount), 0)'), 'paid_from')
+                ->all(),
+        ];
+    }
+
+    /**
      * Money in and out, per account head, with every head present so the table
      * keeps the same shape whatever happened this month.
      */
-    private function accounts(array $purchases, array $expenses, array $sales): array
-    {
+    private function accounts(
+        array $purchases,
+        array $expenses,
+        array $sales,
+        array $invested = [],
+        array $withdrawn = [],
+    ): array {
+        $sum = fn (array $source, string $key) => (float) ($source[$key] ?? 0);
+
+        $row = fn (string $key, string $colour, string $icon) => [
+            'label' => PaymentAccounts::label($key),
+            'colour' => $colour,
+            'icon' => $icon,
+            'in' => $sum($sales, $key) + $sum($invested, $key),
+            'out' => $sum($purchases, $key) + $sum($expenses, $key) + $sum($withdrawn, $key),
+            // The two capital columns of their own, so the table can show what
+            // part of a movement was somebody's money rather than trade.
+            'invested' => $sum($invested, $key),
+            'withdrawn' => $sum($withdrawn, $key),
+        ];
+
         $heads = [];
 
         foreach (PaymentAccounts::keys() as $key) {
-            $in = (float) ($sales[$key] ?? 0);
-            $out = (float) ($purchases[$key] ?? 0) + (float) ($expenses[$key] ?? 0);
-
-            $heads[$key] = [
-                'label' => PaymentAccounts::label($key),
-                'colour' => PaymentAccounts::colour($key),
-                'icon' => PaymentAccounts::icon($key),
-                'in' => $in,
-                'out' => $out,
-                'net' => $in - $out,
-            ];
+            $heads[$key] = $row($key, PaymentAccounts::colour($key), PaymentAccounts::icon($key));
         }
 
         // A head that was retired still has history; show it rather than lose it.
-        foreach (array_merge(array_keys($sales), array_keys($purchases), array_keys($expenses)) as $key) {
+        $seen = array_merge(
+            array_keys($sales), array_keys($purchases), array_keys($expenses),
+            array_keys($invested), array_keys($withdrawn),
+        );
+
+        foreach ($seen as $key) {
             if ($key === null || $key === '' || isset($heads[$key])) {
                 continue;
             }
 
-            $in = (float) ($sales[$key] ?? 0);
-            $out = (float) ($purchases[$key] ?? 0) + (float) ($expenses[$key] ?? 0);
+            $heads[$key] = $row($key, 'dark', 'bi-wallet2');
+        }
 
-            $heads[$key] = [
-                'label' => PaymentAccounts::label($key),
-                'colour' => 'dark',
-                'icon' => 'bi-wallet2',
-                'in' => $in,
-                'out' => $out,
-                'net' => $in - $out,
-            ];
+        foreach ($heads as $key => $head) {
+            $heads[$key]['net'] = $head['in'] - $head['out'];
         }
 
         return $heads;

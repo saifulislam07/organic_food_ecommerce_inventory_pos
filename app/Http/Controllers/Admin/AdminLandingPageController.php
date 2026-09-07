@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Admin\Concerns\PresentsVariantOptions;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\LandingPage;
 use App\Models\LandingPageItem;
 use App\Models\ProductVariant;
@@ -77,7 +78,7 @@ class AdminLandingPageController extends Controller
 
     public function edit(LandingPage $landingPage)
     {
-        $landingPage->load('items.product', 'items.variant');
+        $landingPage->load('items.product', 'items.variant', 'category');
 
         return view('admin.landing-pages.edit', $this->formData($landingPage) + [
             'stats' => $this->stats($landingPage),
@@ -223,10 +224,23 @@ class AdminLandingPageController extends Controller
 
     private function formData(?LandingPage $page = null): array
     {
+        $categories = Category::sorted()->get([
+            'id', 'name', 'name_en', 'name_bn', 'theme', 'landing_defaults',
+        ]);
+
         return [
             'page' => $page,
             'variantOptions' => $this->variantOptions(),
             'itemRows' => $this->itemRows($page),
+            // Themes hang off the category, so the form needs each one's, to
+            // label the inherit option without a second request.
+            'categories' => $categories,
+            // Every category's starting draft, so the "fill from category"
+            // button can act on the page rather than reload it.
+            'categoryDefaults' => $categories
+                ->filter->hasLandingDefaults()
+                ->mapWithKeys(fn (Category $category) => [$category->id => $category->landingDefaults()])
+                ->all(),
         ];
     }
 
@@ -307,6 +321,9 @@ class AdminLandingPageController extends Controller
                 Rule::unique('landing_pages', 'slug')->ignore($page?->id),
             ],
             'template' => ['nullable', Rule::in(array_keys(LandingPage::TEMPLATES))],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            // Blank means "whatever the category says" and is stored as null.
+            'theme' => ['nullable', Rule::in(array_keys(LandingPage::THEMES))],
 
             'headline' => ['required', 'string', 'max:255'],
             'subheadline' => ['nullable', 'string', 'max:255'],
@@ -327,6 +344,9 @@ class AdminLandingPageController extends Controller
             'reviews.*.name' => ['nullable', 'string', 'max:100'],
             'reviews.*.text' => ['nullable', 'string', 'max:1000'],
             'reviews.*.rating' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'specs' => ['nullable', 'array', 'max:30'],
+            'specs.*.label' => ['nullable', 'string', 'max:100'],
+            'specs.*.value' => ['nullable', 'string', 'max:255'],
             'sections' => ['nullable', 'array'],
             'sections.*' => [Rule::in(array_keys(LandingPage::BLOCKS))],
 
@@ -394,11 +414,16 @@ class AdminLandingPageController extends Controller
     private function attributes(Request $request, array $validated): array
     {
         $data = collect($validated)
-            ->except(['items', 'item_images', 'hero_image', 'og_image', 'slug', 'features', 'faqs', 'reviews', 'form_fields'])
+            ->except(['items', 'item_images', 'hero_image', 'og_image', 'slug', 'features', 'faqs', 'reviews', 'specs', 'form_fields'])
             ->all();
 
         $data['body'] = RichText::clean($validated['body'] ?? null);
         $data['template'] = $validated['template'] ?? 'classic';
+
+        // An empty select posts '', which would store as a theme named nothing
+        // and silently stop the category from being asked.
+        $data['category_id'] = $validated['category_id'] ?? null;
+        $data['theme'] = filled($validated['theme'] ?? null) ? $validated['theme'] : null;
 
         // Repeaters post blank rows for anything the admin left alone.
         $data['features'] = array_values(array_filter(
@@ -412,6 +437,14 @@ class AdminLandingPageController extends Controller
                 $validated['faqs'] ?? []
             ),
             fn ($row) => $row['q'] !== ''
+        ));
+
+        $data['specs'] = array_values(array_filter(
+            array_map(
+                fn ($row) => ['label' => trim($row['label'] ?? ''), 'value' => trim($row['value'] ?? '')],
+                $validated['specs'] ?? []
+            ),
+            fn ($row) => $row['label'] !== ''
         ));
 
         $data['reviews'] = array_values(array_filter(

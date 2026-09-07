@@ -43,6 +43,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="{{ asset('css/brand.css') }}" rel="stylesheet">
+    {{-- After brand.css: a theme is nothing but custom properties redefined on
+         <body>, and they only win if this file is the later one. --}}
+    <link href="{{ asset('css/landing-themes.css') }}" rel="stylesheet">
 
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -51,7 +54,19 @@
 
         body {
             margin: 0;
-            font-family: 'Hind Siliguri', system-ui, sans-serif;
+
+            /*
+               One corner scale for the whole page, derived from the theme's
+               --radius so a theme sets a single number and every panel, card
+               and input moves together. The default (12px, from brand.css)
+               reproduces what this page has always looked like.
+            */
+            --lp-r-lg: calc(var(--radius, 12px) + 4px);
+            --lp-r: var(--radius, 12px);
+            --lp-r-sm: calc(var(--radius, 12px) - 2px);
+
+            /* Themes may set --lp-font; all but the gadget one leave it alone. */
+            font-family: var(--lp-font, 'Hind Siliguri', system-ui, sans-serif);
             color: var(--dark, #1c2415);
             background: var(--cream, #fcfdf5);
             font-size: 1rem;
@@ -128,7 +143,7 @@
         .lp-badge {
             display: inline-block;
             background: var(--accent, #fda102);
-            color: #3a2400;
+            color: var(--lp-badge-text, #3a2400);
             font-weight: 700;
             font-size: .85rem;
             border-radius: 999px;
@@ -136,7 +151,12 @@
             margin-bottom: 10px;
         }
 
-        .lp-hero-media { border-radius: 14px; overflow: hidden; }
+        /* Full width, not .lp-wrap width — the tint is the theme announcing itself
+           and a 620px rectangle of it floating in cream reads as a mistake. A
+           theme that sets no band stays transparent. */
+        .lp-hero-band { background: var(--lp-hero-band, transparent); }
+
+        .lp-hero-media { border-radius: var(--lp-r-lg); overflow: hidden; }
         .lp-hero-media iframe { width: 100%; aspect-ratio: 16/9; border: 0; display: block; }
         .lp-media-section { padding-top: 0; }
 
@@ -144,7 +164,7 @@
         .lp-offer {
             background: #fff;
             border: 1px solid var(--cream-dark, #f0f6e2);
-            border-radius: 16px;
+            border-radius: var(--lp-r-lg);
             padding: 18px 16px;
         }
         /* A panel is a boundary of its own; a rule above it as well is one line
@@ -154,7 +174,7 @@
         .lp-card {
             background: #fff;
             border: 1px solid var(--cream-dark, #f0f6e2);
-            border-radius: 14px;
+            border-radius: var(--lp-r);
             padding: 16px;
         }
 
@@ -166,6 +186,7 @@
         .lp-price-was { font-size: 1.1rem; color: #8a9580; text-decoration: line-through; }
         .lp-save {
             background: #fdeddb;
+            background: color-mix(in srgb, var(--accent, #fda102) 20%, #fff);
             color: var(--accent-text, #b85600);
             font-weight: 700;
             font-size: .85rem;
@@ -180,7 +201,7 @@
             align-items: center;
             gap: 12px;
             border: 2px solid var(--cream-dark, #f0f6e2);
-            border-radius: 12px;
+            border-radius: var(--lp-r);
             padding: 10px 12px;
             margin-bottom: 10px;
             background: #fff;
@@ -202,7 +223,7 @@
             font-family: inherit;
             font-size: 1rem;
             border: 1.5px solid var(--gray-300, #dee2e6);
-            border-radius: 10px;
+            border-radius: var(--lp-r-sm);
             padding: 11px 12px;
             width: 100%;
             background: #fff;
@@ -224,7 +245,7 @@
             margin-bottom: 8px;
         }
         .lp-features li::before {
-            content: '✓';
+            content: var(--lp-tick, '✓');
             position: absolute;
             left: 0;
             top: 0;
@@ -237,6 +258,31 @@
             color: #fff;
             font-size: .75rem;
             font-weight: 700;
+        }
+
+        /* ----------------------------------------------------------- specs */
+
+        /* Two columns on every screen: a spec table that reflows to one column
+           on a phone stops being a table and becomes a list you have to read. */
+        .lp-specs { margin: 0; }
+        .lp-spec {
+            display: flex;
+            gap: 12px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--cream-dark, #f0f6e2);
+        }
+        .lp-spec:last-child { border-bottom: 0; }
+        .lp-spec dt {
+            flex: 0 0 40%;
+            font-weight: 600;
+            color: #4a5a3c;
+        }
+        .lp-spec dd {
+            flex: 1 1 auto;
+            margin: 0;
+            font-weight: 600;
+            /* A model number has no spaces and must not widen the page. */
+            overflow-wrap: anywhere;
         }
 
         .lp-review { border-left: 3px solid var(--accent-gold, #fbcf02); padding: 2px 0 2px 12px; margin-bottom: 14px; }
@@ -277,7 +323,7 @@
             display: block;
             width: 100%;
             border: 0;
-            border-radius: 12px;
+            border-radius: var(--lp-r);
             background: var(--primary, #3d8202);
             color: #fff;
             font-family: inherit;
@@ -307,7 +353,7 @@
         }
 
         .lp-alert {
-            border-radius: 10px;
+            border-radius: var(--lp-r-sm);
             padding: 12px 14px;
             margin-bottom: 14px;
             font-weight: 600;
@@ -327,7 +373,7 @@
         .lp-countdown div {
             background: var(--primary-darker, #1e4a01);
             color: #fff;
-            border-radius: 10px;
+            border-radius: var(--lp-r-sm);
             padding: 6px 10px;
             min-width: 58px;
             text-align: center;
@@ -425,7 +471,10 @@
     @vite(['resources/js/landing.js'])
     @stack('styles')
 </head>
-<body class="{{ ($takingOrders ?? false) ? 'has-sticky' : '' }}">
+{{-- The theme is a class on <body> and nothing else: custom properties inherit,
+     and the nearest ancestor that defines one wins, so this beats brand.css's
+     :root for everything inside without a specificity fight. --}}
+<body class="lp-theme-{{ $page->themeKey() }} {{ ($takingOrders ?? false) ? 'has-sticky' : '' }}">
     @if($preview ?? false)
         <div class="lp-preview">প্রিভিউ — এই পেজটি এখনো লাইভ নয়, শুধু আপনি দেখতে পাচ্ছেন।</div>
     @endif

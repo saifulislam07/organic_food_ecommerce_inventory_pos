@@ -150,7 +150,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3">
                 <h5 class="mb-0 fw-bold text-dark">Where the money moved</h5>
-                <small class="text-muted">Sales in, purchases and expenses out</small>
+                <small class="text-muted">Sales and capital in; purchases, expenses and withdrawals out</small>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -196,6 +196,15 @@
                     </table>
                 </div>
             </div>
+            @if($report['invested'] || $report['withdrawn'])
+                {{-- Said out loud because these two are the reason the cash
+                     total above and the profit figure opposite disagree. --}}
+                <div class="card-footer bg-white small text-muted">
+                    Includes {{ $money($report['invested']) }} put in by investors and
+                    {{ $money($report['withdrawn']) }} taken out.
+                    Neither is profit or loss, so neither appears on the left.
+                </div>
+            @endif
         </div>
     </div>
 </div>

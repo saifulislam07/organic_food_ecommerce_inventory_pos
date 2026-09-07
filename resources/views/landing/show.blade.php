@@ -55,28 +55,30 @@
         <script type="application/json" id="lp-config">@json($config)</script>
 
         {{-- --------------------------------------------- headline and price --}}
-        <section class="lp-wrap lp-section lp-hero-band">
-            @if($page->badge_text)
-                <span class="lp-badge">{{ $page->badge_text }}</span>
-            @endif
+        <div class="lp-hero-band">
+            <section class="lp-wrap lp-section">
+                @if($page->badge_text)
+                    <span class="lp-badge">{{ $page->badge_text }}</span>
+                @endif
 
-            <h1 class="lp-h1">{{ $page->headline }}</h1>
+                <h1 class="lp-h1">{{ $page->headline }}</h1>
 
-            @if($page->subheadline)
-                <p class="lp-sub">{{ $page->subheadline }}</p>
-            @endif
+                @if($page->subheadline)
+                    <p class="lp-sub">{{ $page->subheadline }}</p>
+                @endif
 
-            @include('landing.blocks.price')
+                @include('landing.blocks.price')
 
-            @if($page->countdown_ends_at?->isFuture())
-                <div class="lp-countdown" data-countdown="{{ $page->countdown_ends_at->toIso8601String() }}">
-                    <div><b data-cd="d">০</b><span>দিন</span></div>
-                    <div><b data-cd="h">০</b><span>ঘণ্টা</span></div>
-                    <div><b data-cd="m">০</b><span>মিনিট</span></div>
-                    <div><b data-cd="s">০</b><span>সেকেন্ড</span></div>
-                </div>
-            @endif
-        </section>
+                @if($page->countdown_ends_at?->isFuture())
+                    <div class="lp-countdown" data-countdown="{{ $page->countdown_ends_at->toIso8601String() }}">
+                        <div><b data-cd="d">০</b><span>দিন</span></div>
+                        <div><b data-cd="h">০</b><span>ঘণ্টা</span></div>
+                        <div><b data-cd="m">০</b><span>মিনিট</span></div>
+                        <div><b data-cd="s">০</b><span>সেকেন্ড</span></div>
+                    </div>
+                @endif
+            </section>
+        </div>
 
         {{-- ------------------------------------------------- picture or video --}}
         @if($page->videoEmbedUrl() && $page->showsSection('video'))

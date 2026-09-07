@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\AdminComboController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminExpenseController;
 use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminInvestmentController;
+use App\Http\Controllers\Admin\AdminInvestorController;
 use App\Http\Controllers\Admin\AdminLandingPageController;
 use App\Http\Controllers\Admin\AdminMailSettingController;
 use App\Http\Controllers\Admin\AdminNotificationController;
@@ -23,6 +25,7 @@ use App\Http\Controllers\Admin\AdminSmsSettingController;
 use App\Http\Controllers\Admin\AdminSupplierController;
 use App\Http\Controllers\Admin\AdminUnitController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminWithdrawalController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -98,6 +101,9 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::delete('units/bulk', [AdminUnitController::class, 'bulkDestroy'])->name('units.bulkDestroy');
     Route::delete('suppliers/bulk', [AdminSupplierController::class, 'bulkDestroy'])->name('suppliers.bulkDestroy');
     Route::delete('expenses/bulk', [AdminExpenseController::class, 'bulkDestroy'])->name('expenses.bulkDestroy');
+    Route::delete('investors/bulk', [AdminInvestorController::class, 'bulkDestroy'])->name('investors.bulkDestroy');
+    Route::delete('investments/bulk', [AdminInvestmentController::class, 'bulkDestroy'])->name('investments.bulkDestroy');
+    Route::delete('withdrawals/bulk', [AdminWithdrawalController::class, 'bulkDestroy'])->name('withdrawals.bulkDestroy');
     Route::delete('pages/bulk', [AdminPageController::class, 'bulkDestroy'])->name('pages.bulkDestroy');
     Route::delete('landing-pages/bulk', [AdminLandingPageController::class, 'bulkDestroy'])->name('landing-pages.bulkDestroy');
     Route::delete('combos/bulk', [AdminComboController::class, 'bulkDestroy'])->name('combos.bulkDestroy');
@@ -115,6 +121,12 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::resource('categories', AdminCategoryController::class);
     Route::resource('units', AdminUnitController::class)->except(['show']);
     Route::resource('expenses', AdminExpenseController::class);
+
+    // Capital in and out. Separate from expenses because neither belongs in the
+    // profit figure, and separate from each other because they are two ledgers.
+    Route::resource('investors', AdminInvestorController::class);
+    Route::resource('investments', AdminInvestmentController::class)->except(['show']);
+    Route::resource('withdrawals', AdminWithdrawalController::class)->except(['show']);
 
     Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
     Route::patch('/inventory/{variant}', [AdminInventoryController::class, 'updateStock'])->name('inventory.update');
