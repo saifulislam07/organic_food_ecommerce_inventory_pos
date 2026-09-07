@@ -3,50 +3,50 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\Expense;
-use App\Models\Order;
-use App\Models\Product;
-use App\Models\ProductVariant;
+use App\Services\DashboardSummary;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    /** Anything below this is called low stock across the panel. */
-    private const LOW_STOCK = 5;
-
-    public function index()
+    /**
+     * The panel's front page.
+     *
+     * Sections are gathered only for a viewer allowed to see them. That is not
+     * only about hiding a card: the profit block alone is seven queries, and a
+     * packer who may not read it should not pay for it either.
+     *
+     * The permission each section needs is the one that opens the screen it
+     * summarises, so nothing here can show a number the viewer could not have
+     * reached by clicking through.
+     */
+    public function index(Request $request, DashboardSummary $summary)
     {
-        $orders = $this->orderTotals();
-        $stock = $this->stockTotals();
+        $user = $request->user();
 
-        $stats = [
-            'total_products' => Product::count(),
-            'total_categories' => Category::count(),
-            'total_orders' => (int) $orders->total,
-            'pending_orders' => (int) $orders->pending,
-            'total_revenue' => (float) $orders->revenue,
-            'stock_value' => (float) $stock->value,
-            'low_stock_count' => (int) $stock->low,
-            'total_expenses' => Expense::sum('amount'),
-            'recent_orders' => Order::latest()->take(5)->get(),
-        ];
+        $can = fn (string $permission) => (bool) $user?->can($permission);
 
-        return view('admin.dashboard', compact('stats'));
-    }
+        return view('admin.dashboard', [
+            'monthLabel' => $summary->monthLabel(),
 
-    /** Three figures off one pass over the orders table rather than three. */
-    private function orderTotals(): object
-    {
-        return Order::selectRaw('COUNT(*) as total')
-            ->selectRaw('SUM(status = ?) as pending', ['pending'])
-            ->selectRaw('SUM(CASE WHEN status = ? THEN total ELSE 0 END) as revenue', ['delivered'])
-            ->first();
-    }
+            // Trading. Anyone who can reach the panel is here to sell.
+            'sales' => $summary->sales(),
+            'attention' => $summary->attention(),
+            'pipeline' => $can('orders.view') ? $summary->pipeline() : null,
+            'channels' => $can('orders.view') ? $summary->channels() : null,
+            'recentOrders' => $can('orders.view') ? $summary->recentOrders() : null,
 
-    private function stockTotals(): object
-    {
-        return ProductVariant::selectRaw('SUM(stock * cost_price) as value')
-            ->selectRaw('SUM(stock < ?) as low', [self::LOW_STOCK])
-            ->first();
+            // Stock.
+            'standing' => $summary->standing(),
+            'lowStockItems' => $can('inventory.view') ? $summary->lowStockItems() : null,
+            'catalogue' => $summary->catalogue(),
+            'topProducts' => $can('reports.view') ? $summary->topProducts() : null,
+
+            // Money. The owner's numbers, behind the owner's permissions.
+            'money' => $can('reports.view') ? $summary->money() : null,
+            'capital' => $can('investors.view') ? $summary->capital() : null,
+            'recentExpenses' => $can('expenses.view') ? $summary->recentExpenses() : null,
+
+            'campaigns' => $can('landing-pages.view') ? $summary->campaigns() : null,
+        ]);
     }
 }
