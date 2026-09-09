@@ -16,7 +16,8 @@ class Order extends Model
 
     protected $fillable = [
         'user_id', 'order_number', 'customer_name', 'customer_phone', 'customer_address',
-        'customer_area', 'notes', 'subtotal', 'discount_amount', 'delivery_charge', 'total',
+        'customer_area', 'notes', 'subtotal', 'discount_amount', 'coupon_id', 'coupon_code',
+        'delivery_charge', 'total',
         'status', 'payment_method', 'source', 'pickup_point',
         'landing_page_id', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'fbclid',
     ];
@@ -29,6 +30,11 @@ class Order extends Model
     public function landingPage()
     {
         return $this->belongsTo(LandingPage::class);
+    }
+
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
     }
 
     protected $casts = [

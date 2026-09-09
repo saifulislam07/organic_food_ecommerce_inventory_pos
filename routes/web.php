@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAdjustmentController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminChatSettingController;
 use App\Http\Controllers\Admin\AdminComboController;
+use App\Http\Controllers\Admin\AdminCouponController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminExpenseController;
 use App\Http\Controllers\Admin\AdminHeroSlideController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminSeoSettingController;
 use App\Http\Controllers\Admin\AdminSettingController;
+use App\Http\Controllers\Admin\AdminSiteBlockController;
 use App\Http\Controllers\Admin\AdminSmsSettingController;
 use App\Http\Controllers\Admin\AdminSupplierController;
 use App\Http\Controllers\Admin\AdminUnitController;
@@ -57,6 +59,8 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::post('/remove', [CartController::class, 'remove'])->name('remove');
     Route::get('/count', [CartController::class, 'count'])->name('count');
     Route::get('/mini', [CartController::class, 'mini'])->name('mini');
+    Route::post('/coupon', [CartController::class, 'applyCoupon'])->name('coupon.apply');
+    Route::post('/coupon/remove', [CartController::class, 'removeCoupon'])->name('coupon.remove');
 });
 
 // Checkout Routes
@@ -108,6 +112,8 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::delete('pages/bulk', [AdminPageController::class, 'bulkDestroy'])->name('pages.bulkDestroy');
     Route::delete('landing-pages/bulk', [AdminLandingPageController::class, 'bulkDestroy'])->name('landing-pages.bulkDestroy');
     Route::delete('sliders/bulk', [AdminHeroSlideController::class, 'bulkDestroy'])->name('sliders.bulkDestroy');
+    Route::delete('blocks/bulk', [AdminSiteBlockController::class, 'bulkDestroy'])->name('blocks.bulkDestroy');
+    Route::delete('coupons/bulk', [AdminCouponController::class, 'bulkDestroy'])->name('coupons.bulkDestroy');
     Route::delete('combos/bulk', [AdminComboController::class, 'bulkDestroy'])->name('combos.bulkDestroy');
     Route::delete('purchases/bulk', [AdminPurchaseController::class, 'bulkDestroy'])->name('purchases.bulkDestroy');
     Route::delete('adjustments/bulk', [AdminAdjustmentController::class, 'bulkDestroy'])->name('adjustments.bulkDestroy');
@@ -175,6 +181,12 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
 
     // The front page hero, one row per panel of the carousel.
     Route::resource('sliders', AdminHeroSlideController::class)->except(['show']);
+
+    // Header menu, service strip, promo tiles, payment chips, footer links.
+    Route::resource('blocks', AdminSiteBlockController::class)->except(['show']);
+
+    // Discount codes.
+    Route::resource('coupons', AdminCouponController::class)->except(['show']);
     Route::resource('users', AdminUserController::class)->except(['show']);
     Route::resource('roles', AdminRoleController::class)->except(['show']);
 

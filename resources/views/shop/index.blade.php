@@ -5,31 +5,6 @@
 
 @push('styles')
 <style>
-    .page-header {
-        /* header-bg.jpg is optional. Layering the scrim over the brand gradient
-           means the band looks deliberate with or without the photograph. */
-        background: linear-gradient(rgba(30, 74, 1, 0.72), rgba(30, 74, 1, 0.72)),
-                    url('/images/header-bg.jpg'),
-                    linear-gradient(135deg, var(--primary-darker), var(--primary));
-        background-size: cover;
-        background-position: center;
-        padding: 60px 0;
-        color: white;
-        text-align: center;
-        margin-bottom: 40px;
-    }
-    .breadcrumb-custom {
-        display: inline-flex;
-        list-style: none;
-        padding: 0;
-        margin-top: 15px;
-        gap: 10px;
-        font-size: 0.9rem;
-        opacity: 0.9;
-    }
-    .breadcrumb-custom a { color: white; text-decoration: none; }
-    .breadcrumb-custom span { color: var(--secondary); }
-
     .shop-sidebar {
         background: white;
         padding: 25px;
@@ -73,7 +48,6 @@
     .active .category-count { background: var(--primary); color: white; }
 
     @media (max-width: 991px) {
-        .page-header { padding: 40px 0; }
         .sidebar-collapse-toggle {
             width: 100%;
             margin-bottom: 20px;
@@ -86,16 +60,11 @@
 @endpush
 
 @section('content')
-<div class="page-header">
-    <div class="container">
-        <h1>{{ app()->getLocale() == 'bn' ? 'শপ' : 'Shop' }}</h1>
-        <ul class="breadcrumb-custom">
-            <li><a href="{{ route('home') }}">{{ app()->getLocale() == 'bn' ? 'হোম' : 'Home' }}</a></li>
-            <li><span>/</span></li>
-            <li>{{ app()->getLocale() == 'bn' ? 'শপ' : 'Shop' }}</li>
-        </ul>
-    </div>
-</div>
+@include('partials.page-head', [
+    'title' => app()->getLocale() == 'bn' ? 'শপ' : 'Shop',
+    'icon' => 'shop',
+    'crumbs' => [app()->getLocale() == 'bn' ? 'শপ' : 'Shop'],
+])
 
 <section class="section">
     <div class="container">
@@ -176,7 +145,7 @@
                 </div>
 
                 @if($products->count())
-                <div class="row g-4" id="product-grid">
+                <div class="row g-3" id="product-grid">
                     @include('shop._products', ['products' => $products])
                 </div>
 

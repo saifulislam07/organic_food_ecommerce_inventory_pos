@@ -4,40 +4,6 @@
 
 @push('styles')
 <style>
-    .page-header {
-        background-color: var(--primary-dark);
-        padding: 60px 0;
-        color: white;
-    }
-    .page-header h1 {
-        color: white !important;
-        margin-bottom: 10px;
-    }
-    .breadcrumb-custom {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        font-size: 0.9rem;
-    }
-    .breadcrumb-custom a {
-        color: rgba(255, 255, 255, 0.8);
-        text-decoration: none;
-        transition: var(--transition);
-    }
-    .breadcrumb-custom a:hover {
-        color: white;
-    }
-    .breadcrumb-custom span {
-        color: rgba(255, 255, 255, 0.5);
-    }
-    .breadcrumb-custom li:last-child {
-        color: white;
-        font-weight: 600;
-    }
-
     .admin-card {
         border-radius: var(--radius-lg);
         border: 1px solid var(--gray-100);
@@ -125,18 +91,14 @@
 @endpush
 
 @section('content')
-<div class="page-header">
-    <div class="container">
-        <h1><i class="bi bi-lock"></i> {{ app()->getLocale() == 'bn' ? 'চেকআউট' : 'Checkout' }}</h1>
-        <ul class="breadcrumb-custom">
-            <li><a href="{{ route('home') }}">{{ app()->getLocale() == 'bn' ? 'হোম' : 'Home' }}</a></li>
-            <li><span>/</span></li>
-            <li><a href="{{ route('cart.index') }}">{{ app()->getLocale() == 'bn' ? 'কার্ট' : 'Cart' }}</a></li>
-            <li><span>/</span></li>
-            <li>{{ app()->getLocale() == 'bn' ? 'চেকআউট' : 'Checkout' }}</li>
-        </ul>
-    </div>
-</div>
+@include('partials.page-head', [
+    'title' => app()->getLocale() == 'bn' ? 'চেকআউট' : 'Checkout',
+    'icon' => 'lock',
+    'crumbs' => [
+        (app()->getLocale() == 'bn' ? 'কার্ট' : 'Cart') => route('cart.index'),
+        app()->getLocale() == 'bn' ? 'চেকআউট' : 'Checkout',
+    ],
+])
 
 <section class="section">
     <div class="container">

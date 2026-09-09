@@ -3,17 +3,11 @@
 @section('title', $page->title . ' – ' . \App\Models\Setting::get('site_title', 'MohiPure'))
 
 @section('content')
-<div class="page-header py-5" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;">
-    <div class="container text-center">
-        <h1 class="fw-bold mb-0">{{ $page->title }}</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb justify-content-center mb-0 mt-3">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-white-50 text-decoration-none">Home</a></li>
-                <li class="breadcrumb-item active text-white" aria-current="page">{{ $page->title }}</li>
-            </ol>
-        </nav>
-    </div>
-</div>
+@include('partials.page-head', [
+    'title' => $page->title,
+    'icon' => 'file-text',
+    'crumbs' => [$page->title],
+])
 
 <section class="section py-5">
     <div class="container">

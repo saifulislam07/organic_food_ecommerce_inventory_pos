@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
@@ -29,6 +30,8 @@ class CheckoutController extends Controller
 
         $items = $this->cart->getItems();
         $subtotal = $this->cart->getSubtotal();
+        $discount = $this->cart->getDiscount();
+        $coupon = $this->cart->coupon();
 
         $shippingFeeInside = (float) Setting::get('shipping_fee_inside', 60);
         $shippingFeeOutside = (float) Setting::get('shipping_fee_outside', 120);
@@ -41,7 +44,7 @@ class CheckoutController extends Controller
         $total = $this->cart->getTotal($defaultAddress->area ?? 'dhaka_inside');
 
         return view('checkout.index', compact(
-            'items', 'subtotal', 'delivery', 'total',
+            'items', 'subtotal', 'discount', 'coupon', 'delivery', 'total',
             'shippingFeeInside', 'shippingFeeOutside', 'threshold',
             'userAddresses', 'defaultAddress'
         ));
@@ -75,10 +78,18 @@ class CheckoutController extends Controller
         }
 
         $deliveryCharge = $validated['delivery_type'] === 'pickup' ? 0 : $this->cart->getDeliveryCharge($validated['customer_area']);
+
+        // Read here, not from the form: the browser never gets to say what the
+        // discount was, and a code that expired while the shopper filled the
+        // page in has already been dropped by the service.
         $subtotal = $this->cart->getSubtotal();
+        $discount = $this->cart->getDiscount();
+        $coupon = $this->cart->coupon();
 
         try {
-            $order = DB::transaction(fn () => $this->placeOrder($validated, $subtotal, $deliveryCharge));
+            $order = DB::transaction(fn () => $this->placeOrder(
+                $validated, $subtotal, $discount, $deliveryCharge, $coupon
+            ));
         } catch (\RuntimeException $e) {
             return back()->withInput()->withErrors(['cart' => $e->getMessage()]);
         }
@@ -94,8 +105,13 @@ class CheckoutController extends Controller
      * Creates the order and takes the stock in one transaction, so a sold-out
      * item cannot leave a half-written order behind.
      */
-    private function placeOrder(array $validated, float $subtotal, float $deliveryCharge): Order
-    {
+    private function placeOrder(
+        array $validated,
+        float $subtotal,
+        float $discount,
+        float $deliveryCharge,
+        ?Coupon $coupon
+    ): Order {
         $inventory = app(InventoryService::class);
 
         $order = Order::create([
@@ -107,11 +123,20 @@ class CheckoutController extends Controller
             'pickup_point' => $validated['pickup_point'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'subtotal' => $subtotal,
+            'discount_amount' => $discount,
+            // The code is copied beside the id so the invoice still names it if
+            // the coupon is deleted later.
+            'coupon_id' => $coupon?->id,
+            'coupon_code' => $coupon?->code,
             'delivery_charge' => $deliveryCharge,
-            'total' => $subtotal + $deliveryCharge,
+            'total' => $subtotal - $discount + $deliveryCharge,
             'payment_method' => 'cod',
             'source' => 'website',
         ]);
+
+        // Counted once the order exists, so an order that fails on stock does
+        // not burn a use of a limited code.
+        $coupon?->increment('used_count');
 
         foreach ($this->cart->getItems() as $item) {
             $variant = ProductVariant::with('product', 'comboItems.component')->find($item['variant_id']);

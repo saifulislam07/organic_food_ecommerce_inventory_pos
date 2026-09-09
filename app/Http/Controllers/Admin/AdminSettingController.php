@@ -30,6 +30,20 @@ class AdminSettingController extends Controller
         'shipping_fee_inside' => ['type' => 'text', 'rules' => ['nullable', 'numeric', 'min:0']],
         'shipping_fee_outside' => ['type' => 'text', 'rules' => ['nullable', 'numeric', 'min:0']],
         'free_delivery_threshold' => ['type' => 'text', 'rules' => ['nullable', 'numeric', 'min:0']],
+
+        // Storefront wording. These were fixed strings in the Blade templates
+        // until the shop asked to change them without a deploy. Every one falls
+        // back to its old text when the key is missing, so leaving a box empty
+        // is safe. :threshold in topbar_note is replaced with the free-delivery
+        // figure at render time.
+        'topbar_note' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:255']],
+        'footer_desc' => ['type' => 'textarea', 'rules' => ['nullable', 'string', 'max:1000']],
+        'section_categories' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:120']],
+        'section_combos' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:120']],
+        'section_combos_sub' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:255']],
+        'section_bestsellers' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:120']],
+        'section_featured' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:120']],
+        'section_trending' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:120']],
     ];
 
     public function index()

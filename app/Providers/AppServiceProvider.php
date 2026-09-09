@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
 use App\Models\Setting;
 use App\Notifications\Channels\SmsChannel;
 use App\Sms\SmsManager;
@@ -11,6 +12,7 @@ use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -38,5 +40,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Lets a notification declare toSms() and reach the configured gateway.
         Notification::extend('sms', fn ($app) => $app->make(SmsChannel::class));
+
+        // The storefront header carries an "All Categories" menu on every page,
+        // so the list is composed into the layout rather than repeated in each
+        // controller. Named apart from the page's own $categories on purpose.
+        View::composer('layouts.frontend', function ($view) {
+            $view->with('navCategories', Category::active()->sorted()->withCount('products')->get());
+        });
     }
 }

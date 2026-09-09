@@ -18,10 +18,34 @@ class CartController extends Controller
     {
         $items = $this->cart->getItems();
         $subtotal = $this->cart->getSubtotal();
+        $discount = $this->cart->getDiscount();
         $delivery = $this->cart->getDeliveryCharge();
         $total = $this->cart->getTotal();
+        $coupon = $this->cart->coupon();
 
-        return view('cart.index', compact('items', 'subtotal', 'delivery', 'total'));
+        return view('cart.index', compact('items', 'subtotal', 'discount', 'delivery', 'total', 'coupon'));
+    }
+
+    /**
+     * Put a discount code on the cart.
+     *
+     * Refusals come back as a reason key rather than a sentence; the storefront
+     * owns the wording, in whichever language the shopper is reading.
+     */
+    public function applyCoupon(Request $request)
+    {
+        $request->validate(['code' => 'required|string|max:40']);
+
+        $result = $this->cart->applyCoupon($request->input('code'));
+
+        return response()->json(array_merge($result, $this->totals()));
+    }
+
+    public function removeCoupon()
+    {
+        $this->cart->forgetCoupon();
+
+        return response()->json(array_merge(['success' => true], $this->totals()));
     }
 
     public function add(Request $request)
@@ -55,12 +79,7 @@ class CartController extends Controller
         $result = $this->cart->update($request->key, $request->quantity);
 
         if ($request->expectsJson()) {
-            return response()->json(array_merge($result, [
-                'subtotal' => $this->cart->getSubtotal(),
-                'delivery' => $this->cart->getDeliveryCharge(),
-                'total' => $this->cart->getTotal(),
-                'items' => $this->cart->getItems(),
-            ]));
+            return response()->json(array_merge($result, $this->totals()));
         }
 
         return back()->with('success', $result['message']);
@@ -73,12 +92,7 @@ class CartController extends Controller
         $result = $this->cart->remove($request->key);
 
         if ($request->expectsJson()) {
-            return response()->json(array_merge($result, [
-                'subtotal' => $this->cart->getSubtotal(),
-                'delivery' => $this->cart->getDeliveryCharge(),
-                'total' => $this->cart->getTotal(),
-                'items' => $this->cart->getItems(),
-            ]));
+            return response()->json(array_merge($result, $this->totals()));
         }
 
         return back()->with('success', $result['message']);
@@ -91,11 +105,24 @@ class CartController extends Controller
 
     public function mini()
     {
-        return response()->json([
+        return response()->json(array_merge(['count' => $this->cart->count()], $this->totals()));
+    }
+
+    /**
+     * The numbers every cart response carries. Shared so a new one — the coupon
+     * discount, say — cannot reach one endpoint and not the others.
+     */
+    private function totals(): array
+    {
+        $coupon = $this->cart->coupon();
+
+        return [
             'items' => $this->cart->getItems(),
-            'count' => $this->cart->count(),
             'subtotal' => $this->cart->getSubtotal(),
+            'discount' => $this->cart->getDiscount(),
+            'delivery' => $this->cart->getDeliveryCharge(),
             'total' => $this->cart->getTotal(),
-        ]);
+            'coupon' => $coupon ? ['code' => $coupon->code, 'label' => $coupon->label] : null,
+        ];
     }
 }

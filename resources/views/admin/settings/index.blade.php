@@ -159,6 +159,65 @@
                 <div class="form-text">Orders above this amount will have 0 delivery charge.</div>
             </div>
 
+            <!-- Storefront Text -->
+            <div class="col-12 mt-5">
+                <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: var(--primary-dark);">
+                    <i class="bi bi-type"></i> Storefront Text
+                </h5>
+                <p class="text-muted small">
+                    দোকানের সামনের লেখাগুলো। কোনো ঘর খালি রাখলে সাইটে আগের লেখাটাই দেখাবে।
+                    মেনু, সার্ভিস কার্ড ও প্রোমো কার্ড বদলাতে
+                    <a href="{{ route('admin.blocks.index') }}">Storefront Blocks</a> দেখুন।
+                </p>
+            </div>
+
+            @php
+                // key => [label, hint, rows]. A textarea gets rows, a plain input none.
+                $storefrontText = [
+                    'topbar_note' => ['Top bar notice', 'উপরের সবুজ স্ট্রিপের লেখা। <code>:threshold</code> লিখলে ফ্রি ডেলিভারির টাকার অঙ্ক বসবে।', 0],
+                    'footer_desc' => ['Footer description', 'ফুটারে লোগোর নিচের প্যারাগ্রাফ।', 3],
+                    'section_categories' => ['Section — Categories', 'হোমপেজের ক্যাটাগরি সেকশনের শিরোনাম।', 0],
+                    'section_combos' => ['Section — Combo Offers', 'কম্বো প্যানেলের শিরোনাম।', 0],
+                    'section_combos_sub' => ['Section — Combo subtitle', 'কম্বো প্যানেলের শিরোনামের নিচের ছোট লেখা।', 0],
+                    'section_bestsellers' => ['Section — Best Sellers', 'জনপ্রিয় পণ্যের সেকশনের শিরোনাম।', 0],
+                    'section_featured' => ['Section — Featured', 'নির্বাচিত পণ্যের সেকশনের শিরোনাম।', 0],
+                    'section_trending' => ['Section — Trending', 'ট্রেন্ডিং সেকশনের শিরোনাম।', 0],
+                ];
+            @endphp
+
+            @foreach($storefrontText as $key => [$label, $hint, $rows])
+                <div class="col-md-6">
+                    <label class="form-label d-flex align-items-center">
+                        <img src="https://flagcdn.com/w20/gb.png" class="me-2" alt="EN"> {{ $label }} (English)
+                    </label>
+                    @if($rows)
+                        <textarea name="{{ $key }}[value_en]" rows="{{ $rows }}"
+                                  class="form-control @error($key.'.value_en') is-invalid @enderror">{{ \App\Models\Setting::value($key, 'en', '') }}</textarea>
+                    @else
+                        <input type="text" name="{{ $key }}[value_en]"
+                               class="form-control @error($key.'.value_en') is-invalid @enderror"
+                               value="{{ \App\Models\Setting::value($key, 'en', '') }}">
+                    @endif
+                    @error($key.'.value_en') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <div class="form-text">{!! $hint !!}</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label d-flex align-items-center">
+                        <img src="https://flagcdn.com/w20/bd.png" class="me-2" alt="BN"> {{ $label }} (বাংলা)
+                    </label>
+                    @if($rows)
+                        <textarea name="{{ $key }}[value_bn]" rows="{{ $rows }}"
+                                  class="form-control @error($key.'.value_bn') is-invalid @enderror">{{ \App\Models\Setting::value($key, 'bn', '') }}</textarea>
+                    @else
+                        <input type="text" name="{{ $key }}[value_bn]"
+                               class="form-control @error($key.'.value_bn') is-invalid @enderror"
+                               value="{{ \App\Models\Setting::value($key, 'bn', '') }}">
+                    @endif
+                    @error($key.'.value_bn') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <div class="form-text">খালি রাখলে ইংরেজিটাই দেখানো হবে।</div>
+                </div>
+            @endforeach
+
             <div class="col-12 mt-4">
                 <button type="submit" class="btn btn-primary px-5">
                     <i class="bi bi-save"></i> Save All Settings

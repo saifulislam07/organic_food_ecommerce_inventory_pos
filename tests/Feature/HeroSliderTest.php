@@ -56,7 +56,7 @@ class HeroSliderTest extends TestCase
         $this->assertStringContainsString('Settings <span>Headline</span>', $html);
         $this->assertStringContainsString('Straight from the orchard.', $html);
         // One panel is not a slider: nothing to press, nothing to jump to.
-        $this->assertStringNotContainsString('hero-slider-arrow', $html);
+        $this->assertStringNotContainsString('data-bs-slide="prev"', $html);
         $this->assertStringNotContainsString('data-bs-slide-to', $html);
     }
 
@@ -69,7 +69,7 @@ class HeroSliderTest extends TestCase
 
         $this->assertSame(2, substr_count($html, 'carousel-item '));
         $this->assertSame(2, substr_count($html, 'data-bs-slide-to'));
-        $this->assertStringContainsString('hero-slider-arrow', $html);
+        $this->assertStringContainsString('data-bs-slide="prev"', $html);
 
         // sort_order decides the running order, not insertion order.
         $this->assertLessThan(

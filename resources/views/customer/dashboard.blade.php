@@ -5,7 +5,7 @@
 @push('styles')
 <style>
     .dashboard-wrapper {
-        padding: 60px 0;
+        padding: 0 0 60px;
         background-color: #f8f9fa;
     }
     .dashboard-sidebar {
@@ -86,23 +86,15 @@
         text-transform: uppercase;
     }
     
-    .page-header-simple {
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-        padding: 40px 0;
-        color: white;
-        margin-bottom: 40px;
-        border-radius: 0 0 40px 40px;
-    }
 </style>
 @endpush
 
 @section('content')
-<div class="page-header-simple text-center">
-    <div class="container">
-        <h2 class="fw-bold mb-0">{{ app()->getLocale() == 'bn' ? 'আমার অ্যাকাউন্ট' : 'My Account' }}</h2>
-        <p class="mb-0 text-white-50">{{ app()->getLocale() == 'bn' ? 'স্বাগতম' : 'Welcome back' }}, {{ auth()->user()->name }}!</p>
-    </div>
-</div>
+@include('partials.page-head', [
+    'title' => app()->getLocale() == 'bn' ? 'আমার অ্যাকাউন্ট' : 'My Account',
+    'icon' => 'person-circle',
+    'lead' => (app()->getLocale() == 'bn' ? 'স্বাগতম' : 'Welcome back').', '.auth()->user()->name.'!',
+])
 
 <div class="dashboard-wrapper">
     <div class="container">

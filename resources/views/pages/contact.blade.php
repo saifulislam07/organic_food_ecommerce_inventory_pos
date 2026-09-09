@@ -1,16 +1,11 @@
 @extends('layouts.frontend')
 @section('title', 'Contact Us – MohiPure')
 @section('content')
-<div class="page-header">
-    <div class="container">
-        <h1>Contact Us</h1>
-        <ul class="breadcrumb-custom">
-            <li><a href="{{ route('home') }}">Home</a></li>
-            <li><span>/</span></li>
-            <li>Contact</li>
-        </ul>
-    </div>
-</div>
+@include('partials.page-head', [
+    'title' => app()->getLocale() == 'bn' ? 'যোগাযোগ' : 'Contact Us',
+    'icon' => 'headset',
+    'crumbs' => [app()->getLocale() == 'bn' ? 'যোগাযোগ' : 'Contact'],
+])
 <section class="section">
     <div class="container">
         <div class="row g-4">

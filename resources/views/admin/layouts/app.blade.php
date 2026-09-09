@@ -160,11 +160,12 @@
                 'sell' => [
                     'label' => 'Sell',
                     'icon' => 'bi-cart3',
-                    'patterns' => ['admin.pos.*', 'admin.orders.*', 'admin.customers.*'],
+                    'patterns' => ['admin.pos.*', 'admin.orders.*', 'admin.customers.*', 'admin.coupons.*'],
                     'items' => [
                         ['route' => 'admin.pos.index', 'active' => 'admin.pos.*', 'label' => 'POS System', 'can' => 'pos.view'],
                         ['route' => 'admin.orders.index', 'active' => 'admin.orders.*', 'label' => 'Orders', 'can' => 'orders.view'],
                         ['route' => 'admin.customers.index', 'active' => 'admin.customers.*', 'label' => 'Customers', 'can' => 'customers.view'],
+                        ['route' => 'admin.coupons.index', 'active' => 'admin.coupons.*', 'label' => 'Coupons', 'can' => 'coupons.view'],
                     ],
                 ],
                 'catalogue' => [
@@ -207,10 +208,11 @@
                 'settings' => [
                     'label' => 'Settings',
                     'icon' => 'bi-gear',
-                    'patterns' => ['admin.settings.*', 'admin.sliders.*'],
+                    'patterns' => ['admin.settings.*', 'admin.sliders.*', 'admin.blocks.*'],
                     'items' => [
                         ['route' => 'admin.settings.index', 'active' => 'admin.settings.index', 'label' => 'Site Settings', 'can' => 'settings.view'],
                         ['route' => 'admin.sliders.index', 'active' => 'admin.sliders.*', 'label' => 'Hero Slider', 'can' => 'sliders.view'],
+                        ['route' => 'admin.blocks.index', 'active' => 'admin.blocks.*', 'label' => 'Storefront Blocks', 'can' => 'blocks.view'],
                         ['route' => 'admin.settings.mail.edit', 'active' => 'admin.settings.mail.*', 'label' => 'Email / SMTP', 'can' => 'settings.edit'],
                         ['route' => 'admin.settings.sms.edit', 'active' => 'admin.settings.sms.*', 'label' => 'SMS Gateway', 'can' => 'settings.edit'],
                         ['route' => 'admin.settings.seo.edit', 'active' => 'admin.settings.seo.*', 'label' => 'SEO & Analytics', 'can' => 'settings.edit'],

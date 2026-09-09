@@ -5,7 +5,7 @@
 @push('styles')
 <style>
     .dashboard-wrapper {
-        padding: 60px 0;
+        padding: 0 0 60px;
         background-color: #f8f9fa;
     }
     .dashboard-sidebar {
@@ -62,6 +62,14 @@
 @endpush
 
 @section('content')
+@include('partials.page-head', [
+    'title' => app()->getLocale() == 'bn' ? 'প্রোফাইল' : 'Profile',
+    'icon' => 'person-gear',
+    'crumbs' => [
+        (app()->getLocale() == 'bn' ? 'আমার অ্যাকাউন্ট' : 'My Account') => route('customer.dashboard'),
+        app()->getLocale() == 'bn' ? 'প্রোফাইল' : 'Profile',
+    ],
+])
 <div class="dashboard-wrapper">
     <div class="container">
         <div class="row g-4">

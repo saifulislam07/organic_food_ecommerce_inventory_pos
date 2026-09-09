@@ -1,195 +1,240 @@
 @extends('layouts.frontend')
 
-@push('styles')
-<style>
-    /* Safe Mobile-Only Optimizations */
-    @media (max-width: 991px) {
-        .hero-section { padding: 40px 0; text-align: center; }
-        .hero-content { display: flex; flex-direction: column; align-items: center; }
-        .hero-desc { margin-left: auto; margin-right: auto; }
-        .hero-stats { justify-content: center; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
-        .hero-btn { width: 100%; justify-content: center; }
-        .btn-whatsapp { width: 100%; justify-content: center; }
-    }
-</style>
-@endpush
-
 @section('title', 'MohiPure – খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার')
 
 @section('content')
+    {{-- Quoted in the service strip and again in the promo tiles further down. --}}
+    @php
+        $threshold = \App\Models\Setting::get('free_delivery_threshold', 2000);
+
+        // Section headings are editable in Settings > Storefront Text; an empty
+        // box falls back to the wording the page shipped with.
+        $t = fn (string $key, string $bn, string $en) => \App\Models\Setting::get($key)
+            ?: (app()->getLocale() == 'bn' ? $bn : $en);
+    @endphp
+
     {{--
-        Hero Section — one carousel panel per hero_slides row. A shop with no
-        slides gets a single panel built from the site settings, so the markup
-        below has only one path through it either way.
+        Hero — the marketplace arrangement: the category rail on the left, the
+        slider filling the rest. One carousel panel per hero_slides row; a shop
+        with no slides gets a single panel built from the site settings, so
+        there is only one path through the markup either way.
     --}}
-    <section class="hero-section">
-        <div id="heroSlider" class="carousel slide hero-carousel w-100"
-             data-bs-ride="carousel" data-bs-interval="6000" data-bs-pause="hover">
-            <div class="carousel-inner">
-                @foreach($slides as $slide)
-                <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                    <div class="container">
-                        <div class="row align-items-center">
-                            <div class="col-lg-6">
-                                <div class="hero-content">
-                                    @if($slide->badge)
-                                    <div class="hero-badge">
-                                        <i class="bi bi-patch-check-fill"></i> {{ $slide->badge }}
-                                    </div>
-                                    @endif
-                                    {{-- Admin-authored, and allowed the <br> and <span> the styling needs. --}}
-                                    <h1 class="hero-title">{!! $slide->title !!}</h1>
-                                    @if($slide->subtitle)
-                                    <p class="hero-desc">{{ $slide->subtitle }}</p>
-                                    @endif
-                                    <a href="{{ $slide->button_link }}" class="hero-btn">
-                                        <i class="bi bi-shop"></i> {{ $slide->button_text }}
-                                    </a>
-                                    @include('partials.hero-stats')
-                                </div>
+    <section class="pc-hero">
+        <div class="container">
+            <div class="pc-hero-grid">
+                <aside class="pc-hero-rail">
+                    <div class="pc-hero-rail-head">
+                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                        {{ app()->getLocale() == 'bn' ? 'সব ক্যাটাগরি' : 'All Categories' }}
+                    </div>
+                    <div class="pc-hero-rail-body">
+                        @include('partials.category-list', ['categories' => $categories])
+                    </div>
+                </aside>
+
+                <div id="heroSlider" class="pc-hero-slider carousel slide"
+                     data-bs-ride="carousel" data-bs-interval="6000" data-bs-pause="hover">
+                    <div class="carousel-inner">
+                        @foreach($slides as $slide)
+                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                            <div class="pc-slide-media">
+                                <img src="{{ $slide->image_url }}" alt="{{ strip_tags($slide->title) }}"
+                                     loading="{{ $loop->first ? 'eager' : 'lazy' }}">
                             </div>
-                            <div class="col-lg-6 d-none d-lg-block">
-                                <div class="hero-image-wrapper text-center">
-                                    <img src="{{ $slide->image_url }}" alt="{{ strip_tags($slide->title) }}"
-                                         class="img-fluid rounded-4 shadow-lg hero-floating-img"
-                                         loading="{{ $loop->first ? 'eager' : 'lazy' }}"
-                                         style="max-height: 450px; border: 8px solid white;">
-                                </div>
+                            <div class="pc-slide-body">
+                                @if($slide->badge)
+                                    <span class="pc-slide-badge">
+                                        <i class="bi bi-patch-check-fill"></i> {{ $slide->badge }}
+                                    </span>
+                                @endif
+                                {{-- Admin-authored, and allowed the <br> and <span> the styling needs. --}}
+                                <h2 class="pc-slide-title">{!! $slide->title !!}</h2>
+                                @if($slide->subtitle)
+                                    <p class="pc-slide-text">{{ $slide->subtitle }}</p>
+                                @endif
+                                <a href="{{ $slide->button_link }}" class="pc-slide-btn">
+                                    <i class="bi bi-bag-check"></i> {{ $slide->button_text }}
+                                </a>
                             </div>
                         </div>
+                        @endforeach
                     </div>
+
+                    {{-- A single slide is not a slider: no arrows, no dots. --}}
+                    @if($slides->count() > 1)
+                        <button class="carousel-control-prev" type="button" data-bs-target="#heroSlider" data-bs-slide="prev">
+                            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                            <span class="visually-hidden">{{ app()->getLocale() == 'bn' ? 'আগেরটি' : 'Previous' }}</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#heroSlider" data-bs-slide="next">
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            <span class="visually-hidden">{{ app()->getLocale() == 'bn' ? 'পরেরটি' : 'Next' }}</span>
+                        </button>
+                        <div class="carousel-indicators">
+                            @foreach($slides as $slide)
+                                <button type="button" data-bs-target="#heroSlider" data-bs-slide-to="{{ $loop->index }}"
+                                        class="{{ $loop->first ? 'active' : '' }}"
+                                        @if($loop->first) aria-current="true" @endif
+                                        aria-label="{{ (app()->getLocale() == 'bn' ? 'স্লাইড ' : 'Slide ').$loop->iteration }}"></button>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
-                @endforeach
             </div>
 
-            {{-- A single slide is not a slider: no arrows, no dots, nothing to press. --}}
-            @if($slides->count() > 1)
-            <button class="carousel-control-prev hero-slider-arrow" type="button"
-                    data-bs-target="#heroSlider" data-bs-slide="prev">
-                <i class="bi bi-chevron-left" aria-hidden="true"></i>
-                <span class="visually-hidden">{{ app()->getLocale() == 'bn' ? 'আগেরটি' : 'Previous' }}</span>
-            </button>
-            <button class="carousel-control-next hero-slider-arrow" type="button"
-                    data-bs-target="#heroSlider" data-bs-slide="next">
-                <i class="bi bi-chevron-right" aria-hidden="true"></i>
-                <span class="visually-hidden">{{ app()->getLocale() == 'bn' ? 'পরেরটি' : 'Next' }}</span>
-            </button>
-
-            <div class="carousel-indicators hero-slider-dots">
-                @foreach($slides as $slide)
-                <button type="button" data-bs-target="#heroSlider" data-bs-slide-to="{{ $loop->index }}"
-                        class="{{ $loop->first ? 'active' : '' }}"
-                        @if($loop->first) aria-current="true" @endif
-                        aria-label="{{ (app()->getLocale() == 'bn' ? 'স্লাইড ' : 'Slide ').$loop->iteration }}"></button>
-                @endforeach
+            {{--
+                What the shop promises, in the strip right under the banner.
+                Admin > Settings > Storefront Blocks > Service Strip. The two
+                placeholders let a card quote the live figures rather than a
+                number that has to be kept in step by hand.
+            --}}
+            @if($services->count())
+            <div class="pc-services">
+                <div class="pc-services-grid">
+                    @foreach($services as $service)
+                        <div class="pc-service">
+                            <span class="pc-service-icon"><i class="bi bi-{{ $service->icon_name }}"></i></span>
+                            <div>
+                                <h4>{{ $service->title }}</h4>
+                                @if($service->subtitle)
+                                    <p>{{ strtr($service->subtitle, [
+                                        ':threshold' => number_format($threshold),
+                                        ':phone' => \App\Models\Setting::get('phone', '01716-952365'),
+                                    ]) }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
             @endif
         </div>
     </section>
 
-    <!-- Best Selling Products -->
-    <section class="section">
+    {{-- Shop by category --}}
+    @if($categories->count())
+    <section class="pc-section">
         <div class="container">
-            <div class="section-header">
-                <div class="section-badge"><i class="bi bi-star-fill"></i> {{ app()->getLocale() == 'bn' ? 'সেরা পণ্য' : 'Best Sellers' }}</div>
-                <h2 class="section-title">{{ app()->getLocale() == 'bn' ? 'জনপ্রিয় পণ্যসমূহ' : 'Popular Products' }}</h2>
-                <p class="section-subtitle">{{ app()->getLocale() == 'bn' ? 'আমাদের সবচেয়ে বিক্রিত প্রাকৃতিক ও অর্গানিক পণ্য' : 'Our most sold natural & organic products' }}</p>
+            <div class="pc-section-head">
+                <h2><i class="bi bi-grid-3x3-gap-fill"></i> {{ $t('section_categories', 'ক্যাটাগরি অনুযায়ী কিনুন', 'Shop by Category') }}</h2>
+                <a href="{{ route('shop') }}" class="pc-section-more">
+                    {{ app()->getLocale() == 'bn' ? 'সব দেখুন' : 'View all' }} <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
-            <div class="row g-4">
-                @foreach($bestSellers as $product)
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-6">
-                        @include('partials.product-card', ['product' => $product])
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- Combo Offers -->
-    @if($combos->count())
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-badge"><i class="bi bi-box2-fill"></i> {{ app()->getLocale() == 'bn' ? 'কম্বো' : 'Combo' }}</div>
-                <h2 class="section-title">{{ app()->getLocale() == 'bn' ? 'কম্বো অফার' : 'Combo Offers' }}</h2>
-                <p class="section-subtitle">{{ app()->getLocale() == 'bn' ? 'একসাথে কিনলে দাম কম' : 'Buy them together and pay less' }}</p>
-            </div>
-            <div class="row g-4">
-                @foreach($combos as $product)
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-6">
-                        @include('partials.product-card', ['product' => $product])
-                    </div>
+            <div class="pc-cat-grid">
+                @foreach($categories as $category)
+                    <a href="{{ route('shop', ['category' => $category->slug]) }}" class="pc-cat-tile">
+                        <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="pc-cat-tile-img" loading="lazy">
+                        <div class="pc-cat-tile-name">{{ $category->name }}</div>
+                    </a>
                 @endforeach
             </div>
         </div>
     </section>
     @endif
 
-    <!-- Category Promo Section -->
-    <section class="section section-alt">
+    {{-- Combo offers, in the banner-headed deal panel --}}
+    @if($combos->count())
+    <section class="pc-section pc-section-tint">
         <div class="container">
-            <div class="section-header">
-                <div class="section-badge"><i class="bi bi-collection"></i> {{ app()->getLocale() == 'bn' ? 'ক্যাটাগরি' : 'Categories' }}</div>
-                <h2 class="section-title">{{ app()->getLocale() == 'bn' ? 'আমাদের পণ্য ক্যাটাগরি' : 'Our Product Categories' }}</h2>
-            </div>
-            <div class="row g-4">
-                @foreach($categories as $category)
-                <div class="col-lg-4 col-md-6">
-                    <div class="category-promo" style="background-image: url('{{ $category->image_url }}');">
-                        <div class="category-promo-content">
-                            <h3>{{ $category->name }}</h3>
-                            <a href="{{ route('shop', ['category' => $category->slug]) }}" class="promo-btn">
-                                {{ app()->getLocale() == 'bn' ? 'বিস্তারিত দেখুন' : 'Shop Now' }} <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
+            <div class="pc-deal">
+                <div class="pc-deal-head">
+                    <div>
+                        <h2><i class="bi bi-box2-heart-fill"></i> {{ $t('section_combos', 'কম্বো অফার', 'Combo Offers') }}</h2>
+                        <p>{{ $t('section_combos_sub', 'একসাথে কিনলে দাম কম', 'Buy them together and pay less') }}</p>
+                    </div>
+                    <a href="{{ route('shop') }}" class="pc-deal-more">
+                        {{ app()->getLocale() == 'bn' ? 'সব কম্বো' : 'All combos' }} <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="pc-deal-body">
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3">
+                        @foreach($combos as $product)
+                            <div class="col">@include('partials.product-card', ['product' => $product])</div>
+                        @endforeach
                     </div>
                 </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- Trending Products -->
-    @if($trending->count())
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-badge"><i class="bi bi-fire"></i> {{ app()->getLocale() == 'bn' ? 'ট্রেন্ডিং' : 'Trending' }}</div>
-                <h2 class="section-title">{{ app()->getLocale() == 'bn' ? 'ট্রেন্ডিং পণ্যসমূহ' : 'Trending Products' }}</h2>
-                <p class="section-subtitle">{{ app()->getLocale() == 'bn' ? 'এই মুহূর্তে সবচেয়ে জনপ্রিয়' : 'Most popular right now' }}</p>
-            </div>
-            <div class="row g-4">
-                @foreach($trending as $product)
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-6">
-                        @include('partials.product-card', ['product' => $product])
-                    </div>
-                @endforeach
-            </div>
-            <div class="text-center mt-4">
-                <a href="{{ route('shop') }}" class="hero-btn" style="font-size: 1rem; padding: 12px 30px;">
-                    {{ app()->getLocale() == 'bn' ? 'সব পণ্য দেখুন' : 'View All Products' }} <i class="bi bi-arrow-right"></i>
-                </a>
             </div>
         </div>
     </section>
     @endif
 
-    <!-- CTA Section -->
-    <section class="section section-alt">
-        <div class="container text-center">
-            <div class="section-badge"><i class="bi bi-whatsapp"></i> {{ app()->getLocale() == 'bn' ? 'সহজ অর্ডার' : 'Easy Order' }}</div>
-            <h2 class="section-title">{{ app()->getLocale() == 'bn' ? 'সহজেই অর্ডার করুন' : 'Order Effortlessly' }}</h2>
-            <p class="section-subtitle mb-4">{{ app()->getLocale() == 'bn' ? 'ফোন কল, WhatsApp বা সরাসরি ওয়েবসাইট থেকে অর্ডার করুন' : 'Order via phone, WhatsApp, or directly from our website' }}</p>
-            <div class="d-flex flex-wrap justify-content-center gap-3">
-                @if($orderUrl = \App\Support\Whatsapp::shopUrl(app()->getLocale() == 'bn' ? 'হ্যালো! আমি অর্ডার করতে চাই।' : 'Hello! I want to order.'))
-                <a href="{{ $orderUrl }}" target="_blank" rel="noopener" class="btn-whatsapp">
-                    <i class="bi bi-whatsapp"></i> {{ app()->getLocale() == 'bn' ? 'WhatsApp এ অর্ডার করুন' : 'Order on WhatsApp' }}
+    {{-- Best sellers --}}
+    @if($bestSellers->count())
+    <section class="pc-section">
+        <div class="container">
+            <div class="pc-section-head">
+                <h2><i class="bi bi-star-fill"></i> {{ $t('section_bestsellers', 'জনপ্রিয় পণ্যসমূহ', 'Best Sellers') }}</h2>
+                <a href="{{ route('shop') }}" class="pc-section-more">
+                    {{ app()->getLocale() == 'bn' ? 'সব দেখুন' : 'View all' }} <i class="bi bi-arrow-right"></i>
                 </a>
-                @endif
-                <a href="{{ route('shop') }}" class="btn-primary-custom">
-                    <i class="bi bi-shop"></i> {{ app()->getLocale() == 'bn' ? 'শপ করুন' : 'Shop Now' }}
-                </a>
+            </div>
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3">
+                @foreach($bestSellers as $product)
+                    <div class="col">@include('partials.product-card', ['product' => $product])</div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
+
+    {{-- Promo strip — Admin > Settings > Storefront Blocks > Promo Tiles --}}
+    @if($promos->count())
+    <section class="pc-section pc-section-tint">
+        <div class="container">
+            <div class="pc-promo-grid">
+                @foreach($promos as $promo)
+                    <a href="{{ $promo->link }}" class="pc-promo"
+                       @if($promo->image_url) style="background-image: url('{{ $promo->image_url }}');" @endif
+                       @if($promo->is_external) target="_blank" rel="noopener" @endif>
+                        @if($promo->subtitle)<small>{{ $promo->subtitle }}</small>@endif
+                        <h3>{{ strtr($promo->title, [':threshold' => number_format($threshold)]) }}</h3>
+                        <span>
+                            {{ app()->getLocale() == 'bn' ? 'দেখুন' : 'Browse' }}
+                            <i class="bi bi-arrow-right"></i>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
+    {{-- Featured --}}
+    @if($featured->count())
+    <section class="pc-section">
+        <div class="container">
+            <div class="pc-section-head">
+                <h2><i class="bi bi-award-fill"></i> {{ $t('section_featured', 'নির্বাচিত পণ্য', 'Featured Products') }}</h2>
+                <a href="{{ route('shop') }}" class="pc-section-more">
+                    {{ app()->getLocale() == 'bn' ? 'সব দেখুন' : 'View all' }} <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3">
+                @foreach($featured as $product)
+                    <div class="col">@include('partials.product-card', ['product' => $product])</div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
+    {{-- Trending --}}
+    @if($trending->count())
+    <section class="pc-section pc-section-tint">
+        <div class="container">
+            <div class="pc-section-head">
+                <h2><i class="bi bi-fire"></i> {{ $t('section_trending', 'ট্রেন্ডিং পণ্যসমূহ', 'Trending Now') }}</h2>
+                <a href="{{ route('shop') }}" class="pc-section-more">
+                    {{ app()->getLocale() == 'bn' ? 'সব দেখুন' : 'View all' }} <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3">
+                @foreach($trending as $product)
+                    <div class="col">@include('partials.product-card', ['product' => $product])</div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
 @endsection

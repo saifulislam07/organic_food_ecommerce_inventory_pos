@@ -48,6 +48,8 @@ class AdminModules
         'pages' => ['Static Pages', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'landing-pages' => ['Landing Pages', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'sliders' => ['Hero Slider', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
+        'blocks' => ['Storefront Blocks', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
+        'coupons' => ['Coupons', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'settings' => ['Settings', [self::VIEW, self::EDIT]],
         'users' => ['Users', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'roles' => ['Roles', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],

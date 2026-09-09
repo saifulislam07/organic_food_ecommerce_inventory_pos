@@ -212,3 +212,8 @@
     --bs-btn-focus-shadow-rgb: 253, 161, 2;
 }
 .text-warning { color: #b85600 !important; }
+
+/* A letter-spacing utility four screens ask for by its Tailwind name. This is
+   a Bootstrap project, so nothing was answering; defined here because the auth
+   layout uses it too and loads only this stylesheet. */
+.tracking-wider { letter-spacing: 0.05em; }

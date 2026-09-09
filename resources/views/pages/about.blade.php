@@ -16,16 +16,11 @@
 </style>
 @endpush
 @section('content')
-<div class="page-header">
-    <div class="container">
-        <h1>About Us</h1>
-        <ul class="breadcrumb-custom">
-            <li><a href="{{ route('home') }}">Home</a></li>
-            <li><span>/</span></li>
-            <li>About</li>
-        </ul>
-    </div>
-</div>
+@include('partials.page-head', [
+    'title' => app()->getLocale() == 'bn' ? 'আমাদের সম্পর্কে' : 'About Us',
+    'icon' => 'info-circle',
+    'crumbs' => [app()->getLocale() == 'bn' ? 'সম্পর্কে' : 'About'],
+])
 <section class="section">
     <div class="container">
         <div class="row align-items-center g-5">
