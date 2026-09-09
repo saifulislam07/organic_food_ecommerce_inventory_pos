@@ -13,16 +13,16 @@ use Spatie\Permission\Models\Role;
  *
  *   php artisan db:seed --class=AdminSeeder
  *
- * Credentials come from ADMIN_EMAIL / ADMIN_PASSWORD / ADMIN_NAME when those are
- * set, so a live site never has to hard-code them here.
+ * Credentials come from config/admin.php — ADMIN_EMAIL / ADMIN_PASSWORD /
+ * ADMIN_NAME when those are set, so a live site never has to hard-code them.
  */
 class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = env('ADMIN_EMAIL', 'admin@gmail.com');
-        $name = env('ADMIN_NAME', 'Admin');
-        $password = env('ADMIN_PASSWORD', '111111');
+        $email = config('admin.email');
+        $name = config('admin.name');
+        $password = config('admin.password');
 
         $admin = User::where('email', $email)->first();
 

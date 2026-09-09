@@ -66,6 +66,10 @@ class AdminSeederTest extends TestCase
         putenv('ADMIN_PASSWORD=s3cret-pass');
 
         try {
+            // config/admin.php is read at boot, before putenv() above could
+            // reach it — re-evaluating the file is what proves it reads them.
+            config()->set('admin', require config_path('admin.php'));
+
             $this->seed(AdminSeeder::class);
 
             $admin = User::where('email', 'owner@mangohut.test')->firstOrFail();

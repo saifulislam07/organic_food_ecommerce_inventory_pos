@@ -232,6 +232,21 @@
                     </div>
                 @endif
 
+                @php
+                    // Development convenience only — config('admin.prefill_login')
+                    // is false anywhere APP_ENV is not local, so a password can
+                    // never be printed into this page on a live site.
+                    $prefill = config('admin.prefill_login');
+                @endphp
+
+                @if($prefill)
+                    <div class="alert alert-warning border-0 shadow-sm mb-4 small" role="alert">
+                        <i class="bi bi-tools"></i>
+                        <strong>Local development:</strong> সিডারের অ্যাডমিন ক্রেডেনশিয়াল বসানো আছে —
+                        শুধু “সুরক্ষিত প্রবেশ” চাপুন।
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('admin.login') }}">
                     @csrf
 
@@ -239,9 +254,9 @@
                         <label for="login_id" class="form-label">
                             <i class="bi bi-shield-lock"></i> এডমিন ইউজারনেম/মোবাইল
                         </label>
-                        <input id="login_id" name="login_id" type="text" 
-                               class="form-control @error('login_id') is-invalid @enderror" 
-                               value="{{ old('login_id') }}" required autofocus placeholder="Admin identity">
+                        <input id="login_id" name="login_id" type="text"
+                               class="form-control @error('login_id') is-invalid @enderror"
+                               value="{{ old('login_id', $prefill ? config('admin.email') : '') }}" required autofocus placeholder="Admin identity">
                         @error('login_id')
                             <div class="invalid-feedback fw-bold">{{ $message }}</div>
                         @enderror
@@ -256,8 +271,9 @@
                                 <a href="{{ route('password.request') }}" class="text-muted small text-decoration-none hover:text-dark">রিসেট করুন?</a>
                             @endif
                         </div>
-                        <input id="password" name="password" type="password" 
-                               class="form-control @error('password') is-invalid @enderror" 
+                        <input id="password" name="password" type="password"
+                               class="form-control @error('password') is-invalid @enderror"
+                               value="{{ $prefill ? config('admin.password') : '' }}"
                                required autocomplete="current-password" placeholder="Access key">
                         @error('password')
                             <div class="invalid-feedback fw-bold">{{ $message }}</div>

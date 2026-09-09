@@ -3,6 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use Database\Seeders\AdminSeeder;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -71,6 +72,38 @@ class AdminLoginTest extends TestCase
             ->assertSessionHasErrors('login_id');
 
         $this->assertGuest();
+    }
+
+    /* ------------------------------------------- the local-only prefill */
+
+    public function test_the_gateway_arrives_filled_in_on_a_development_machine(): void
+    {
+        config()->set('admin.prefill_login', true);
+
+        $this->seed(AdminSeeder::class);
+
+        $html = $this->get(route('admin.login'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('value="'.config('admin.email').'"', $html);
+        $this->assertStringContainsString('value="'.config('admin.password').'"', $html);
+
+        // What is typed in must be what actually opens the panel.
+        $this->post(route('admin.login'), [
+            'login_id' => config('admin.email'),
+            'password' => config('admin.password'),
+        ])->assertRedirect(route('admin.dashboard', absolute: false));
+    }
+
+    public function test_no_password_reaches_the_page_anywhere_but_local(): void
+    {
+        // What every environment except a developer's own machine gets.
+        config()->set('admin.prefill_login', false);
+
+        $html = $this->get(route('admin.login'))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString(config('admin.password'), $html);
+        $this->assertStringNotContainsString(config('admin.email'), $html);
+        $this->assertStringContainsString('value=""', $html);
     }
 
     public function test_an_admin_can_also_sign_in_with_a_mobile_number(): void
