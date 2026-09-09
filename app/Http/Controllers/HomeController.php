@@ -3,12 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\HeroSlide;
 use App\Models\Product;
 
 class HomeController extends Controller
 {
     public function index()
     {
+        // A shop that has not built a slider yet still gets a hero: the single
+        // panel the settings describe, rendered through the same carousel.
+        $slides = HeroSlide::active()->sorted()->get();
+
+        if ($slides->isEmpty()) {
+            $slides = collect([HeroSlide::fallback()]);
+        }
+
         $categories = Category::active()->sorted()->get();
         $bestSellers = Product::active()->bestseller()->withCardData()->take(8)->get();
         $featured = Product::active()->featured()->withCardData()->take(8)->get();
@@ -18,6 +27,6 @@ class HomeController extends Controller
         // section of their own they never reach the front page at all.
         $combos = Product::active()->combo()->withCardData()->latest()->take(4)->get();
 
-        return view('home', compact('categories', 'bestSellers', 'featured', 'trending', 'combos'));
+        return view('home', compact('slides', 'categories', 'bestSellers', 'featured', 'trending', 'combos'));
     }
 }

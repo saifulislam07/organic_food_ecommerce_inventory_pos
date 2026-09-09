@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminChatSettingController;
 use App\Http\Controllers\Admin\AdminComboController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminExpenseController;
+use App\Http\Controllers\Admin\AdminHeroSlideController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminInvestmentController;
 use App\Http\Controllers\Admin\AdminInvestorController;
@@ -106,6 +107,7 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::delete('withdrawals/bulk', [AdminWithdrawalController::class, 'bulkDestroy'])->name('withdrawals.bulkDestroy');
     Route::delete('pages/bulk', [AdminPageController::class, 'bulkDestroy'])->name('pages.bulkDestroy');
     Route::delete('landing-pages/bulk', [AdminLandingPageController::class, 'bulkDestroy'])->name('landing-pages.bulkDestroy');
+    Route::delete('sliders/bulk', [AdminHeroSlideController::class, 'bulkDestroy'])->name('sliders.bulkDestroy');
     Route::delete('combos/bulk', [AdminComboController::class, 'bulkDestroy'])->name('combos.bulkDestroy');
     Route::delete('purchases/bulk', [AdminPurchaseController::class, 'bulkDestroy'])->name('purchases.bulkDestroy');
     Route::delete('adjustments/bulk', [AdminAdjustmentController::class, 'bulkDestroy'])->name('adjustments.bulkDestroy');
@@ -170,6 +172,9 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::post('landing-pages/{landing_page}/duplicate', [AdminLandingPageController::class, 'duplicate'])
         ->name('landing-pages.duplicate');
     Route::resource('landing-pages', AdminLandingPageController::class)->except(['show']);
+
+    // The front page hero, one row per panel of the carousel.
+    Route::resource('sliders', AdminHeroSlideController::class)->except(['show']);
     Route::resource('users', AdminUserController::class)->except(['show']);
     Route::resource('roles', AdminRoleController::class)->except(['show']);
 

@@ -207,9 +207,10 @@
                 'settings' => [
                     'label' => 'Settings',
                     'icon' => 'bi-gear',
-                    'patterns' => ['admin.settings.*'],
+                    'patterns' => ['admin.settings.*', 'admin.sliders.*'],
                     'items' => [
                         ['route' => 'admin.settings.index', 'active' => 'admin.settings.index', 'label' => 'Site Settings', 'can' => 'settings.view'],
+                        ['route' => 'admin.sliders.index', 'active' => 'admin.sliders.*', 'label' => 'Hero Slider', 'can' => 'sliders.view'],
                         ['route' => 'admin.settings.mail.edit', 'active' => 'admin.settings.mail.*', 'label' => 'Email / SMTP', 'can' => 'settings.edit'],
                         ['route' => 'admin.settings.sms.edit', 'active' => 'admin.settings.sms.*', 'label' => 'SMS Gateway', 'can' => 'settings.edit'],
                         ['route' => 'admin.settings.seo.edit', 'active' => 'admin.settings.seo.*', 'label' => 'SEO & Analytics', 'can' => 'settings.edit'],

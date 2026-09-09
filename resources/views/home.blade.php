@@ -17,46 +17,73 @@
 @section('title', 'MohiPure – খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার')
 
 @section('content')
-    <!-- Hero Section -->
+    {{--
+        Hero Section — one carousel panel per hero_slides row. A shop with no
+        slides gets a single panel built from the site settings, so the markup
+        below has only one path through it either way.
+    --}}
     <section class="hero-section">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <div class="hero-content">
-                        <div class="hero-badge">
-                            <i class="bi bi-patch-check-fill"></i> {{ app()->getLocale() == 'bn' ? '১০০% খাঁটি ও অর্গানিক' : '100% Pure & Organic' }}
-                        </div>
-                        <h1 class="hero-title">
-                            {!! \App\Models\Setting::get('hero_title', 'Pure & Organic <br><span>Nature</span> Online Market') !!}
-                        </h1>
-                        <p class="hero-desc">
-                            {{ \App\Models\Setting::get('hero_desc', 'Directly from Chapainawabganj to your doorstep.') }}
-                        </p>
-                        <a href="{{ route('shop') }}" class="hero-btn">
-                            <i class="bi bi-shop"></i> {{ app()->getLocale() == 'bn' ? 'শপ করুন' : 'Shop Now' }}
-                        </a>
-                        <div class="hero-stats">
-                            <div class="hero-stat">
-                                <div class="hero-stat-num">500+</div>
-                                <div class="hero-stat-label">{{ app()->getLocale() == 'bn' ? 'সন্তুষ্ট গ্রাহক' : 'Happy Customers' }}</div>
+        <div id="heroSlider" class="carousel slide hero-carousel w-100"
+             data-bs-ride="carousel" data-bs-interval="6000" data-bs-pause="hover">
+            <div class="carousel-inner">
+                @foreach($slides as $slide)
+                <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6">
+                                <div class="hero-content">
+                                    @if($slide->badge)
+                                    <div class="hero-badge">
+                                        <i class="bi bi-patch-check-fill"></i> {{ $slide->badge }}
+                                    </div>
+                                    @endif
+                                    {{-- Admin-authored, and allowed the <br> and <span> the styling needs. --}}
+                                    <h1 class="hero-title">{!! $slide->title !!}</h1>
+                                    @if($slide->subtitle)
+                                    <p class="hero-desc">{{ $slide->subtitle }}</p>
+                                    @endif
+                                    <a href="{{ $slide->button_link }}" class="hero-btn">
+                                        <i class="bi bi-shop"></i> {{ $slide->button_text }}
+                                    </a>
+                                    @include('partials.hero-stats')
+                                </div>
                             </div>
-                            <div class="hero-stat">
-                                <div class="hero-stat-num">50+</div>
-                                <div class="hero-stat-label">{{ app()->getLocale() == 'bn' ? 'পণ্যসমূহ' : 'Products' }}</div>
-                            </div>
-                            <div class="hero-stat">
-                                <div class="hero-stat-num">100%</div>
-                                <div class="hero-stat-label">{{ app()->getLocale() == 'bn' ? 'অর্গানিক' : 'Organic' }}</div>
+                            <div class="col-lg-6 d-none d-lg-block">
+                                <div class="hero-image-wrapper text-center">
+                                    <img src="{{ $slide->image_url }}" alt="{{ strip_tags($slide->title) }}"
+                                         class="img-fluid rounded-4 shadow-lg hero-floating-img"
+                                         loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                                         style="max-height: 450px; border: 8px solid white;">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 d-none d-lg-block">
-                    <div class="hero-image-wrapper text-center">
-                        <img src="{{ asset('images/hero-mango.png') }}" alt="Premium Mango Basket" class="img-fluid rounded-4 shadow-lg hero-floating-img" style="max-height: 450px; border: 8px solid white;">
-                    </div>
-                </div>
+                @endforeach
             </div>
+
+            {{-- A single slide is not a slider: no arrows, no dots, nothing to press. --}}
+            @if($slides->count() > 1)
+            <button class="carousel-control-prev hero-slider-arrow" type="button"
+                    data-bs-target="#heroSlider" data-bs-slide="prev">
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                <span class="visually-hidden">{{ app()->getLocale() == 'bn' ? 'আগেরটি' : 'Previous' }}</span>
+            </button>
+            <button class="carousel-control-next hero-slider-arrow" type="button"
+                    data-bs-target="#heroSlider" data-bs-slide="next">
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                <span class="visually-hidden">{{ app()->getLocale() == 'bn' ? 'পরেরটি' : 'Next' }}</span>
+            </button>
+
+            <div class="carousel-indicators hero-slider-dots">
+                @foreach($slides as $slide)
+                <button type="button" data-bs-target="#heroSlider" data-bs-slide-to="{{ $loop->index }}"
+                        class="{{ $loop->first ? 'active' : '' }}"
+                        @if($loop->first) aria-current="true" @endif
+                        aria-label="{{ (app()->getLocale() == 'bn' ? 'স্লাইড ' : 'Slide ').$loop->iteration }}"></button>
+                @endforeach
+            </div>
+            @endif
         </div>
     </section>
 
