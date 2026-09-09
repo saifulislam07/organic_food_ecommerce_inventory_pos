@@ -100,6 +100,11 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
     /**
      * What this bundle is made of, gathered off its variants. Empty for an
      * ordinary product.

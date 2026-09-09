@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', (app()->getLocale() == 'bn' ? 'অর্ডার ডিটেইলস' : 'Order Details') . ' – MohiPure')
+@section('title', (app()->getLocale() == 'bn' ? 'অর্ডার ডিটেইলস' : 'Order Details') . ' – BaburhashiBD')
 
 @push('styles')
 <style>
@@ -237,6 +237,9 @@
                                             <th>{{ app()->getLocale() == 'bn' ? 'প্রোডাক্ট' : 'Product' }}</th>
                                             <th class="text-center">{{ app()->getLocale() == 'bn' ? 'পিক' : 'Qty' }}</th>
                                             <th class="text-end">{{ app()->getLocale() == 'bn' ? 'মূল্য' : 'Price' }}</th>
+                                            @if($order->status === 'delivered')
+                                                <th class="text-end">{{ app()->getLocale() == 'bn' ? 'রিভিউ' : 'Review' }}</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -259,7 +262,46 @@
                                             </td>
                                             <td class="text-center fw-bold">×{{ $item->quantity }}</td>
                                             <td class="text-end fw-bold">৳{{ number_format($item->total) }}</td>
+                                            @if($order->status === 'delivered')
+                                                <td class="text-end">
+                                                    @if(in_array($item->product_id, $reviewedProductIds))
+                                                        <span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle"></i> {{ app()->getLocale() == 'bn' ? 'রিভিউ দেওয়া হয়েছে' : 'Reviewed' }}</span>
+                                                    @elseif($item->product_id)
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#review-form-{{ $item->id }}">
+                                                            <i class="bi bi-star"></i> {{ app()->getLocale() == 'bn' ? 'রিভিউ লিখুন' : 'Write a Review' }}
+                                                        </button>
+                                                    @endif
+                                                </td>
+                                            @endif
                                         </tr>
+                                        @if($order->status === 'delivered' && $item->product_id && ! in_array($item->product_id, $reviewedProductIds))
+                                        <tr class="collapse" id="review-form-{{ $item->id }}">
+                                            <td colspan="4" class="bg-light">
+                                                <form action="{{ route('customer.reviews.store', $item) }}" method="POST" class="py-2">
+                                                    @csrf
+                                                    <div class="mb-2">
+                                                        <div class="star-input">
+                                                            @for($i = 5; $i >= 1; $i--)
+                                                                <input type="radio" id="star{{ $i }}-{{ $item->id }}" name="rating" value="{{ $i }}" {{ $i == 5 ? 'checked' : '' }} required>
+                                                                <label for="star{{ $i }}-{{ $item->id }}" title="{{ $i }}"><i class="bi bi-star-fill"></i></label>
+                                                            @endfor
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <input type="text" name="title" class="form-control form-control-sm" maxlength="150"
+                                                               placeholder="{{ app()->getLocale() == 'bn' ? 'শিরোনাম (ঐচ্ছিক)' : 'Title (optional)' }}">
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <textarea name="body" class="form-control form-control-sm" rows="3" maxlength="2000" required
+                                                                  placeholder="{{ app()->getLocale() == 'bn' ? 'পণ্যটি কেমন লাগলো?' : 'How was the product?' }}"></textarea>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        {{ app()->getLocale() == 'bn' ? 'জমা দিন' : 'Submit Review' }}
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        @endif
                                         @endforeach
                                     </tbody>
                                 </table>

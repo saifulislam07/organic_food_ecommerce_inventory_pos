@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\AdminPOSController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminPurchaseController;
 use App\Http\Controllers\Admin\AdminReportController;
+use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminSeoSettingController;
 use App\Http\Controllers\Admin\AdminSettingController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Customer\CustomerDashboardController;
+use App\Http\Controllers\Customer\CustomerReviewController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LandingOrderController;
 use App\Http\Controllers\LandingPageController;
@@ -93,6 +95,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/orders/{orderNumber}', [CustomerDashboardController::class, 'show'])->name('orders.show');
     Route::get('/orders/{orderNumber}/invoice', [CustomerDashboardController::class, 'invoice'])->name('orders.invoice');
+    Route::post('/order-items/{orderItem}/review', [CustomerReviewController::class, 'store'])->name('reviews.store');
 });
 
 // Admin Routes
@@ -119,6 +122,7 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::delete('adjustments/bulk', [AdminAdjustmentController::class, 'bulkDestroy'])->name('adjustments.bulkDestroy');
     Route::delete('users/bulk', [AdminUserController::class, 'bulkDestroy'])->name('users.bulkDestroy');
     Route::delete('roles/bulk', [AdminRoleController::class, 'bulkDestroy'])->name('roles.bulkDestroy');
+    Route::delete('reviews/bulk', [AdminReviewController::class, 'bulkDestroy'])->name('reviews.bulkDestroy');
     Route::resource('products', AdminProductController::class);
     Route::get('combos', [AdminComboController::class, 'index'])->name('combos.index');
     Route::get('combos/create', [AdminComboController::class, 'create'])->name('combos.create');
@@ -192,6 +196,10 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::resource('roles', AdminRoleController::class)->except(['show']);
 
     Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+    // Product reviews: customer-submitted (pending approval) plus admin-authored (trusted immediately).
+    Route::post('reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('reviews.approve');
+    Route::resource('reviews', AdminReviewController::class)->except(['show']);
 });
 
 Route::middleware('auth')->group(function () {

@@ -66,7 +66,7 @@
                         <div class="col-md-12">
                             <label class="form-label fw-bold small text-uppercase">Notes (Optional)</label>
                             <textarea name="notes" class="form-control" rows="3"
-                                      placeholder="e.g., second instalment for the mango season">{{ old('notes', $record->notes ?? '') }}</textarea>
+                                      placeholder="e.g., second instalment for the winter clothing stock">{{ old('notes', $record->notes ?? '') }}</textarea>
                         </div>
                     </div>
 

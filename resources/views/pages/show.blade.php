@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', $page->title . ' – ' . \App\Models\Setting::get('site_title', 'MohiPure'))
+@section('title', $page->title . ' – ' . \App\Models\Setting::get('site_title', 'BaburhashiBD'))
 
 @section('content')
 @include('partials.page-head', [

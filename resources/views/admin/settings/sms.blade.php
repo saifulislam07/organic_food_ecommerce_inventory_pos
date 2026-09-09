@@ -38,7 +38,7 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Sender ID</label>
                             <input type="text" name="sms_sender_id" class="form-control @error('sms_sender_id') is-invalid @enderror"
-                                   value="{{ old('sms_sender_id', $sms['sms_sender_id'] ?? '') }}" placeholder="MangoHut">
+                                   value="{{ old('sms_sender_id', $sms['sms_sender_id'] ?? '') }}" placeholder="BaburhashiBD">
                             @error('sms_sender_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             <div class="form-text">The approved masking name from your provider.</div>
                         </div>

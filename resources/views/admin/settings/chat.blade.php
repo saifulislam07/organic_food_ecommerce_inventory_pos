@@ -38,7 +38,7 @@
                             <input type="text" name="chat_whatsapp_number"
                                    class="form-control @error('chat_whatsapp_number') is-invalid @enderror"
                                    value="{{ old('chat_whatsapp_number', $chat['chat_whatsapp_number'] ?? '') }}"
-                                   placeholder="01716-952365">
+                                   placeholder="+880 1XXX-XXXXXX">
                             @error('chat_whatsapp_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             <div class="form-text">
                                 Leave blank to use the shop number from Site Settings
@@ -91,11 +91,11 @@
                     <input type="text" name="chat_messenger_id"
                            class="form-control @error('chat_messenger_id') is-invalid @enderror"
                            value="{{ old('chat_messenger_id', $chat['chat_messenger_id'] ?? '') }}"
-                           placeholder="mangohut.bd">
+                           placeholder="baburhashibd">
                     @error('chat_messenger_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     <div class="form-text">
                         The page username, its numeric ID, or the full page link — all three work.
-                        Find it in your page's address bar: <code>facebook.com/<strong>mangohut.bd</strong></code>.
+                        Find it in your page's address bar: <code>facebook.com/<strong>baburhashibd</strong></code>.
                     </div>
                 </div>
             </div>

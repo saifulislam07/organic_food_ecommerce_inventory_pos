@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin Panel') – {{ \App\Models\Setting::get('site_title', 'MohiPure') }}</title>
+    <title>@yield('title', 'Admin Panel') – {{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -160,12 +160,13 @@
                 'sell' => [
                     'label' => 'Sell',
                     'icon' => 'bi-cart3',
-                    'patterns' => ['admin.pos.*', 'admin.orders.*', 'admin.customers.*', 'admin.coupons.*'],
+                    'patterns' => ['admin.pos.*', 'admin.orders.*', 'admin.customers.*', 'admin.coupons.*', 'admin.reviews.*'],
                     'items' => [
                         ['route' => 'admin.pos.index', 'active' => 'admin.pos.*', 'label' => 'POS System', 'can' => 'pos.view'],
                         ['route' => 'admin.orders.index', 'active' => 'admin.orders.*', 'label' => 'Orders', 'can' => 'orders.view'],
                         ['route' => 'admin.customers.index', 'active' => 'admin.customers.*', 'label' => 'Customers', 'can' => 'customers.view'],
                         ['route' => 'admin.coupons.index', 'active' => 'admin.coupons.*', 'label' => 'Coupons', 'can' => 'coupons.view'],
+                        ['route' => 'admin.reviews.index', 'active' => 'admin.reviews.*', 'label' => 'Reviews', 'can' => 'reviews.view'],
                     ],
                 ],
                 'catalogue' => [

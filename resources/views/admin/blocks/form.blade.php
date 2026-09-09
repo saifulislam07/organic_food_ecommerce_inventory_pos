@@ -79,7 +79,7 @@
                     <div class="card bg-light border-0 p-3 mt-4" data-field="url">
                         <label class="form-label fw-bold">Link</label>
                         <input type="text" name="url" class="form-control @error('url') is-invalid @enderror"
-                               value="{{ old('url', $block->url ?? '') }}" placeholder="/shop?category=mangoes">
+                               value="{{ old('url', $block->url ?? '') }}" placeholder="/shop?category=toys-games">
                         @error('url') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         <div class="form-text">
                             সাইটের ভেতরের ঠিকানা <code>/shop</code> এভাবে, বাইরের হলে পুরো

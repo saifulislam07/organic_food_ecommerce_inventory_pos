@@ -22,7 +22,7 @@
 @section('content')
 <main class="lp-wrap lp-section">
     <div style="text-align:center;margin-bottom:20px;">
-        <div style="width:64px;height:64px;margin:0 auto 12px;border-radius:50%;background:var(--primary,#3d8202);
+        <div style="width:64px;height:64px;margin:0 auto 12px;border-radius:50%;background:var(--primary,#4f0e94);
                     color:#fff;font-size:2rem;line-height:64px;">✓</div>
         <h1 class="lp-h1" style="margin-bottom:6px;">
             {{ $page->thankyou_headline ?: 'অর্ডার সফল হয়েছে!' }}
@@ -35,7 +35,7 @@
     <div class="lp-card">
         <div class="lp-total">
             <span>অর্ডার নম্বর</span>
-            <strong style="color:var(--primary,#3d8202);">{{ $order->order_number }}</strong>
+            <strong style="color:var(--primary,#4f0e94);">{{ $order->order_number }}</strong>
         </div>
         <div class="lp-total"><span>নাম</span><strong>{{ $order->customer_name }}</strong></div>
         <div class="lp-total"><span>মোবাইল</span><strong>{{ $order->customer_phone }}</strong></div>
@@ -52,7 +52,7 @@
         @if((float) $order->discount_amount > 0)
             <div class="lp-total">
                 <span>কম্বো ছাড়</span>
-                <strong style="color:var(--primary,#3d8202);">− ৳{{ number_format((float) $order->discount_amount) }}</strong>
+                <strong style="color:var(--primary,#4f0e94);">− ৳{{ number_format((float) $order->discount_amount) }}</strong>
             </div>
         @endif
 
@@ -81,7 +81,7 @@
            target="_blank" rel="noopener">WhatsApp-এ যোগাযোগ করুন</a>
     @endif
 
-    <a class="lp-btn" style="background:transparent;color:var(--primary,#3d8202);border:2px solid var(--primary,#3d8202);margin-top:10px;"
+    <a class="lp-btn" style="background:transparent;color:var(--primary,#4f0e94);border:2px solid var(--primary,#4f0e94);margin-top:10px;"
        href="{{ route('shop') }}">আরও পণ্য দেখুন</a>
 </main>
 @endsection

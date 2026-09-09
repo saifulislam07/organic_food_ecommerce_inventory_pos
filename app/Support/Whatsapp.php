@@ -6,7 +6,7 @@ use App\Sms\SmsManager;
 
 /**
  * wa.me only accepts a number in international form. The shop's number is
- * typed by hand in Site Settings — usually as 01716-952365 — so every link
+ * typed by hand in Site Settings — usually as +880 1XXX-XXXXXX — so every link
  * has to be normalised before it is rendered.
  */
 class Whatsapp

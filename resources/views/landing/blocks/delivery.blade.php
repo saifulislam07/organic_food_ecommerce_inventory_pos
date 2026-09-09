@@ -9,13 +9,13 @@
 
     <div class="lp-card">
         @if($page->delivery_mode === 'free')
-            <div style="font-weight:700;color:var(--primary,#3d8202);">🚚 সারা দেশে ফ্রি ডেলিভারি</div>
+            <div style="font-weight:700;color:var(--primary,#4f0e94);">🚚 সারা দেশে ফ্রি ডেলিভারি</div>
         @else
             <div class="lp-total"><span>ঢাকার ভেতরে</span><strong>৳{{ number_format($insideCharge) }}</strong></div>
             <div class="lp-total"><span>ঢাকার বাইরে</span><strong>৳{{ number_format($outsideCharge) }}</strong></div>
 
             @if($page->delivery_mode === 'global' && $threshold > 0)
-                <p style="margin:8px 0 0;font-size:.9rem;color:var(--primary-dark,#2f6b02);">
+                <p style="margin:8px 0 0;font-size:.9rem;color:var(--primary-dark,#3a0775);">
                     ৳{{ number_format($threshold) }} টাকার বেশি অর্ডারে ডেলিভারি ফ্রি।
                 </p>
             @endif

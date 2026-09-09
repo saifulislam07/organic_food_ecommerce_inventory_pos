@@ -13,13 +13,13 @@ class InitialSettingsSeeder extends Seeder
     {
         // Settings
         $settings = [
-            ['key' => 'site_title', 'value_en' => 'MohiPure', 'value_bn' => 'MohiPure', 'type' => 'text'],
-            ['key' => 'phone', 'value_en' => '01716-952365', 'value_bn' => '01716-952365', 'type' => 'text'],
-            ['key' => 'whatsapp', 'value_en' => '01716-952365', 'value_bn' => '01716-952365', 'type' => 'text'],
-            ['key' => 'address', 'value_en' => 'Chapainawabganj, Rajshahi, Bangladesh', 'value_bn' => 'চাঁপাই নবাবগঞ্জ, রাজশাহী, বাংলাদেশ', 'type' => 'textarea'],
-            ['key' => 'facebook', 'value_en' => 'https://facebook.com/mangohut', 'value_bn' => 'https://facebook.com/mangohut', 'type' => 'text'],
-            ['key' => 'hero_title', 'value_en' => 'Pure & Organic <br><span>Nature</span> Online Market', 'value_bn' => 'খাঁটি ও <span>অর্গানিক</span><br>পণ্যের অনলাইন বাজার', 'type' => 'text'],
-            ['key' => 'hero_desc', 'value_en' => 'Directly from Chapainawabganj to your doorstep. All natural and seasonal products.', 'value_bn' => 'সরাসরি চাঁপাই নবাবগঞ্জ থেকে আপনার দোরগোড়ায়। সকল প্রাকৃতিক ও মৌসুমী পণ্য।', 'type' => 'textarea'],
+            ['key' => 'site_title', 'value_en' => 'BaburhashiBD', 'value_bn' => 'BaburhashiBD', 'type' => 'text'],
+            ['key' => 'phone', 'value_en' => '+880 1XXX-XXXXXX', 'value_bn' => '+880 1XXX-XXXXXX', 'type' => 'text'],
+            ['key' => 'whatsapp', 'value_en' => '+880 1XXX-XXXXXX', 'value_bn' => '+880 1XXX-XXXXXX', 'type' => 'text'],
+            ['key' => 'address', 'value_en' => 'Dhaka, Bangladesh', 'value_bn' => 'ঢাকা, বাংলাদেশ', 'type' => 'textarea'],
+            ['key' => 'facebook', 'value_en' => '', 'value_bn' => '', 'type' => 'text'],
+            ['key' => 'hero_title', 'value_en' => 'Everything Your <span>Little One</span> Needs', 'value_bn' => 'আপনার <span>ছোট্ট সোনামণির</span><br>সব প্রয়োজন এক জায়গায়', 'type' => 'text'],
+            ['key' => 'hero_desc', 'value_en' => 'Baby essentials, kids fashion and toys, delivered across Bangladesh.', 'value_bn' => 'শিশুদের পোশাক, খেলনা ও নিত্যপ্রয়োজনীয় সবকিছু — সারাদেশে ডেলিভারি।', 'type' => 'textarea'],
         ];
 
         foreach ($settings as $setting) {
@@ -29,19 +29,19 @@ class InitialSettingsSeeder extends Seeder
         // Categories
         $categories = [
             [
-                'name_en' => 'Premium Mangoes',
-                'name_bn' => 'প্রিমিয়াম আম',
-                'slug' => 'mangoes',
-                'description_en' => 'The finest mangoes from Chapainawabganj.',
-                'description_bn' => 'চাঁপাই নবাবগঞ্জের সেরা আমসমূহ।',
+                'name_en' => 'Baby Clothing',
+                'name_bn' => 'নবজাতকের পোশাক',
+                'slug' => 'baby-clothing',
+                'description_en' => 'Soft cotton clothing for newborns and infants.',
+                'description_bn' => 'নবজাতক ও ছোট্ট সোনামণিদের জন্য নরম সুতির পোশাক।',
                 'is_active' => true,
             ],
             [
-                'name_en' => 'Organic Honey',
-                'name_bn' => 'খাঁটি মধু',
-                'slug' => 'honey',
-                'description_en' => '100% natural flower honey.',
-                'description_bn' => '১০০% প্রাকৃতিক ফুলের মধু।',
+                'name_en' => 'Toys & Games',
+                'name_bn' => 'খেলনা',
+                'slug' => 'toys-games',
+                'description_en' => 'Educational and safe toys for every age.',
+                'description_bn' => 'সব বয়সের জন্য শিক্ষামূলক ও নিরাপদ খেলনা।',
                 'is_active' => true,
             ],
         ];
@@ -56,8 +56,8 @@ class InitialSettingsSeeder extends Seeder
                 'slug' => 'about-us',
                 'title_en' => 'About Us',
                 'title_bn' => 'আমাদের সম্পর্কে',
-                'content_en' => 'Welcome to MohiPure. We provide the best organic products from Chapainawabganj.',
-                'content_bn' => 'MohiPure-এ আপনাকে স্বাগতম। আমরা সরাসরি চাঁপাই নবাবগঞ্জ থেকে সেরা অর্গানিক পণ্য সরবরাহ করি।',
+                'content_en' => 'Welcome to BaburhashiBD. We bring safe, quality baby and kids essentials to your doorstep.',
+                'content_bn' => 'BaburhashiBD-তে আপনাকে স্বাগতম। আমরা আপনার শিশুর জন্য নিরাপদ ও মানসম্পন্ন পণ্য পৌঁছে দিই।',
             ],
             [
                 'slug' => 'terms-and-conditions',

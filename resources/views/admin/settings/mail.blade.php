@@ -67,14 +67,14 @@
                             <label class="form-label fw-bold">From Address *</label>
                             <input type="email" name="mail_from_address" class="form-control @error('mail_from_address') is-invalid @enderror"
                                    value="{{ old('mail_from_address', $mail['mail_from_address'] ?? '') }}"
-                                   placeholder="orders@mangohut.com.bd" required>
+                                   placeholder="orders@baburhashibd.com" required>
                             @error('mail_from_address') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label fw-bold">From Name *</label>
                             <input type="text" name="mail_from_name" class="form-control @error('mail_from_name') is-invalid @enderror"
-                                   value="{{ old('mail_from_name', $mail['mail_from_name'] ?? 'MohiPure') }}" required>
+                                   value="{{ old('mail_from_name', $mail['mail_from_name'] ?? 'BaburhashiBD') }}" required>
                             @error('mail_from_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>

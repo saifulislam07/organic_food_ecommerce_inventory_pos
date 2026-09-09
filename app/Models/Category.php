@@ -103,9 +103,11 @@ class Category extends Model
 
     public function getImageUrlAttribute(): string
     {
-        // Legacy bare filenames have no shipped directory behind them any more.
-        return ImageStore::url(
-            str_contains((string) $this->image, '/') ? $this->image : null
-        );
+        // A bare filename is a shipped asset from the seed data.
+        if (filled($this->image) && ! str_contains($this->image, '/')) {
+            return asset('assets/img/categories/'.$this->image);
+        }
+
+        return ImageStore::url($this->image);
     }
 }

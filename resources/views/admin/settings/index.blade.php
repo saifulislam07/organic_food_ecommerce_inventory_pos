@@ -16,11 +16,11 @@
 
             <div class="col-md-6">
                 <label class="form-label">Site Title (English)</label>
-                <input type="text" name="site_title[value_en]" class="form-control" value="{{ \App\Models\Setting::value('site_title', 'en', 'MohiPure') }}">
+                <input type="text" name="site_title[value_en]" class="form-control" value="{{ \App\Models\Setting::value('site_title', 'en', 'BaburhashiBD') }}">
             </div>
             <div class="col-md-6">
                 <label class="form-label">Site Title (Bengali)</label>
-                <input type="text" name="site_title[value_bn]" class="form-control" value="{{ \App\Models\Setting::value('site_title', 'bn', 'MohiPure') }}">
+                <input type="text" name="site_title[value_bn]" class="form-control" value="{{ \App\Models\Setting::value('site_title', 'bn', 'BaburhashiBD') }}">
             </div>
 
             <div class="col-md-6">

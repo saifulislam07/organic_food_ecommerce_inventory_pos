@@ -57,7 +57,7 @@
                         <input type="text" name="internal_name"
                                class="form-control @error('internal_name') is-invalid @enderror"
                                value="{{ old('internal_name', $page->internal_name ?? '') }}"
-                               placeholder="যেমন: ঈদ আম কম্বো — রিটার্গেটিং" required>
+                               placeholder="যেমন: ঈদ কিডস কম্বো — রিটার্গেটিং" required>
                         @error('internal_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         <div class="form-text">শুধু এই লিস্টে দেখা যাবে, ক্রেতা দেখবে না।</div>
                     </div>
@@ -67,7 +67,7 @@
                         <input type="text" name="headline"
                                class="form-control form-control-lg @error('headline') is-invalid @enderror"
                                value="{{ old('headline', $page->headline ?? '') }}"
-                               placeholder="খাঁটি হিমসাগর আম — গাছপাকা, ফরমালিন মুক্ত" required>
+                               placeholder="প্রিমিয়াম বেবি ডায়াপার — নরম ও লিক-প্রুফ" required>
                         @error('headline') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
@@ -368,7 +368,7 @@
                         <div class="input-group">
                             <span class="input-group-text">/{{ config('landing.prefix', 'lp') }}/</span>
                             <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror"
-                                   value="{{ old('slug', $page->slug ?? '') }}" placeholder="eid-mango-combo">
+                                   value="{{ old('slug', $page->slug ?? '') }}" placeholder="eid-kids-combo">
                             @error('slug') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="form-text">খালি রাখলে নাম থেকে তৈরি হবে। লাইভ পেজের URL বদলালে পুরোনো অ্যাডের লিংক ভেঙে যাবে।</div>

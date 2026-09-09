@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', 'Checkout – MohiPure')
+@section('title', 'Checkout – BaburhashiBD')
 
 @push('styles')
 <style>
@@ -106,7 +106,7 @@
             @csrf
             @php
                 $pickupPoints = [
-                    ['value' => 'Main Branch - Dhaka', 'label' => app()->getLocale() == 'bn' ? 'প্রধান শাখা - ঢাকা (চাঁপাই নবাবগঞ্জ বাগান)' : 'Main Branch - Dhaka (Chapainawabganj Garden)'],
+                    ['value' => 'Main Branch - Dhaka', 'label' => app()->getLocale() == 'bn' ? 'প্রধান শাখা - ঢাকা' : 'Main Branch - Dhaka'],
                     ['value' => 'Uttara Pickup Point', 'label' => app()->getLocale() == 'bn' ? 'উত্তরা পিকআপ পয়েন্ট' : 'Uttara Pickup Point'],
                     ['value' => 'Dhanmondi Pickup Point', 'label' => app()->getLocale() == 'bn' ? 'ধানমন্ডি পিকআপ পয়েন্ট' : 'Dhanmondi Pickup Point'],
                 ];

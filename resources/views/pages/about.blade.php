@@ -1,5 +1,5 @@
 @extends('layouts.frontend')
-@section('title', 'About Us – MohiPure')
+@section('title', 'About Us – BaburhashiBD')
 
 @push('styles')
 <style>
@@ -33,11 +33,11 @@
                 <div class="section-badge"><i class="bi bi-info-circle"></i> About Us</div>
                 <h2 class="section-title text-start">আমাদের সম্পর্কে</h2>
                 <p class="text-muted" style="line-height: 1.8;">
-                    <strong>MohiPure</strong> একটি অনলাইন প্ল্যাটফর্ম যেখানে আপনি পাবেন চাঁপাই নবাবগঞ্জের সেরা আম,
-                    রাজশাহীর খাঁটি খেজুর গুড়, সুন্দরবনের মধু, ঘানিভাঙ্গা সরিষার তেল এবং আরও অনেক প্রাকৃতিক ও অর্গানিক পণ্য।
+                    <strong>BaburhashiBD</strong> একটি অনলাইন প্ল্যাটফর্ম যেখানে আপনি পাবেন শিশুদের পোশাক,
+                    ডায়াপার ও ওয়াইপস, ফিডিং সামগ্রী, খেলনা, বেবি কেয়ার পণ্য এবং স্কুল সামগ্রী — সবকিছু এক জায়গায়।
                 </p>
                 <p class="text-muted" style="line-height: 1.8;">
-                    আমাদের লক্ষ্য হলো বাংলাদেশের প্রতিটি ঘরে খাঁটি ও মেশালমুক্ত পণ্য পৌঁছে দেওয়া। আমরা সরাসরি কৃষকদের কাছ থেকে পণ্য সংগ্রহ করি এবং সারাদেশে ডেলিভারি দিই।
+                    আমাদের লক্ষ্য হলো বাংলাদেশের প্রতিটি ঘরে নিরাপদ ও মানসম্পন্ন শিশু পণ্য পৌঁছে দেওয়া। আমরা মান যাচাই করে পণ্য সংগ্রহ করি এবং সারাদেশে ডেলিভারি দিই।
                 </p>
                 <div class="d-flex flex-wrap gap-4 mt-4">
                     <div class="text-center">
@@ -50,7 +50,7 @@
                     </div>
                     <div class="text-center">
                         <div style="font-size: 2rem; color: var(--primary); font-weight: 700;">100%</div>
-                        <small class="text-muted">Organic</small>
+                        <small class="text-muted">Trusted Brands</small>
                     </div>
                 </div>
             </div>

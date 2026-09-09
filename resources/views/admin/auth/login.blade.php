@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Admin Gateway – {{ \App\Models\Setting::get('site_title', 'MohiPure') }}</title>
+    <title>Admin Gateway – {{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,10 +197,10 @@
     <div class="auth-container">
         <!-- Visual Layered Info -->
         <div class="auth-image-side">
-            <img src="{{ asset('images/admin-auth-bg.png') }}" alt="{{ \App\Models\Setting::get('site_title', 'MohiPure') }} Admin">
+            <img src="{{ asset('images/admin-auth-bg.png') }}" alt="{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }} Admin">
             <div class="auth-overlay-content">
                 <h1 class="display-3 fw-black text-white pe-5 mb-4">স্বাগতম এডমিন পোর্টাল</h1>
-                <p class="lead text-white-50 opacity-75">নিরাপদ এবং দক্ষভাবে আপনার ব্যবসা পরিচালনা করুন। MohiPure ড্যাশবোর্ডে লগইন করুন।</p>
+                <p class="lead text-white-50 opacity-75">নিরাপদ এবং দক্ষভাবে আপনার ব্যবসা পরিচালনা করুন। BaburhashiBD ড্যাশবোর্ডে লগইন করুন।</p>
                 
                 <div class="d-flex gap-4 mt-5">
                     <div class="text-white">

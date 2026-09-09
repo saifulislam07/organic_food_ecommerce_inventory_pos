@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
-@section('title', 'Shop – MohiPure')
-@section('meta_description', 'Browse our collection of organic products - mangoes, ghee, honey, mustard oil and more.')
+@section('title', 'Shop – BaburhashiBD')
+@section('meta_description', 'Browse our collection of baby and kids essentials - clothing, diapers, toys, feeding and more.')
 
 @push('styles')
 <style>

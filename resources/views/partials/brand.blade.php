@@ -1,5 +1,5 @@
 {{--
-    The MohiPure wordmark, in one place.
+    The BaburhashiBD wordmark, in one place.
 
     A logo uploaded in Admin > Settings still wins — this is the packaged
     fallback, so a fresh install already looks like the brand instead of an
@@ -10,7 +10,7 @@
 @php
     $size = $size ?? '';
     $onDark = $onDark ?? false;
-    $siteTitle = \App\Models\Setting::get('site_title', 'MohiPure');
+    $siteTitle = \App\Models\Setting::get('site_title', 'BaburhashiBD');
     $uploaded = \App\Models\Setting::value('logo');
     $classes = trim('brand-logo '
         .($size ? "brand-logo-{$size} " : '')
@@ -23,6 +23,6 @@
     <picture>
         <source srcset="{{ asset('assets/img/logo.webp') }}" type="image/webp">
         <img src="{{ asset('assets/img/logo.png') }}" alt="{{ $siteTitle }}"
-             class="{{ $classes }}" width="900" height="249" decoding="async">
+             class="{{ $classes }}" width="900" height="289" decoding="async">
     </picture>
 @endif

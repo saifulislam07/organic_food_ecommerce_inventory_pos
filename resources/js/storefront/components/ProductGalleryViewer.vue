@@ -53,6 +53,6 @@ const current = ref(props.images[0] ?? null);
 
 .gallery-thumb.active,
 .gallery-thumb:hover {
-    border-color: #3d8202;
+    border-color: #4f0e94;
 }
 </style>

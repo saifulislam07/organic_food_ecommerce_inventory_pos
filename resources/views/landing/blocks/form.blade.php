@@ -96,6 +96,6 @@
     {{ $page->ctaText() }}
 </button>
 
-<p style="text-align:center;font-size:.86rem;color:#7c876f;margin:10px 0 0;">
+<p style="text-align:center;font-size:.86rem;color:#7a7086;margin:10px 0 0;">
     অর্ডার নিশ্চিত করতে আমরা আপনাকে ফোন করবো।
 </p>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\HeroSlide;
 use App\Models\Product;
+use App\Models\Review;
 use App\Models\SiteBlock;
 
 class HomeController extends Controller
@@ -39,8 +40,12 @@ class HomeController extends Controller
         $services = SiteBlock::list('service');
         $promos = SiteBlock::list('promo');
 
+        // Approved reviews only — a customer's submission or an admin's own
+        // entry both sit hidden until then.
+        $reviews = Review::approved()->with('product')->latest()->take(12)->get();
+
         return view('home', compact(
-            'slides', 'categories', 'bestSellers', 'featured', 'trending', 'combos', 'services', 'promos'
+            'slides', 'categories', 'bestSellers', 'featured', 'trending', 'combos', 'services', 'promos', 'reviews'
         ));
     }
 }

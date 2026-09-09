@@ -35,22 +35,22 @@ class PageSeeder extends Seeder
                 'title_bn' => 'রিটার্ন পলিসি',
                 'content_en' => <<<'HTML'
                         <h2>Our promise</h2>
-                        <p>Organic food is perishable, so we check every order before it leaves us. If something still arrives in poor condition, tell us and we will put it right.</p>
+                        <p>We check every order before it leaves us so it reaches your little one exactly as expected. If something still arrives wrong, tell us and we will put it right.</p>
 
                         <h3>When you can return an item</h3>
                         <ul>
-                        <li>The product arrived damaged, spoiled or leaking.</li>
-                        <li>You received the wrong item or the wrong weight.</li>
+                        <li>The product arrived damaged or defective.</li>
+                        <li>You received the wrong item, size or colour.</li>
                         <li>The packaging seal was broken on delivery.</li>
                         </ul>
 
                         <h3>How long you have</h3>
-                        <p>Tell us within <strong>24 hours</strong> of delivery for fresh items such as mangoes and vegetables, and within <strong>7 days</strong> for packaged goods like ghee, honey and mustard oil.</p>
+                        <p>Tell us within <strong>7 days</strong> of delivery for clothing, toys and gear, and within <strong>24 hours</strong> for diapers, wipes and feeding items due to hygiene reasons.</p>
 
                         <h3>What we cannot take back</h3>
                         <ul>
-                        <li>Items that have been opened or partly used, unless they were faulty.</li>
-                        <li>Fresh produce reported after 24 hours.</li>
+                        <li>Items that have been used, washed or have tags removed, unless they were faulty.</li>
+                        <li>Diapers, wipes and other hygiene products once opened.</li>
                         <li>Orders where the delivery was refused without a reason.</li>
                         </ul>
 
@@ -66,22 +66,22 @@ class PageSeeder extends Seeder
                         HTML,
                 'content_bn' => <<<'HTML'
                         <h2>আমাদের প্রতিশ্রুতি</h2>
-                        <p>অর্গানিক খাবার পচনশীল, তাই প্রতিটি অর্ডার পাঠানোর আগে আমরা যাচাই করি। তারপরও পণ্য খারাপ অবস্থায় পৌঁছালে আমাদের জানান — আমরা সমাধান করে দেব।</p>
+                        <p>প্রতিটি অর্ডার পাঠানোর আগে আমরা যাচাই করি, যেন তা আপনার সোনামণির কাছে ঠিকভাবে পৌঁছায়। তারপরও কোনো ভুল হলে আমাদের জানান — আমরা সমাধান করে দেব।</p>
 
                         <h3>কখন ফেরত দিতে পারবেন</h3>
                         <ul>
-                        <li>পণ্য ভাঙা, নষ্ট বা লিক হওয়া অবস্থায় পৌঁছেছে।</li>
-                        <li>ভুল পণ্য বা ভুল ওজন পেয়েছেন।</li>
+                        <li>পণ্য ভাঙা বা ত্রুটিপূর্ণ অবস্থায় পৌঁছেছে।</li>
+                        <li>ভুল পণ্য, ভুল সাইজ বা ভুল রং পেয়েছেন।</li>
                         <li>ডেলিভারির সময় প্যাকেটের সিল ভাঙা ছিল।</li>
                         </ul>
 
                         <h3>কত সময়ের মধ্যে</h3>
-                        <p>আম বা সবজির মতো তাজা পণ্যের ক্ষেত্রে ডেলিভারির <strong>২৪ ঘণ্টার</strong> মধ্যে, আর ঘি, মধু, সরিষার তেলের মতো প্যাকেটজাত পণ্যের ক্ষেত্রে <strong>৭ দিনের</strong> মধ্যে জানাতে হবে।</p>
+                        <p>পোশাক, খেলনা ও অন্যান্য সামগ্রীর ক্ষেত্রে ডেলিভারির <strong>৭ দিনের</strong> মধ্যে, আর ডায়াপার, ওয়াইপস ও ফিডিং পণ্যের ক্ষেত্রে স্বাস্থ্যগত কারণে <strong>২৪ ঘণ্টার</strong> মধ্যে জানাতে হবে।</p>
 
                         <h3>যা ফেরত নেওয়া হয় না</h3>
                         <ul>
-                        <li>খোলা বা আংশিক ব্যবহৃত পণ্য, যদি না সেটি ত্রুটিপূর্ণ হয়।</li>
-                        <li>২৪ ঘণ্টা পার হওয়ার পর জানানো তাজা পণ্য।</li>
+                        <li>ব্যবহৃত, ধোয়া বা ট্যাগ খোলা পণ্য, যদি না সেটি ত্রুটিপূর্ণ হয়।</li>
+                        <li>খোলা ডায়াপার, ওয়াইপস বা অন্যান্য হাইজিন পণ্য।</li>
                         <li>কারণ ছাড়া ডেলিভারি ফিরিয়ে দেওয়া অর্ডার।</li>
                         </ul>
 
@@ -99,17 +99,17 @@ class PageSeeder extends Seeder
 
             [
                 'slug' => 'about-us',
-                'title_en' => 'About MohiPure',
-                'title_bn' => 'MohiPure সম্পর্কে',
-                'content_en' => '<h3>Our Journey</h3><p>At MohiPure, we believe in the purity of nature. Born in the heart of Chapainawabganj, the mango capital of Bangladesh, we started with a simple mission: to bring the authentic, garden-fresh taste of premium mangoes directly to your table.</p><h3>Why Choose Us?</h3><ul><li><strong>100% Organic:</strong> No formalin or harmful chemicals.</li><li><strong>Direct Sourcing:</strong> Straight from our monitored orchards.</li><li><strong>Premium Quality:</strong> Every fruit is hand-picked for perfection.</li></ul>',
-                'content_bn' => '<h3>আমাদের যাত্রা</h3><p>MohiPure-এ আমরা প্রকৃতির বিশুদ্ধতায় বিশ্বাস করি। বাংলাদেশের আমের রাজধানী চাঁপাইনবাবগঞ্জের প্রাণকেন্দ্রে আমাদের যাত্রা শুরু। আমাদের লক্ষ্য ছিল সাধারণ: প্রিমিয়াম আমের আসল, বাগান-তাজা স্বাদ সরাসরি আপনার টেবিলে পৌঁছে দেওয়া।</p><h3>কেন আমাদের বেছে নেবেন?</h3><ul><li><strong>১০০% অর্গানিক:</strong> কোনো ফরমালিন বা ক্ষতিকারক রাসায়নিক নেই।</li><li><strong>সরাসরি সংগ্রহ:</strong> আমাদের নিজস্ব তত্ত্বাবধানে থাকা বাগান থেকে সরাসরি।</li><li><strong>সেরা মান:</strong> প্রতিটি ফল নিখুঁতভাবে হাতে বাছাই করা হয়।</li></ul>',
+                'title_en' => 'About BaburhashiBD',
+                'title_bn' => 'BaburhashiBD সম্পর্কে',
+                'content_en' => '<h3>Our Journey</h3><p>BaburhashiBD started with a simple idea: shopping for your little one should be easy, safe and joyful. From baby clothing and diapers to toys and school supplies, we bring everything a growing child needs to one place.</p><h3>Why Choose Us?</h3><ul><li><strong>Safety First:</strong> Every product is checked for quality before it reaches you.</li><li><strong>Wide Range:</strong> From newborn essentials to school-age needs.</li><li><strong>Nationwide Delivery:</strong> From our store to your doorstep, anywhere in Bangladesh.</li></ul>',
+                'content_bn' => '<h3>আমাদের যাত্রা</h3><p>BaburhashiBD শুরু হয়েছিল একটি সাধারণ ভাবনা থেকে — আপনার ছোট্ট সোনামণির জন্য কেনাকাটা হোক সহজ, নিরাপদ ও আনন্দময়। শিশুর পোশাক ও ডায়াপার থেকে শুরু করে খেলনা ও স্কুল সামগ্রী — সবকিছু আমরা এক জায়গায় নিয়ে এসেছি।</p><h3>কেন আমাদের বেছে নেবেন?</h3><ul><li><strong>নিরাপত্তা প্রথমে:</strong> প্রতিটি পণ্য আপনার কাছে পৌঁছানোর আগে মান যাচাই করা হয়।</li><li><strong>বিস্তৃত পরিসর:</strong> নবজাতকের প্রয়োজনীয় জিনিস থেকে শুরু করে স্কুলের সামগ্রী পর্যন্ত।</li><li><strong>সারাদেশে ডেলিভারি:</strong> আমাদের দোকান থেকে সরাসরি আপনার দরজায়, বাংলাদেশের যেকোনো প্রান্তে।</li></ul>',
             ],
             [
                 'slug' => 'terms-and-conditions',
                 'title_en' => 'Terms & Conditions',
                 'title_bn' => 'টার্মস ও কন্ডিশন',
-                'content_en' => '<h3>1. Agreement to Terms</h3><p>By using MohiPure, you agree to comply with our service policies. We strive to provide the best organic products, but availability depends on seasonal harvests.</p><h3>2. Ordering & Payment</h3><p>Orders are confirmed after verification. Payments can be made via Cash on Delivery or digital payment gateways.</p>',
-                'content_bn' => '<h3>১. শর্তাবলী সম্মতি</h3><p>MohiPure ব্যবহারের মাধ্যমে আপনি আমাদের পরিষেবা নীতি মেনে চলতে সম্মত হন। আমরা সেরা অর্গানিক পণ্য প্রদানের চেষ্টা করি, তবে প্রাপ্যতা মৌসুমী ফসলের ওপর নির্ভর করে।</p><h3>২. অর্ডার এবং পেমেন্ট</h3><p>যাচাইকরণের পরে অর্ডার নিশ্চিত করা হয়। পেমেন্ট ক্যাশ অন ডেলিভারি বা ডিজিটাল পেমেন্ট গেটওয়ের মাধ্যমে করা যেতে পারে।</p>',
+                'content_en' => '<h3>1. Agreement to Terms</h3><p>By using BaburhashiBD, you agree to comply with our service policies. Product images are for illustration; actual colour or packaging may vary slightly.</p><h3>2. Ordering & Payment</h3><p>Orders are confirmed after verification. Payments can be made via Cash on Delivery or digital payment gateways.</p>',
+                'content_bn' => '<h3>১. শর্তাবলী সম্মতি</h3><p>BaburhashiBD ব্যবহারের মাধ্যমে আপনি আমাদের পরিষেবা নীতি মেনে চলতে সম্মত হন। পণ্যের ছবি শুধুমাত্র উদাহরণস্বরূপ, প্রকৃত রং বা প্যাকেজিং কিছুটা ভিন্ন হতে পারে।</p><h3>২. অর্ডার এবং পেমেন্ট</h3><p>যাচাইকরণের পরে অর্ডার নিশ্চিত করা হয়। পেমেন্ট ক্যাশ অন ডেলিভারি বা ডিজিটাল পেমেন্ট গেটওয়ের মাধ্যমে করা যেতে পারে।</p>',
             ],
             [
                 'slug' => 'privacy-policy',
@@ -122,8 +122,8 @@ class PageSeeder extends Seeder
                 'slug' => 'shipping-policy',
                 'title_en' => 'Shipping Policy',
                 'title_bn' => 'শিপিং পলিসি',
-                'content_en' => '<h3>Delivery Times</h3><p>Internal city delivery takes 24-48 hours. Nationwide delivery takes 3-5 days. Mangoes are shipped in specialized crates to ensure freshness.</p><h3>Free Delivery</h3><p>Free delivery is available on orders above the specified threshold (currently ৳2,000).</p>',
-                'content_bn' => '<h3>ডেলিভারি সময়</h3><p>শহরের অভ্যন্তরে ডেলিভারি ২৪-৪৮ ঘণ্টা সময় নেয়। সারাদেশে ডেলিভারি হতে ৩-৫ দিন সময় লাগে। সতেজতা নিশ্চিত করতে আম বিশেষ ক্র্যাটে পাঠানো হয়।</p><h3>ফ্রি ডেলিভারি</h3><p>নির্দিষ্ট পরিমাণের বেশি অর্ডারে (বর্তমানে ২,০০০ টাকা) ফ্রি ডেলিভারি উপলব্ধ।</p>',
+                'content_en' => '<h3>Delivery Times</h3><p>Inside city delivery takes 24-48 hours. Nationwide delivery takes 3-5 days. Fragile items such as feeding bottles and toys are packed with extra padding.</p><h3>Free Delivery</h3><p>Free delivery is available on orders above the specified threshold (currently ৳2,000).</p>',
+                'content_bn' => '<h3>ডেলিভারি সময়</h3><p>শহরের অভ্যন্তরে ডেলিভারি ২৪-৪৮ ঘণ্টা সময় নেয়। সারাদেশে ডেলিভারি হতে ৩-৫ দিন সময় লাগে। ফিডিং বোতল ও খেলনার মতো ভঙ্গুর পণ্য অতিরিক্ত প্যাডিং দিয়ে প্যাক করা হয়।</p><h3>ফ্রি ডেলিভারি</h3><p>নির্দিষ্ট পরিমাণের বেশি অর্ডারে (বর্তমানে ২,০০০ টাকা) ফ্রি ডেলিভারি উপলব্ধ।</p>',
             ],
         ];
     }

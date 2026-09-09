@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', (app()->getLocale() == 'bn' ? 'প্রোফাইল সেটিংস' : 'Profile Settings') . ' – MohiPure')
+@section('title', (app()->getLocale() == 'bn' ? 'প্রোফাইল সেটিংস' : 'Profile Settings') . ' – BaburhashiBD')
 
 @push('styles')
 <style>

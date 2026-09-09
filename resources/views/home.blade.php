@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', 'MohiPure – খাঁটি ও অর্গানিক পণ্যের অনলাইন বাজার')
+@section('title', 'BaburhashiBD – শিশুদের প্রিয় সবকিছুর অনলাইন শপ')
 
 @section('content')
     {{-- Quoted in the service strip and again in the promo tiles further down. --}}
@@ -99,7 +99,7 @@
                                 @if($service->subtitle)
                                     <p>{{ strtr($service->subtitle, [
                                         ':threshold' => number_format($threshold),
-                                        ':phone' => \App\Models\Setting::get('phone', '01716-952365'),
+                                        ':phone' => \App\Models\Setting::get('phone', '+880 1XXX-XXXXXX'),
                                     ]) }}</p>
                                 @endif
                             </div>
@@ -121,13 +121,19 @@
                     {{ app()->getLocale() == 'bn' ? 'সব দেখুন' : 'View all' }} <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
-            <div class="pc-cat-grid">
-                @foreach($categories as $category)
-                    <a href="{{ route('shop', ['category' => $category->slug]) }}" class="pc-cat-tile">
-                        <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="pc-cat-tile-img" loading="lazy">
-                        <div class="pc-cat-tile-name">{{ $category->name }}</div>
-                    </a>
-                @endforeach
+            <div class="pc-carousel-wrap">
+                <div class="pc-carousel pc-cat-grid" data-carousel>
+                    @foreach($categories as $category)
+                        <a href="{{ route('shop', ['category' => $category->slug]) }}" class="pc-cat-tile">
+                            <img src="{{ $category->image_url }}" alt="{{ $category->name }}" class="pc-cat-tile-img" loading="lazy">
+                            <div class="pc-cat-tile-name">{{ $category->name }}</div>
+                        </a>
+                    @endforeach
+                </div>
+                @if($categories->count() > 6)
+                    <button type="button" class="pc-carousel-nav pc-carousel-prev" data-carousel-prev aria-label="{{ app()->getLocale() == 'bn' ? 'আগেরটি' : 'Previous' }}"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" class="pc-carousel-nav pc-carousel-next" data-carousel-next aria-label="{{ app()->getLocale() == 'bn' ? 'পরেরটি' : 'Next' }}"><i class="bi bi-chevron-right"></i></button>
+                @endif
             </div>
         </div>
     </section>
@@ -219,6 +225,43 @@
     </section>
     @endif
 
+    {{-- Customer reviews — approved only; a customer's submission or an admin's
+         own entry both sit hidden until then (Admin > Reviews). --}}
+    @if($reviews->count())
+    <section class="pc-section pc-section-tint">
+        <div class="container">
+            <div class="pc-section-head">
+                <h2><i class="bi bi-chat-heart-fill"></i> {{ $t('section_reviews', 'কাস্টমার রিভিউ', 'Customer Reviews') }}</h2>
+            </div>
+            <div class="pc-carousel-wrap">
+                <div class="pc-carousel pc-review-grid" data-carousel>
+                    @foreach($reviews as $review)
+                        <div class="pc-review-card">
+                            <div class="pc-review-stars">{{ $review->stars }}</div>
+                            @if($review->title)<div class="pc-review-title">{{ $review->title }}</div>@endif
+                            <p class="pc-review-body">{{ $review->body }}</p>
+                            <div class="pc-review-meta">
+                                <div class="pc-review-avatar">{{ mb_substr($review->customer_name, 0, 1) }}</div>
+                                <div>
+                                    <div class="pc-review-name">
+                                        {{ $review->customer_name }}
+                                        @if($review->order_id)<i class="bi bi-patch-check-fill pc-review-verified" title="{{ app()->getLocale() == 'bn' ? 'যাচাইকৃত ক্রয়' : 'Verified purchase' }}"></i>@endif
+                                    </div>
+                                    @if($review->product)<div class="pc-review-product">{{ $review->product->name }}</div>@endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                @if($reviews->count() > 3)
+                    <button type="button" class="pc-carousel-nav pc-carousel-prev" data-carousel-prev aria-label="{{ app()->getLocale() == 'bn' ? 'আগেরটি' : 'Previous' }}"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" class="pc-carousel-nav pc-carousel-next" data-carousel-next aria-label="{{ app()->getLocale() == 'bn' ? 'পরেরটি' : 'Next' }}"><i class="bi bi-chevron-right"></i></button>
+                @endif
+            </div>
+        </div>
+    </section>
+    @endif
+
     {{-- Trending --}}
     @if($trending->count())
     <section class="pc-section pc-section-tint">
@@ -238,3 +281,31 @@
     </section>
     @endif
 @endsection
+
+@push('scripts')
+<script>
+// Drives every .pc-carousel's arrow buttons by scrolling one viewport-width
+// at a time; scroll-snap (in the CSS) settles the page, so this never has to
+// compute item widths. Buttons disable themselves at either end.
+document.querySelectorAll('[data-carousel]').forEach(function (track) {
+    var wrap = track.closest('.pc-carousel-wrap');
+    if (!wrap) return;
+    var prev = wrap.querySelector('[data-carousel-prev]');
+    var next = wrap.querySelector('[data-carousel-next]');
+    if (!prev || !next) return;
+
+    var page = function () { return track.clientWidth * 0.92; };
+    prev.addEventListener('click', function () { track.scrollBy({ left: -page(), behavior: 'smooth' }); });
+    next.addEventListener('click', function () { track.scrollBy({ left: page(), behavior: 'smooth' }); });
+
+    var updateNav = function () {
+        var max = track.scrollWidth - track.clientWidth - 1;
+        prev.disabled = track.scrollLeft <= 0;
+        next.disabled = track.scrollLeft >= max;
+    };
+    track.addEventListener('scroll', updateNav, { passive: true });
+    window.addEventListener('resize', updateNav);
+    updateNav();
+});
+</script>
+@endpush

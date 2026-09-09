@@ -7,8 +7,8 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Hind Siliguri'; color: #333; line-height: 1.5; margin: 0; padding: 20px; background: #f0f0f0; }
         .invoice-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 50px; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; }
-        .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #3d8202; padding-bottom: 30px; margin-bottom: 30px; }
-        .brand-section h1 { color: #3d8202; margin: 0; font-size: 32px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4f0e94; padding-bottom: 30px; margin-bottom: 30px; }
+        .brand-section h1 { color: #4f0e94; margin: 0; font-size: 32px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .invoice-logo { height: 56px; width: auto; max-width: 260px; display: block; margin-bottom: 4px; }
         .brand-section p { margin: 5px 0 0; color: #666; font-size: 14px; }
         .invoice-meta { text-align: right; }
@@ -16,11 +16,11 @@
         .invoice-meta p { margin: 5px 0; color: #666; font-size: 14px; }
 
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
-        .info-block h3 { font-size: 14px; text-transform: uppercase; color: #3d8202; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; font-weight: 700; letter-spacing: 0.5px; }
+        .info-block h3 { font-size: 14px; text-transform: uppercase; color: #4f0e94; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; font-weight: 700; letter-spacing: 0.5px; }
         .info-block p { margin: 4px 0; font-size: 14px; color: #444; }
 
         .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .invoice-table th { background: #f6faee; border-bottom: 2px solid #3d8202; padding: 12px 15px; text-align: left; font-size: 13px; font-weight: 700; text-transform: uppercase; color: #3d8202; }
+        .invoice-table th { background: #f5ecff; border-bottom: 2px solid #4f0e94; padding: 12px 15px; text-align: left; font-size: 13px; font-weight: 700; text-transform: uppercase; color: #4f0e94; }
         .invoice-table td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 14px; }
         .invoice-table .text-right { text-align: right; }
         .invoice-table .text-center { text-align: center; }
@@ -28,15 +28,15 @@
         .summary-section { display: flex; justify-content: flex-end; }
         .summary-table { width: 250px; }
         .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
-        .summary-row.total { border-top: 2px solid #3d8202; margin-top: 10px; padding-top: 12px; font-weight: 800; font-size: 18px; color: #3d8202; }
+        .summary-row.total { border-top: 2px solid #4f0e94; margin-top: 10px; padding-top: 12px; font-weight: 800; font-size: 18px; color: #4f0e94; }
         
         .footer { margin-top: 60px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 20px; }
         .footer p { margin: 4px 0; }
 
         .no-print-area { text-align: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; }
         .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 14px; transition: 0.2s; cursor: pointer; border: none; }
-        .btn-print { background: #3d8202; color: white; }
-        .btn-print:hover { background: #1e4a01; }
+        .btn-print { background: #4f0e94; color: white; }
+        .btn-print:hover { background: #3a0775; }
         .btn-back { background: #6c757d; color: white; margin-left: 10px; }
         
         @media print {
@@ -63,10 +63,13 @@
     <div class="invoice-header">
         <div class="brand-section">
             @php $invoiceLogo = \App\Models\Setting::value('logo'); @endphp
-            <img class="invoice-logo"
-                 src="{{ $invoiceLogo ? \App\Support\ImageStore::url($invoiceLogo) : asset('assets/img/logo.png') }}"
-                 alt="{{ \App\Models\Setting::get('site_title', 'MohiPure') }}">
-            <p>{{ app()->getLocale() == 'bn' ? 'আপনার বিশ্বস্ত অর্গানিক ফুড পার্টনার' : 'Your Trusted Organic Food Partner' }}</p>
+            @if($invoiceLogo)
+                <img class="invoice-logo" src="{{ \App\Support\ImageStore::url($invoiceLogo) }}"
+                     alt="{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}">
+            @else
+                <h1>{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}</h1>
+            @endif
+            <p>{{ app()->getLocale() == 'bn' ? 'আপনার বিশ্বস্ত শিশু পণ্যের পার্টনার' : 'Your Trusted Kids Store Partner' }}</p>
         </div>
         <div class="invoice-meta">
             <h2>{{ app()->getLocale() == 'bn' ? 'ইনভয়েস' : 'Invoice' }}</h2>
@@ -88,10 +91,10 @@
         </div>
         <div class="info-block">
             <h3>{{ app()->getLocale() == 'bn' ? 'প্রেরক' : 'Ship From' }}</h3>
-            <p><strong>{{ \App\Models\Setting::get('site_title', 'MohiPure') }}</strong></p>
-            <p>{{ \App\Models\Setting::get('phone', '01716-952365') }}</p>
-            <p>{{ \App\Models\Setting::get('address', 'Chapainawabganj, Rajshahi') }}</p>
-            <p>www.mangohut.com.bd</p>
+            <p><strong>{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}</strong></p>
+            <p>{{ \App\Models\Setting::get('phone', '+880 1XXX-XXXXXX') }}</p>
+            <p>{{ \App\Models\Setting::get('address', 'Dhaka, Bangladesh') }}</p>
+            <p>www.baburhashibd.com</p>
         </div>
     </div>
 
@@ -166,7 +169,7 @@
     @endif
 
     <div class="footer">
-        <p>{{ app()->getLocale() == 'bn' ? 'আমাদের কাছ থেকে কেনাকাটা করার জন্য ধন্যবাদ!' : 'Thank you for shopping with '.\App\Models\Setting::get('site_title', 'MohiPure').'!' }}</p>
+        <p>{{ app()->getLocale() == 'bn' ? 'আমাদের কাছ থেকে কেনাকাটা করার জন্য ধন্যবাদ!' : 'Thank you for shopping with '.\App\Models\Setting::get('site_title', 'BaburhashiBD').'!' }}</p>
         <p>{{ app()->getLocale() == 'bn' ? 'এটি একটি কম্পিউটার জেনারেটেড ইনভয়েস' : 'This is a computer generated invoice' }}</p>
     </div>
 </div>

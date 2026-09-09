@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Authentication') – {{ \App\Models\Setting::get('site_title', 'MohiPure') }}</title>
+    <title>@yield('title', 'Authentication') – {{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -201,11 +201,11 @@
     <div class="auth-container">
         <!-- Left Side: Visual -->
         <div class="auth-image-side">
-            <img src="{{ asset('images/auth-bg.png') }}" alt="Orchard">
+            <img src="{{ asset('images/auth-bg.png') }}" alt="BaburhashiBD">
             <div class="auth-overlay-content">
-                <span class="badge mb-3 px-3 py-2 text-uppercase tracking-wider fw-bold auth-chip">Premium Quality</span>
-                <h1 class="display-4 fw-black text-white mb-3">খাঁটি ও তাজা আমের জাদুকরী স্বাদ।</h1>
-                <p class="lead text-white-50">চাঁপাই নবাবগঞ্জের বিখ্যাত বাগান থেকে সরাসরি সংগ্রহ করা শতভাগ অর্গানিক পণ্য এখন আপনার দোরগোড়ায়।</p>
+                <span class="badge mb-3 px-3 py-2 text-uppercase tracking-wider fw-bold auth-chip">Trusted by Parents</span>
+                <h1 class="display-4 fw-black text-white mb-3">আপনার সোনামণির জন্য, সবচেয়ে নিরাপদ পছন্দ।</h1>
+                <p class="lead text-white-50">শিশুদের পোশাক থেকে খেলনা — মানসম্পন্ন সবকিছু এখন আপনার দোরগোড়ায়।</p>
             </div>
         </div>
 
@@ -221,7 +221,7 @@
 
             <!-- Footer Small -->
             <div class="mt-5 text-center text-muted small">
-                <p>&copy; {{ date('Y') }} {{ \App\Models\Setting::get('site_title', 'MohiPure') }}. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} {{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}. All rights reserved.</p>
             </div>
         </div>
     </div>

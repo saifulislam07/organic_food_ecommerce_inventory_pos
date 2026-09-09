@@ -1,7 +1,7 @@
-/* === MOHIPURE — Storefront chrome ===================================== */
+/* === BABURHASHIBD — Storefront chrome =================================== */
 /*
    The marketplace layout: a three-row header (info strip, logo + mega search,
-   green category bar), a category rail beside the hero, and the section and
+   pink category bar), a category rail beside the hero, and the section and
    card furniture the front page is built out of.
 
    Loads after css/app.css, which still owns the shared pieces — hero copy,
@@ -9,9 +9,8 @@
    repeats a selector from app.css is a deliberate retune, not a duplicate:
    this file is the last stylesheet in, so it wins.
 
-   Every colour comes from the tokens in css/brand.css, which are sampled off
-   the MohiPure logo — leaf green for structure, mango gold for anything that
-   has to be pressed or noticed.
+   Every colour comes from the tokens in css/brand.css — deep violet for
+   structure, bright magenta-violet for anything that has to be pressed or noticed.
 */
 
 :root {
@@ -599,12 +598,56 @@ h3 { font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 600; color: var(--dark)
 }
 .pc-section-more:hover { color: var(--accent-dark); gap: 10px; }
 
-/* Category tiles — a round image over the name, marketplace style.
-   Flex rather than grid: a shop with, say, eight categories then centres the
-   two left over instead of stranding them against the left edge. */
-.pc-cat-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+/* === CAROUSEL (multi-item, scroll-snap) =================================
+   A horizontally-scrolling strip that shows N items at a time with arrow
+   buttons for the rest, rather than a grid that wraps everything onto more
+   rows. Used by both "Shop by Category" and "Customer Reviews" below;
+   .pc-cat-grid / .pc-review-grid only set the per-item width. No JS library
+   — scroll-snap does the paging, a few lines of vanilla JS (home.blade.php)
+   drive the arrow buttons via scrollBy(). */
+.pc-carousel-wrap { position: relative; }
+.pc-carousel {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.pc-carousel::-webkit-scrollbar { display: none; }
+.pc-carousel > * { scroll-snap-align: start; flex-shrink: 0; }
+
+.pc-carousel-nav {
+    position: absolute;
+    top: 50%;
+    translate: 0 -50%;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    color: var(--primary);
+    transition: var(--transition);
+}
+.pc-carousel-nav:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+.pc-carousel-nav:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+.pc-carousel-prev { left: -18px; }
+.pc-carousel-next { right: -18px; }
+@media (max-width: 767.98px) {
+    /* No room for floating arrows on a phone; the strip still scrolls by touch. */
+    .pc-carousel-nav { display: none; }
+}
+
+/* Category tiles — a round image over the name, marketplace style. */
 .pc-cat-tile {
-    flex: 0 1 calc((100% - 5 * 14px) / 6);
+    flex-basis: calc((100% - 5 * 14px) / 6);
     background: #fff;
     border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
@@ -647,6 +690,50 @@ h3 { font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 600; color: var(--dark)
     .pc-cat-tile-img { width: 56px; height: 56px; }
     .pc-cat-tile-name { font-size: 0.72rem; }
 }
+
+/* Review cards — a rating, the words, and who said it. */
+.pc-review-card {
+    flex-basis: calc((100% - 2 * 14px) / 3);
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    border: 1px solid transparent;
+    transition: var(--transition);
+}
+.pc-review-card:hover { box-shadow: var(--shadow-md); border-color: rgba(var(--primary-rgb), 0.2); }
+.pc-review-stars { color: var(--accent); letter-spacing: 2px; font-size: 0.95rem; margin-bottom: 10px; }
+.pc-review-title { font-weight: 700; margin-bottom: 6px; color: var(--dark); }
+.pc-review-body {
+    color: #555;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+.pc-review-meta { display: flex; align-items: center; gap: 10px; }
+.pc-review-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--brand-gradient);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex: none;
+}
+.pc-review-name { font-weight: 700; font-size: 0.85rem; color: var(--dark); }
+.pc-review-product { font-size: 0.72rem; color: var(--gray-500); }
+.pc-review-verified { color: var(--success); font-size: 0.7rem; }
+
+@media (max-width: 991.98px) { .pc-review-card { flex-basis: calc((100% - 14px) / 2); } }
+@media (max-width: 575.98px) { .pc-review-card { flex-basis: 86%; } }
 
 /* The deal block: a banner-headed panel wrapped around a product row. */
 .pc-deal { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); background: #fff; }
@@ -737,7 +824,7 @@ h3 { font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 600; color: var(--dark)
    which is what the storefront actually did before this file existed. */
 .product-card-image img { object-fit: contain; padding: 10px; }
 
-/* The discount flag, in the logo's mango gold. */
+/* The discount flag, in the brand's gold. */
 .badge-discount {
     background: var(--accent-dark);
     color: #fff;
@@ -998,3 +1085,27 @@ main { padding-bottom: 74px; }
 
 .summary-row.summary-discount { color: var(--accent-text); font-weight: 600; }
 .summary-row.summary-discount small { font-weight: 400; font-size: 0.72rem; }
+
+/* === STAR RATING INPUT ===================================================
+   Five radio buttons, reversed in the DOM and in flex direction, so the CSS
+   "checked ~ label" sibling selector — which only ever reaches forward —
+   ends up lighting up everything to the *left* of the chosen star. No JS. */
+.star-input {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 2px;
+}
+.star-input input { position: absolute; opacity: 0; width: 0; height: 0; }
+.star-input label {
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--gray-200);
+    cursor: pointer;
+    transition: color 0.15s;
+}
+.star-input input:checked ~ label,
+.star-input label:hover,
+.star-input label:hover ~ label {
+    color: var(--accent);
+}

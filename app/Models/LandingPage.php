@@ -65,7 +65,7 @@ class LandingPage extends Model
      * colour change ends up needing a new Blade file.
      */
     public const THEMES = [
-        'default' => 'ব্র্যান্ড (সবুজ)',
+        'default' => 'ব্র্যান্ড (গোলাপি)',
         'mango' => 'আম',
         'dates' => 'খেজুর ও গুড়',
         'honey' => 'মধু',

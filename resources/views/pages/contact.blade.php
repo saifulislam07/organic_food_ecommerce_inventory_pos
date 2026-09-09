@@ -1,5 +1,5 @@
 @extends('layouts.frontend')
-@section('title', 'Contact Us – MohiPure')
+@section('title', 'Contact Us – BaburhashiBD')
 @section('content')
 @include('partials.page-head', [
     'title' => app()->getLocale() == 'bn' ? 'যোগাযোগ' : 'Contact Us',
@@ -15,7 +15,7 @@
                         <i class="bi bi-telephone"></i>
                     </div>
                     <h5>Phone</h5>
-                    <p class="text-muted">01716-952365</p>
+                    <p class="text-muted">+880 1XXX-XXXXXX</p>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
@@ -33,7 +33,7 @@
                         <i class="bi bi-geo-alt"></i>
                     </div>
                     <h5>Address</h5>
-                    <p class="text-muted">চাঁপাই নবাবগঞ্জ, রাজশাহী, বাংলাদেশ</p>
+                    <p class="text-muted">ঢাকা, বাংলাদেশ</p>
                 </div>
             </div>
         </div>

@@ -14,7 +14,7 @@
                     <div class="row g-3">
                         <div class="col-md-12">
                             <label class="form-label fw-bold small text-uppercase">Expense Title</label>
-                            <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" placeholder="e.g., Mango Procurement" required>
+                            <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" placeholder="e.g., Diaper Stock Procurement" required>
                             @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 

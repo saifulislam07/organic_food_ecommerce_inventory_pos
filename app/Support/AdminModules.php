@@ -32,6 +32,7 @@ class AdminModules
         'pos' => ['POS System', [self::VIEW, self::CREATE]],
         'orders' => ['Orders', [self::VIEW, self::EDIT]],
         'customers' => ['Customers', [self::VIEW]],
+        'reviews' => ['Reviews', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'products' => ['Products', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'categories' => ['Categories', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'combos' => ['Combos', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],

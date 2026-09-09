@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', (app()->getLocale() == 'bn' ? 'আমার অ্যাকাউন্ট' : 'My Account') . ' – MohiPure')
+@section('title', (app()->getLocale() == 'bn' ? 'আমার অ্যাকাউন্ট' : 'My Account') . ' – BaburhashiBD')
 
 @push('styles')
 <style>

@@ -19,7 +19,7 @@
                 @endif
                 <div class="lp-pack-body">
                     <div class="lp-pack-name">{{ $item->label() }}</div>
-                    <div style="font-size:.85rem;color:#7c876f;">{{ $item->min_qty }} টি</div>
+                    <div style="font-size:.85rem;color:#7a7086;">{{ $item->min_qty }} টি</div>
                 </div>
             </div>
         @endforeach
@@ -113,7 +113,7 @@
 @endif
 
 @if($page->stock_note)
-    <p style="margin:12px 0 0;color:var(--accent-text,#b85600);font-weight:600;">
+    <p style="margin:12px 0 0;color:var(--accent-text,#7a0bb8);font-weight:600;">
         ⚡ {{ $page->stock_note }}
     </p>
 @endif

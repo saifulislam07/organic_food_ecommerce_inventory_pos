@@ -19,7 +19,7 @@ class HeroSlide extends Model
     use CleansUpImages;
 
     /** The picture a slide with no upload of its own shows. */
-    public const DEFAULT_IMAGE = 'images/hero-mango.png';
+    public const DEFAULT_IMAGE = 'assets/img/placeholder.png';
 
     protected static function booted(): void
     {
@@ -48,13 +48,13 @@ class HeroSlide extends Model
     public static function fallback(): self
     {
         return new self([
-            'badge_en' => '100% Pure & Organic',
-            'badge_bn' => '১০০% খাঁটি ও অর্গানিক',
+            'badge_en' => 'New Arrivals for Little Ones',
+            'badge_bn' => 'ছোট্ট সোনামণিদের জন্য নতুন সংগ্রহ',
             'title_en' => Setting::value('hero_title', 'en')
-                ?: 'Pure & Organic <br><span>Nature</span> Online Market',
+                ?: 'Everything Your <span>Little One</span> Needs',
             'title_bn' => Setting::value('hero_title', 'bn'),
             'subtitle_en' => Setting::value('hero_desc', 'en')
-                ?: 'Directly from Chapainawabganj to your doorstep.',
+                ?: 'Baby essentials, kids fashion and toys, delivered nationwide.',
             'subtitle_bn' => Setting::value('hero_desc', 'bn'),
         ]);
     }

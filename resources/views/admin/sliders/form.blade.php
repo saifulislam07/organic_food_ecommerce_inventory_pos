@@ -18,7 +18,7 @@
                                     <img src="https://flagcdn.com/w20/gb.png" class="me-2" alt="EN"> Badge (English)
                                 </label>
                                 <input type="text" name="badge_en" class="form-control @error('badge_en') is-invalid @enderror"
-                                       value="{{ old('badge_en', $slide->badge_en ?? '') }}" placeholder="100% Pure & Organic">
+                                       value="{{ old('badge_en', $slide->badge_en ?? '') }}" placeholder="New Arrivals for Little Ones">
                                 @error('badge_en') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
@@ -26,7 +26,7 @@
                                     <img src="https://flagcdn.com/w20/bd.png" class="me-2" alt="BN"> ব্যাজ (বাংলা)
                                 </label>
                                 <input type="text" name="badge_bn" class="form-control @error('badge_bn') is-invalid @enderror"
-                                       value="{{ old('badge_bn', $slide->badge_bn ?? '') }}" placeholder="১০০% খাঁটি ও অর্গানিক">
+                                       value="{{ old('badge_bn', $slide->badge_bn ?? '') }}" placeholder="ছোট্ট সোনামণিদের জন্য নতুন সংগ্রহ">
                                 @error('badge_bn') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
@@ -97,7 +97,7 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Link</label>
                                 <input type="text" name="button_url" class="form-control @error('button_url') is-invalid @enderror"
-                                       value="{{ old('button_url', $slide->button_url ?? '') }}" placeholder="/shop?category=mango">
+                                       value="{{ old('button_url', $slide->button_url ?? '') }}" placeholder="/shop?category=toys-games">
                                 @error('button_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 <div class="form-text">খালি রাখলে শপ পেজে যাবে।</div>
                             </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Review;
 
 class CustomerDashboardController extends Controller
 {
@@ -20,7 +21,14 @@ class CustomerDashboardController extends Controller
             ->with(['items.product', 'items.variant'])
             ->firstOrFail();
 
-        return view('customer.orders.show', compact('order'));
+        // Which of this order's products the customer has already reviewed,
+        // so the "Write a Review" button can turn into a confirmation instead.
+        $reviewedProductIds = Review::where('order_id', $order->id)
+            ->where('user_id', auth()->id())
+            ->pluck('product_id')
+            ->all();
+
+        return view('customer.orders.show', compact('order', 'reviewedProductIds'));
     }
 
     public function invoice(string $orderNumber)

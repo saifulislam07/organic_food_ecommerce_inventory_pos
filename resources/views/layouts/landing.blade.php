@@ -67,8 +67,8 @@
 
             /* Themes may set --lp-font; all but the gadget one leave it alone. */
             font-family: var(--lp-font, 'Hind Siliguri', system-ui, sans-serif);
-            color: var(--dark, #1c2415);
-            background: var(--cream, #fcfdf5);
+            color: var(--dark, #1e1029);
+            background: var(--cream, #fdfaff);
             font-size: 1rem;
             line-height: 1.7;
             padding-bottom: 0;
@@ -78,7 +78,7 @@
         body.has-sticky { padding-bottom: 84px; }
 
         img { max-width: 100%; height: auto; display: block; }
-        a { color: var(--primary, #3d8202); }
+        a { color: var(--primary, #4f0e94); }
         [hidden] { display: none !important; }
 
         /* One column at every width. .lp-wrap is the measure and it is the only
@@ -99,7 +99,7 @@
             gap: 12px;
             padding: 10px 16px;
             background: #fff;
-            border-bottom: 1px solid var(--cream-dark, #f0f6e2);
+            border-bottom: 1px solid var(--cream-dark, #f5ecff);
             position: sticky;
             top: 0;
             z-index: 20;
@@ -112,9 +112,9 @@
             gap: 6px;
             font-weight: 700;
             font-size: .9rem;
-            color: var(--primary-dark, #2f6b02);
+            color: var(--primary-dark, #3a0775);
             text-decoration: none;
-            border: 1.5px solid var(--primary-light, #70b502);
+            border: 1.5px solid var(--primary-light, #9a41f0);
             border-radius: 999px;
             padding: 5px 14px;
             white-space: nowrap;
@@ -123,27 +123,27 @@
         /* ----------------------------------------------------------- blocks */
 
         .lp-section { padding: 26px 0; }
-        .lp-section + .lp-section { border-top: 1px solid var(--cream-dark, #f0f6e2); }
+        .lp-section + .lp-section { border-top: 1px solid var(--cream-dark, #f5ecff); }
 
         .lp-h1 {
             font-size: clamp(1.5rem, 6vw, 2.1rem);
             line-height: 1.3;
             font-weight: 700;
             margin: 0 0 8px;
-            color: var(--primary-darker, #1e4a01);
+            color: var(--primary-darker, #270361);
         }
-        .lp-sub { font-size: 1.05rem; color: #4a5a3c; margin: 0 0 14px; }
+        .lp-sub { font-size: 1.05rem; color: #5c4f66; margin: 0 0 14px; }
         .lp-h2 {
             font-size: 1.25rem;
             font-weight: 700;
             margin: 0 0 14px;
-            color: var(--primary-dark, #2f6b02);
+            color: var(--primary-dark, #3a0775);
         }
 
         .lp-badge {
             display: inline-block;
-            background: var(--accent, #fda102);
-            color: var(--lp-badge-text, #3a2400);
+            background: var(--accent, #bd06f1);
+            color: var(--lp-badge-text, #3a0759);
             font-weight: 700;
             font-size: .85rem;
             border-radius: 999px;
@@ -163,7 +163,7 @@
         /* The offer and the order form: the two panels the page exists for. */
         .lp-offer {
             background: #fff;
-            border: 1px solid var(--cream-dark, #f0f6e2);
+            border: 1px solid var(--cream-dark, #f5ecff);
             border-radius: var(--lp-r-lg);
             padding: 18px 16px;
         }
@@ -173,7 +173,7 @@
 
         .lp-card {
             background: #fff;
-            border: 1px solid var(--cream-dark, #f0f6e2);
+            border: 1px solid var(--cream-dark, #f5ecff);
             border-radius: var(--lp-r);
             padding: 16px;
         }
@@ -181,13 +181,13 @@
         /* ----------------------------------------------------------- price */
 
         .lp-price { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
-        .lp-price-label { font-size: .9rem; color: #7c876f; }
-        .lp-price-now { font-size: 2rem; font-weight: 700; color: var(--primary, #3d8202); }
-        .lp-price-was { font-size: 1.1rem; color: #8a9580; text-decoration: line-through; }
+        .lp-price-label { font-size: .9rem; color: #7a7086; }
+        .lp-price-now { font-size: 2rem; font-weight: 700; color: var(--primary, #4f0e94); }
+        .lp-price-was { font-size: 1.1rem; color: #9186a0; text-decoration: line-through; }
         .lp-save {
-            background: #fdeddb;
-            background: color-mix(in srgb, var(--accent, #fda102) 20%, #fff);
-            color: var(--accent-text, #b85600);
+            background: #f5e0ff;
+            background: color-mix(in srgb, var(--accent, #bd06f1) 20%, #fff);
+            color: var(--accent-text, #7a0bb8);
             font-weight: 700;
             font-size: .85rem;
             border-radius: 6px;
@@ -200,22 +200,22 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            border: 2px solid var(--cream-dark, #f0f6e2);
+            border: 2px solid var(--cream-dark, #f5ecff);
             border-radius: var(--lp-r);
             padding: 10px 12px;
             margin-bottom: 10px;
             background: #fff;
             cursor: pointer;
         }
-        .lp-pack:has(input:checked) { border-color: var(--primary, #3d8202); background: #f4faec; }
-        .lp-pack input { width: 20px; height: 20px; accent-color: var(--primary, #3d8202); flex: none; }
+        .lp-pack:has(input:checked) { border-color: var(--primary, #4f0e94); background: #f8f0ff; }
+        .lp-pack input { width: 20px; height: 20px; accent-color: var(--primary, #4f0e94); flex: none; }
         .lp-pack img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; flex: none; }
         .lp-pack-body { flex: 1 1 auto; min-width: 0; }
         /* A long Bengali product name must wrap rather than push the price off
            the edge of a 320px screen. */
         .lp-pack-name { font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
-        .lp-pack-price { font-weight: 700; color: var(--primary, #3d8202); white-space: nowrap; }
-        .lp-pack-was { color: #8a9580; text-decoration: line-through; font-size: .85rem; margin-left: 6px; }
+        .lp-pack-price { font-weight: 700; color: var(--primary, #4f0e94); white-space: nowrap; }
+        .lp-pack-was { color: #9186a0; text-decoration: line-through; font-size: .85rem; margin-left: 6px; }
         .lp-pack.is-out { opacity: .55; cursor: not-allowed; }
 
         .lp-qty { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
@@ -232,8 +232,8 @@
         .lp-qty select { width: auto; padding-right: 30px; }
         .lp-field input:focus, .lp-field select:focus, .lp-field textarea:focus {
             outline: none;
-            border-color: var(--primary-light, #70b502);
-            box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 61,130,2), .15);
+            border-color: var(--primary-light, #9a41f0);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79,14,148), .15);
         }
 
         /* ------------------------------------------------------------ lists */
@@ -254,7 +254,7 @@
             line-height: 21px;
             text-align: center;
             border-radius: 50%;
-            background: var(--primary, #3d8202);
+            background: var(--primary, #4f0e94);
             color: #fff;
             font-size: .75rem;
             font-weight: 700;
@@ -269,13 +269,13 @@
             display: flex;
             gap: 12px;
             padding: 9px 0;
-            border-bottom: 1px solid var(--cream-dark, #f0f6e2);
+            border-bottom: 1px solid var(--cream-dark, #f5ecff);
         }
         .lp-spec:last-child { border-bottom: 0; }
         .lp-spec dt {
             flex: 0 0 40%;
             font-weight: 600;
-            color: #4a5a3c;
+            color: #5c4f66;
         }
         .lp-spec dd {
             flex: 1 1 auto;
@@ -285,11 +285,11 @@
             overflow-wrap: anywhere;
         }
 
-        .lp-review { border-left: 3px solid var(--accent-gold, #fbcf02); padding: 2px 0 2px 12px; margin-bottom: 14px; }
+        .lp-review { border-left: 3px solid var(--accent-gold, #e6b3ff); padding: 2px 0 2px 12px; margin-bottom: 14px; }
         .lp-review-name { font-weight: 700; font-size: .92rem; }
-        .lp-stars { color: var(--accent, #fda102); font-size: .85rem; letter-spacing: 1px; }
+        .lp-stars { color: var(--accent, #bd06f1); font-size: .85rem; letter-spacing: 1px; }
 
-        .lp-faq { border-bottom: 1px solid var(--cream-dark, #f0f6e2); }
+        .lp-faq { border-bottom: 1px solid var(--cream-dark, #f5ecff); }
         .lp-faq summary {
             cursor: pointer;
             font-weight: 600;
@@ -300,15 +300,15 @@
             gap: 10px;
         }
         .lp-faq summary::-webkit-details-marker { display: none; }
-        .lp-faq summary::after { content: '+'; font-weight: 700; color: var(--primary, #3d8202); }
+        .lp-faq summary::after { content: '+'; font-weight: 700; color: var(--primary, #4f0e94); }
         .lp-faq[open] summary::after { content: '−'; }
-        .lp-faq p { margin: 0 0 12px; color: #4a5a3c; }
+        .lp-faq p { margin: 0 0 12px; color: #5c4f66; }
 
         /* This block is whatever the admin pasted into the editor, so it is the
            one place a stray table or a wide embed can push the page sideways. */
         .lp-body-copy { overflow-x: auto; }
         .lp-body-copy img { border-radius: 12px; margin: 10px 0; }
-        .lp-body-copy h2, .lp-body-copy h3 { color: var(--primary-dark, #2f6b02); }
+        .lp-body-copy h2, .lp-body-copy h3 { color: var(--primary-dark, #3a0775); }
         .lp-body-copy table { width: 100%; border-collapse: collapse; }
         .lp-body-copy iframe, .lp-body-copy video { max-width: 100%; }
 
@@ -324,7 +324,7 @@
             width: 100%;
             border: 0;
             border-radius: var(--lp-r);
-            background: var(--primary, #3d8202);
+            background: var(--primary, #4f0e94);
             color: #fff;
             font-family: inherit;
             font-size: 1.15rem;
@@ -334,8 +334,8 @@
             text-align: center;
             text-decoration: none;
         }
-        .lp-btn:hover { background: var(--primary-dark, #2f6b02); }
-        .lp-btn:disabled { background: #9db98a; cursor: not-allowed; }
+        .lp-btn:hover { background: var(--primary-dark, #3a0775); }
+        .lp-btn:disabled { background: #a89ab0; cursor: not-allowed; }
 
         .lp-total {
             display: flex;
@@ -349,7 +349,7 @@
             padding-top: 10px;
             font-size: 1.15rem;
             font-weight: 700;
-            color: var(--primary-dark, #2f6b02);
+            color: var(--primary-dark, #3a0775);
         }
 
         .lp-alert {
@@ -360,7 +360,7 @@
         }
         .lp-alert-bad { background: #fdecea; color: #a52117; }
         .lp-alert-note { background: #fff6e5; color: #7a4c00; }
-        .lp-alert-info { background: #eef6e4; color: var(--primary-dark, #2f6b02); }
+        .lp-alert-info { background: #f3e8ff; color: var(--primary-dark, #3a0775); }
 
         /* -------------------------------------------------------- urgency */
 
@@ -371,7 +371,7 @@
             margin: 12px 0;
         }
         .lp-countdown div {
-            background: var(--primary-darker, #1e4a01);
+            background: var(--primary-darker, #270361);
             color: #fff;
             border-radius: var(--lp-r-sm);
             padding: 6px 10px;
@@ -388,20 +388,20 @@
             position: fixed;
             left: 0; right: 0; bottom: 0;
             background: #fff;
-            border-top: 1px solid var(--cream-dark, #f0f6e2);
+            border-top: 1px solid var(--cream-dark, #f5ecff);
             box-shadow: 0 -4px 18px rgba(0, 0, 0, .08);
             padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
             z-index: 30;
         }
         .lp-sticky .lp-wrap { display: flex; align-items: center; gap: 12px; padding: 0; }
-        .lp-sticky-label { font-size: .72rem; color: #7c876f; line-height: 1; }
-        .lp-sticky-price { font-weight: 700; font-size: 1.15rem; color: var(--primary-dark, #2f6b02); white-space: nowrap; }
+        .lp-sticky-label { font-size: .72rem; color: #7a7086; line-height: 1; }
+        .lp-sticky-price { font-weight: 700; font-size: 1.15rem; color: var(--primary-dark, #3a0775); white-space: nowrap; }
         .lp-sticky .lp-btn { width: auto; flex: 1 1 auto; font-size: 1rem; padding: 12px 16px; }
 
         .lp-foot {
             text-align: center;
             font-size: .85rem;
-            color: #7c876f;
+            color: #7a7086;
             padding: 22px 16px 6px;
         }
 
@@ -480,7 +480,7 @@
     @endif
 
     <header class="lp-header">
-        <a href="{{ route('home') }}" aria-label="{{ \App\Models\Setting::get('site_title', 'MohiPure') }}">
+        <a href="{{ route('home') }}" aria-label="{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}">
             @include('partials.brand')
         </a>
 
@@ -495,7 +495,7 @@
     @yield('content')
 
     <footer class="lp-foot">
-        © {{ date('Y') }} {{ \App\Models\Setting::get('site_title', 'MohiPure') }} ·
+        © {{ date('Y') }} {{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }} ·
         <a href="{{ route('home') }}">মূল ওয়েবসাইট</a>
     </footer>
 

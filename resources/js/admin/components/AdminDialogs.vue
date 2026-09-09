@@ -103,8 +103,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 .admin-toast i:first-child { font-size: 1.15rem; }
 
 /* The panel's own greens and reds, not Bootstrap's defaults. */
-.toast-success { border-left-color: #3d8202; color: #1e4a01; }
-.toast-success i:first-child { color: #3d8202; }
+.toast-success { border-left-color: #2e7d32; color: #1b4d20; }
+.toast-success i:first-child { color: #2e7d32; }
 .toast-danger { border-left-color: #c1121f; color: #6a040f; }
 .toast-danger i:first-child { color: #c1121f; }
 .toast-warning { border-left-color: #fda102; color: #6d4a02; }
@@ -162,7 +162,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown));
 
 .tone-danger { background: #fde8e9; color: #c1121f; }
 .tone-warning { background: #fef2d9; color: #b85600; }
-.tone-primary { background: #eaf4dc; color: #3d8202; }
+.tone-primary { background: #f0e0ff; color: #4f0e94; }
 
 .dialog-enter-active, .dialog-leave-active { transition: opacity 0.2s ease; }
 .dialog-enter-from, .dialog-leave-to { opacity: 0; }
