@@ -1,13 +1,24 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { amountToFreeDelivery, cart, hydrate, lines, removeItem, updateQuantity } from '../cart';
+import {
+    amountToFreeDelivery,
+    applyCoupon,
+    cart,
+    hydrate,
+    lines,
+    removeCoupon,
+    removeItem,
+    updateQuantity,
+} from '../cart';
 import { money } from '../../shared/format';
 
 const props = defineProps({
     items: { type: Object, default: () => ({}) },
     subtotal: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
     delivery: { type: Number, default: 0 },
     total: { type: Number, default: 0 },
+    coupon: { type: Object, default: null },
     shopUrl: { type: String, required: true },
     checkoutUrl: { type: String, required: true },
     labels: { type: Object, default: () => ({}) },
@@ -20,8 +31,10 @@ onMounted(() => {
     hydrate({
         items: props.items,
         subtotal: props.subtotal,
+        discount: props.discount,
         delivery: props.delivery,
         total: props.total,
+        coupon: props.coupon,
     });
 });
 
@@ -62,6 +75,44 @@ function setQty(line, value) {
 function remove(line) {
     return withPending(line.key, () => removeItem(line.key));
 }
+
+/* ------------------------------------------------------------------ coupon */
+
+const couponCode = ref('');
+const couponError = ref('');
+const couponBusy = ref(false);
+
+async function submitCoupon() {
+    const code = couponCode.value.trim();
+
+    if (code === '' || couponBusy.value) return;
+
+    couponBusy.value = true;
+    couponError.value = '';
+
+    try {
+        const { success, reason } = await applyCoupon(code);
+
+        if (success) {
+            couponCode.value = '';
+        } else {
+            couponError.value = label(`coupon_${reason}`, label('coupon_error', 'This code cannot be used.'));
+        }
+    } finally {
+        couponBusy.value = false;
+    }
+}
+
+async function dropCoupon() {
+    couponBusy.value = true;
+    couponError.value = '';
+
+    try {
+        await removeCoupon();
+    } finally {
+        couponBusy.value = false;
+    }
+}
 </script>
 
 <template>
@@ -95,10 +146,20 @@ function remove(line) {
                                     <div>
                                         <strong class="d-block">{{ line.product_name }}</strong>
                                         <small class="text-muted">{{ line.variant_name }}</small>
+                                        <span v-if="line.coupon_applied" class="cart-coupon-flag">
+                                            <i class="bi bi-ticket-perforated-fill"></i>
+                                            {{ label('couponOnLine', 'Coupon applied') }}
+                                        </span>
                                     </div>
                                 </div>
                             </td>
-                            <td :data-label="label('price', 'Price')">{{ money(line.price) }}</td>
+                            <td :data-label="label('price', 'Price')">
+                                <template v-if="line.coupon_applied">
+                                    <span class="fw-bold">{{ money(line.payable_price) }}</span>
+                                    <s class="text-muted small ms-1">{{ money(line.price) }}</s>
+                                </template>
+                                <template v-else>{{ money(line.price) }}</template>
+                            </td>
                             <td :data-label="label('quantity', 'Quantity')">
                                 <div class="qty-control">
                                     <button type="button" class="qty-btn" :disabled="busy(line.key)" @click="changeQty(line, -1)">−</button>
@@ -114,7 +175,7 @@ function remove(line) {
                                 </div>
                             </td>
                             <td :data-label="label('subtotal', 'Subtotal')" class="fw-bold text-primary">
-                                {{ money(line.price * line.quantity) }}
+                                {{ money(line.payable_subtotal ?? line.price * line.quantity) }}
                             </td>
                             <td>
                                 <button type="button" class="cart-remove" :disabled="busy(line.key)" :title="label('remove', 'Remove')" @click="remove(line)">
@@ -137,6 +198,14 @@ function remove(line) {
                     <span>{{ label('subtotal', 'Subtotal') }}</span>
                     <span>{{ money(cart.subtotal) }}</span>
                 </div>
+                <div v-if="cart.discount > 0" class="summary-row summary-discount">
+                    <span>
+                        <i class="bi bi-ticket-perforated-fill"></i>
+                        {{ label('couponDiscount', 'Coupon discount') }}
+                        <small v-if="cart.coupon" class="d-block text-muted">{{ cart.coupon.label }}</small>
+                    </span>
+                    <span>− {{ money(cart.discount) }}</span>
+                </div>
                 <div class="summary-row">
                     <span>{{ label('delivery', 'Delivery') }}</span>
                     <span>
@@ -147,6 +216,30 @@ function remove(line) {
                 <div class="summary-row total">
                     <span>{{ label('total', 'Total') }}</span>
                     <span>{{ money(cart.total) }}</span>
+                </div>
+
+                <div class="cart-coupon">
+                    <div v-if="cart.coupon" class="cart-coupon-on">
+                        <span class="cart-coupon-code">
+                            <i class="bi bi-ticket-perforated-fill"></i> {{ cart.coupon.code }}
+                        </span>
+                        <button type="button" class="cart-coupon-drop" :disabled="couponBusy" @click="dropCoupon">
+                            {{ label('couponRemove', 'Remove') }}
+                        </button>
+                    </div>
+                    <form v-else class="cart-coupon-form" @submit.prevent="submitCoupon">
+                        <input
+                            v-model="couponCode"
+                            type="text"
+                            class="cart-coupon-input"
+                            :placeholder="label('couponPlaceholder', 'Discount code')"
+                            :disabled="couponBusy"
+                        >
+                        <button type="submit" class="cart-coupon-btn" :disabled="couponBusy || !couponCode.trim()">
+                            {{ label('couponApply', 'Apply') }}
+                        </button>
+                    </form>
+                    <p v-if="couponError" class="cart-coupon-error">{{ couponError }}</p>
                 </div>
 
                 <div v-if="amountToFreeDelivery > 0" class="alert alert-info mt-3 mb-0" style="font-size:.85rem;">

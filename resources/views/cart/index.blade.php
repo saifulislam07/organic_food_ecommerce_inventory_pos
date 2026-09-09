@@ -159,8 +159,10 @@
             data-props="{{ json_encode([
                 'items' => (object) $items,
                 'subtotal' => (float) $subtotal,
+                'discount' => (float) $discount,
                 'delivery' => (float) $delivery,
                 'total' => (float) $total,
+                'coupon' => $coupon ? ['code' => $coupon->code, 'label' => $coupon->label] : null,
                 'shopUrl' => route('shop'),
                 'checkoutUrl' => route('checkout'),
                 'labels' => [
@@ -179,6 +181,24 @@
                     'emptyTitle' => app()->getLocale() == 'bn' ? 'আপনার কার্ট এখন খালি' : 'Your cart is empty',
                     'emptyBody' => app()->getLocale() == 'bn' ? 'মনে হচ্ছে আপনি এখনো কোনো পণ্য যোগ করেননি' : "Looks like you haven't added anything yet.",
                     'startShopping' => app()->getLocale() == 'bn' ? 'কেনাকাটা শুরু করুন' : 'Start Shopping',
+
+                    // Coupon box. The coupon_* keys answer the reason the server
+                    // sends back when it turns a code down.
+                    'couponPlaceholder' => app()->getLocale() == 'bn' ? 'ডিসকাউন্ট কোড' : 'Discount code',
+                    'couponApply' => app()->getLocale() == 'bn' ? 'প্রয়োগ' : 'Apply',
+                    'couponRemove' => app()->getLocale() == 'bn' ? 'সরান' : 'Remove',
+                    'couponDiscount' => app()->getLocale() == 'bn' ? 'কুপন ছাড়' : 'Coupon discount',
+                    'couponOnLine' => app()->getLocale() == 'bn' ? 'কুপন প্রযোজ্য' : 'Coupon applied',
+                    'coupon_not_found' => app()->getLocale() == 'bn' ? 'এই কোডটি সঠিক নয়।' : 'That code is not valid.',
+                    'coupon_inactive' => app()->getLocale() == 'bn' ? 'কোডটি এখন চালু নেই।' : 'That code is not active right now.',
+                    'coupon_expired' => app()->getLocale() == 'bn' ? 'কোডটির মেয়াদ শেষ।' : 'That code has expired.',
+                    'coupon_exhausted' => app()->getLocale() == 'bn' ? 'কোডটি আর ব্যবহার করা যাবে না।' : 'That code has been fully used.',
+                    'coupon_min_order' => app()->getLocale() == 'bn' ? 'এই অর্ডারের পরিমাণ কোডটির জন্য যথেষ্ট নয়।' : 'Your order is below this code’s minimum.',
+                    'coupon_per_user' => app()->getLocale() == 'bn' ? 'আপনি কোডটি ইতিমধ্যে ব্যবহার করেছেন।' : 'You have already used this code.',
+                    'coupon_no_saving' => app()->getLocale() == 'bn'
+                        ? 'কার্টের পণ্যে ইতিমধ্যেই এর চেয়ে ভালো ছাড় চলছে।'
+                        : 'Your items already have a better discount than this code.',
+                    'coupon_error' => app()->getLocale() == 'bn' ? 'কোডটি ব্যবহার করা যাচ্ছে না।' : 'This code cannot be used.',
                 ],
             ], JSON_UNESCAPED_UNICODE) }}"
         ></div>

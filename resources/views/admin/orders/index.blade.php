@@ -58,8 +58,10 @@
                         @endif
                     </td>
                     <td>
-                        @if($order->source === 'pos')
-                            <span class="badge" style="background-color: #6f42c1;">POS</span>
+                        @if($order->isCounterSale())
+                            <span class="badge" style="background-color: #6f42c1;">
+                                {{ \App\Models\Order::SOURCES[$order->source] ?? 'POS' }}
+                            </span>
                         @elseif($order->source === 'landing')
                             <span class="badge" style="background-color: #d6336c;">Landing</span>
                             @if($order->landingPage)

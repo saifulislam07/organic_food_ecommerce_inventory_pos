@@ -133,7 +133,10 @@
             </div>
             @if($order->discount_amount > 0)
             <div class="summary-row">
-                <span>{{ app()->getLocale() == 'bn' ? 'ডিসকাউন্ট' : 'Discount' }}</span>
+                <span>
+                    {{ app()->getLocale() == 'bn' ? 'ডিসকাউন্ট' : 'Discount' }}
+                    @if($order->coupon_code)({{ $order->coupon_code }})@endif
+                </span>
                 <span style="color: #dc3545;">-৳{{ number_format($order->discount_amount) }}</span>
             </div>
             @endif
@@ -141,6 +144,17 @@
                 <span>{{ app()->getLocale() == 'bn' ? 'সর্বমোট' : 'Grand Total' }}</span>
                 <span>৳{{ number_format($order->total) }}</span>
             </div>
+            {{-- Counter sales record what was handed over, so the slip shows the change. --}}
+            @if($order->paid_amount !== null)
+            <div class="summary-row">
+                <span>{{ app()->getLocale() == 'bn' ? 'জমা' : 'Paid' }}</span>
+                <span>৳{{ number_format($order->paid_amount) }}</span>
+            </div>
+            <div class="summary-row">
+                <span>{{ app()->getLocale() == 'bn' ? 'ফেরত' : 'Change' }}</span>
+                <span>৳{{ number_format($order->change_due) }}</span>
+            </div>
+            @endif
         </div>
     </div>
 

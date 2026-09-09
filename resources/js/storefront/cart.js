@@ -10,8 +10,12 @@ const state = reactive({
     count: 0,
     items: {},
     subtotal: 0,
+    // What the applied code takes off, over and above the offers already on
+    // the products. Zero whenever no code is on the cart.
+    discount: 0,
     delivery: 0,
     total: 0,
+    coupon: null,
     busy: false,
 });
 
@@ -47,11 +51,21 @@ export function dismiss(id) {
 /* ------------------------------------------------------------------ actions */
 
 /** Seed the store from a page that already rendered the cart server-side. */
-export function hydrate({ items = {}, subtotal = 0, delivery = 0, total = 0, count = null } = {}) {
+export function hydrate({
+    items = {},
+    subtotal = 0,
+    discount = 0,
+    delivery = 0,
+    total = 0,
+    coupon = null,
+    count = null,
+} = {}) {
     state.items = items;
     state.subtotal = Number(subtotal) || 0;
+    state.discount = Number(discount) || 0;
     state.delivery = Number(delivery) || 0;
     state.total = Number(total) || 0;
+    state.coupon = coupon;
     state.count = count ?? countOf(items);
 }
 
@@ -62,8 +76,12 @@ function countOf(items) {
 function applyTotals(data) {
     if (data.items !== undefined) state.items = data.items;
     if (data.subtotal !== undefined) state.subtotal = Number(data.subtotal) || 0;
+    if (data.discount !== undefined) state.discount = Number(data.discount) || 0;
     if (data.delivery !== undefined) state.delivery = Number(data.delivery) || 0;
     if (data.total !== undefined) state.total = Number(data.total) || 0;
+    // A code can fall away on its own — it expired, or the line it applied to
+    // was removed — so an absent coupon in the reply clears the one on screen.
+    if (data.coupon !== undefined) state.coupon = data.coupon;
 
     state.count = data.cart_count ?? countOf(state.items);
 }
@@ -161,6 +179,58 @@ export async function removeItem(key) {
         return true;
     } catch (error) {
         notify(errorMessage(error, t('error', 'Something went wrong!')), 'danger');
+        return false;
+    } finally {
+        state.busy = false;
+    }
+}
+
+/* ------------------------------------------------------------------ coupon */
+
+/**
+ * Try a discount code.
+ *
+ * The server owns the verdict and the arithmetic; a refusal comes back as a
+ * reason key, which the caller turns into wording in the shopper's language.
+ *
+ * @returns {Promise<{success: boolean, reason: ?string}>}
+ */
+export async function applyCoupon(code) {
+    const url = route('couponApply');
+
+    if (!url) return { success: false, reason: 'error' };
+
+    state.busy = true;
+
+    try {
+        const { data } = await http.post(url, { code });
+
+        applyTotals(data);
+
+        return { success: Boolean(data.success), reason: data.reason ?? null };
+    } catch (error) {
+        return { success: false, reason: 'error', message: errorMessage(error) };
+    } finally {
+        state.busy = false;
+    }
+}
+
+export async function removeCoupon() {
+    const url = route('couponRemove');
+
+    if (!url) return false;
+
+    state.busy = true;
+
+    try {
+        const { data } = await http.post(url, {});
+
+        applyTotals(data);
+
+        return true;
+    } catch (error) {
+        notify(errorMessage(error, t('error', 'Something went wrong!')), 'danger');
+
         return false;
     } finally {
         state.busy = false;

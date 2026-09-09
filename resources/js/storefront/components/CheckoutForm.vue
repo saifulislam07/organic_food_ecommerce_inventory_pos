@@ -5,6 +5,8 @@ import { money } from '../../shared/format';
 const props = defineProps({
     items: { type: Array, default: () => [] },
     subtotal: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
+    coupon: { type: Object, default: null },
     freeDeliveryThreshold: { type: Number, default: 0 },
     feeInside: { type: Number, default: 0 },
     feeOutside: { type: Number, default: 0 },
@@ -35,14 +37,17 @@ const saveAddress = ref(true);
 
 const isPickup = computed(() => deliveryType.value === 'pickup');
 
+/** Goods total after the coupon — what the server also bases delivery on. */
+const payable = computed(() => props.subtotal - props.discount);
+
 const deliveryFee = computed(() => {
     if (isPickup.value) return 0;
-    if (props.subtotal >= props.freeDeliveryThreshold) return 0;
+    if (payable.value >= props.freeDeliveryThreshold) return 0;
 
     return area.value === 'dhaka_outside' ? props.feeOutside : props.feeInside;
 });
 
-const total = computed(() => props.subtotal + deliveryFee.value);
+const total = computed(() => payable.value + deliveryFee.value);
 
 /** Picking a saved address means there is nothing new to save. */
 watch(selectedAddressId, (id) => {
@@ -235,6 +240,14 @@ function error(field) {
                 <div class="summary-row mt-3">
                     <span>{{ label('subtotal', 'Subtotal') }}</span>
                     <span>{{ money(subtotal) }}</span>
+                </div>
+                <div v-if="discount > 0" class="summary-row summary-discount">
+                    <span>
+                        <i class="bi bi-ticket-perforated-fill"></i>
+                        {{ label('couponDiscount', 'Coupon discount') }}
+                        <small v-if="coupon" class="d-block text-muted">{{ coupon.code }}</small>
+                    </span>
+                    <span>− {{ money(discount) }}</span>
                 </div>
                 <div class="summary-row">
                     <span>{{ label('delivery', 'Delivery') }}</span>

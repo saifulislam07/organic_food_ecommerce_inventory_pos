@@ -32,7 +32,7 @@ return new class extends Migration
             $table->index(['is_active', 'starts_at', 'ends_at']);
         });
 
-        Schema::create('coupon_category', function (Blueprint $table) {
+        Schema::create('category_coupon', function (Blueprint $table) {
             $table->id();
             $table->foreignId('coupon_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
@@ -64,7 +64,7 @@ return new class extends Migration
         });
 
         Schema::dropIfExists('coupon_product');
-        Schema::dropIfExists('coupon_category');
+        Schema::dropIfExists('category_coupon');
         Schema::dropIfExists('coupons');
     }
 };

@@ -142,6 +142,7 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::get('/pos', [AdminPOSController::class, 'index'])->name('pos.index');
     Route::post('/pos', [AdminPOSController::class, 'store'])->name('pos.store');
     Route::get('/pos/search', [AdminPOSController::class, 'search'])->name('pos.search');
+    Route::get('/pos/customers', [AdminPOSController::class, 'customers'])->name('pos.customers');
 
     Route::resource('suppliers', AdminSupplierController::class);
     Route::resource('purchases', AdminPurchaseController::class)->except(['edit', 'update']);

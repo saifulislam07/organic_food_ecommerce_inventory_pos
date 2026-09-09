@@ -45,7 +45,10 @@
                             </tr>
                             @if($order->discount_amount > 0)
                             <tr>
-                                <td colspan="3" class="text-end text-danger">Discount</td>
+                                <td colspan="3" class="text-end text-danger">
+                                    Discount
+                                    @if($order->coupon_code)<span class="badge bg-warning text-dark ms-1">{{ $order->coupon_code }}</span>@endif
+                                </td>
                                 <td class="text-end text-danger">-৳{{ number_format($order->discount_amount) }}</td>
                             </tr>
                             @endif
@@ -57,6 +60,16 @@
                                 <td colspan="3" class="text-end fw-bold">Total</td>
                                 <td class="text-end fw-bold" style="color: var(--primary);">৳{{ number_format($order->total) }}</td>
                             </tr>
+                            @if($order->paid_amount !== null)
+                            <tr class="text-muted small">
+                                <td colspan="3" class="text-end">Paid</td>
+                                <td class="text-end">৳{{ number_format($order->paid_amount) }}</td>
+                            </tr>
+                            <tr class="text-muted small">
+                                <td colspan="3" class="text-end">Change given</td>
+                                <td class="text-end">৳{{ number_format($order->change_due) }}</td>
+                            </tr>
+                            @endif
                         </tfoot>
                     </table>
                 </div>
@@ -110,13 +123,18 @@
                 </div>
                 <div>
                     <span class="text-muted small d-block">Order Source</span>
-                    @if($order->source === 'pos')
-                        <span class="badge" style="background-color: #6f42c1;">POS System</span>
-                    @elseif($order->source === 'landing')
-                        <span class="badge" style="background-color: #d6336c;">Landing Page</span>
-                    @else
-                        <span class="badge" style="background-color: #0d6efd;">Website Order</span>
-                    @endif
+                    @php
+                        // The counter can log a sale as phone, Facebook or WhatsApp,
+                        // so the badge follows the list rather than three fixed cases.
+                        $sourceColour = match (true) {
+                            $order->isCounterSale() => '#6f42c1',
+                            $order->source === 'landing' => '#d6336c',
+                            default => '#0d6efd',
+                        };
+                    @endphp
+                    <span class="badge" style="background-color: {{ $sourceColour }};">
+                        {{ \App\Models\Order::SOURCES[$order->source] ?? ucfirst((string) $order->source) }}
+                    </span>
                 </div>
 
                 @if($order->landingPage || $order->utm_campaign || $order->utm_source)

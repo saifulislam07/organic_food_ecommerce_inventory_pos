@@ -116,6 +116,8 @@
                 data-props="{{ json_encode([
                     'items' => array_values($items),
                     'subtotal' => (float) $subtotal,
+                    'discount' => (float) $discount,
+                    'coupon' => $coupon ? ['code' => $coupon->code, 'label' => $coupon->label] : null,
                     'freeDeliveryThreshold' => (float) $threshold,
                     'feeInside' => (float) $shippingFeeInside,
                     'feeOutside' => (float) $shippingFeeOutside,
@@ -157,6 +159,7 @@
                         'yourOrder' => app()->getLocale() == 'bn' ? 'আপনার অর্ডার' : 'Your Order',
                         'subtotal' => app()->getLocale() == 'bn' ? 'সাবটোটাল' : 'Subtotal',
                         'delivery' => app()->getLocale() == 'bn' ? 'ডেলিভারি' : 'Delivery',
+                        'couponDiscount' => app()->getLocale() == 'bn' ? 'কুপন ছাড়' : 'Coupon discount',
                         'total' => app()->getLocale() == 'bn' ? 'সর্বমোট' : 'Total',
                         'free' => app()->getLocale() == 'bn' ? 'ফ্রি' : 'FREE',
                         'placeOrder' => app()->getLocale() == 'bn' ? 'অর্ডার প্লেস করুন' : 'Place Order',

@@ -299,7 +299,10 @@
                             </div>
                             @if($order->discount_amount > 0)
                             <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted small">{{ app()->getLocale() == 'bn' ? 'ডিসকাউন্ট' : 'Discount' }}</span>
+                                <span class="text-muted small">
+                                    {{ app()->getLocale() == 'bn' ? 'ডিসকাউন্ট' : 'Discount' }}
+                                    @if($order->coupon_code)<span class="badge bg-warning text-dark">{{ $order->coupon_code }}</span>@endif
+                                </span>
                                 <span class="text-danger fw-bold">-৳{{ number_format($order->discount_amount) }}</span>
                             </div>
                             @endif

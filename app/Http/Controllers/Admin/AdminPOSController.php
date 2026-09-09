@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
+use App\Models\User;
 use App\Services\InventoryService;
 use App\Support\OrderNotifier;
 use App\Support\PaymentAccounts;
@@ -17,7 +18,7 @@ class AdminPOSController extends Controller
 {
     public function index()
     {
-        $items = ProductVariant::with('product', 'comboItems.component')
+        $items = ProductVariant::with('product.category', 'comboItems.component')
             ->orderBy('product_id')
             ->orderBy('sort_order')
             ->get()
@@ -25,14 +26,27 @@ class AdminPOSController extends Controller
             ->map(fn (ProductVariant $variant) => $this->presentVariant($variant))
             ->values();
 
-        return view('admin.pos.index', compact('items'));
+        // The counter filters by category constantly, so the chips are built
+        // from what is actually on the board rather than from every category.
+        $categories = $items
+            ->filter(fn (array $item) => $item['category_id'] !== null)
+            ->groupBy('category_id')
+            ->map(fn ($group, $id) => [
+                'id' => (int) $id,
+                'name' => $group->first()['category'],
+                'count' => $group->count(),
+            ])
+            ->sortBy('name')
+            ->values();
+
+        return view('admin.pos.index', compact('items', 'categories'));
     }
 
     public function search(Request $request)
     {
         $query = trim((string) $request->get('q'));
 
-        $variants = ProductVariant::with('product', 'comboItems.component')
+        $variants = ProductVariant::with('product.category', 'comboItems.component')
             ->where(function ($builder) use ($query) {
                 $builder
                     ->whereHas('product', fn ($q) => $q->where('name', 'like', "%{$query}%"))
@@ -49,6 +63,39 @@ class AdminPOSController extends Controller
         );
     }
 
+    /**
+     * Registered customers matching what the cashier is typing.
+     *
+     * Phone first: at a counter the number is what someone gives you, and it is
+     * what tells two people called Rahim apart.
+     */
+    public function customers(Request $request)
+    {
+        $query = trim((string) $request->get('q'));
+
+        if (mb_strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $customers = User::query()
+            ->where('role', 'customer')
+            ->where(fn ($q) => $q
+                ->where('mobile', 'like', "%{$query}%")
+                ->orWhere('name', 'like', "%{$query}%"))
+            ->with(['addresses' => fn ($q) => $q->orderByDesc('is_default')])
+            ->withCount('orders')
+            ->limit(10)
+            ->get();
+
+        return response()->json($customers->map(fn (User $customer) => [
+            'id' => $customer->id,
+            'name' => $customer->name,
+            'phone' => $customer->mobile,
+            'address' => $customer->addresses->first()?->address,
+            'orders_count' => $customer->orders_count,
+        ]));
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -59,19 +106,33 @@ class AdminPOSController extends Controller
             'items.*.variant_id' => 'required|exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
             'delivery_charge' => 'required|numeric|min:0',
+            // Read as taka by default. With discount_type = percent it is a
+            // percentage instead, and the server works out the money — the
+            // browser never gets to say what the discount was worth.
             'discount_amount' => 'required|numeric|min:0',
+            'discount_type' => ['nullable', Rule::in(['flat', 'percent'])],
             'payment_method' => ['nullable', Rule::in(PaymentAccounts::keys())],
+            'customer_id' => ['nullable', 'exists:users,id'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+            'source' => ['nullable', Rule::in(Order::POS_SOURCES)],
+            'paid_amount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         return DB::transaction(function () use ($validated) {
             $subtotal = 0;
+            // What the offers already on these products come to. The slip reads
+            // as a shop slip does — everything at its shelf price, with the
+            // saving broken out underneath — rather than hiding the reduction
+            // inside the line and showing a discount of nothing.
+            $offerSaving = 0;
             $orderItems = [];
 
             foreach ($validated['items'] as $itemData) {
                 $variant = ProductVariant::with('product', 'comboItems.component')
                     ->find($itemData['variant_id']);
 
-                $price = $variant->sale_price ?? $variant->price;
+                $price = (float) $variant->price;
+                $offerSaving += ($price - (float) ($variant->sale_price ?? $price)) * $itemData['quantity'];
                 $lineTotal = $price * $itemData['quantity'];
                 $subtotal += $lineTotal;
 
@@ -88,17 +149,35 @@ class AdminPOSController extends Controller
                 app(InventoryService::class)->deduct($variant, (int) $itemData['quantity']);
             }
 
+            // The offers are a floor, not a suggestion: whatever the browser
+            // asks for, a customer never pays more than the shelf price. The
+            // cashier can still knock off more on top.
+            $discount = max($this->discountFor($validated, $subtotal), round($offerSaving, 2));
+            $discount = min($discount, $subtotal);
+            $total = max(0, ($subtotal + $validated['delivery_charge']) - $discount);
+
+            // Only a customer account, never an admin: attaching a staff login
+            // to a walk-in sale would put it in that person's order history.
+            $customer = isset($validated['customer_id'])
+                ? User::where('role', 'customer')->find($validated['customer_id'])
+                : null;
+
             $order = Order::create([
+                'user_id' => $customer?->id,
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $validated['customer_phone'],
                 'customer_address' => $validated['customer_address'],
+                'notes' => $validated['notes'] ?? null,
                 'subtotal' => $subtotal,
-                'discount_amount' => $validated['discount_amount'],
+                'discount_amount' => $discount,
                 'delivery_charge' => $validated['delivery_charge'],
-                'total' => ($subtotal + $validated['delivery_charge']) - $validated['discount_amount'],
+                'total' => $total,
+                // Below the total means a part payment, so it is kept as given
+                // rather than rounded up to look settled.
+                'paid_amount' => $validated['paid_amount'] ?? null,
                 'status' => 'confirmed',
                 'payment_method' => $validated['payment_method'] ?? PaymentAccounts::DEFAULT_POS,
-                'source' => 'pos',
+                'source' => $validated['source'] ?? 'pos',
             ]);
 
             foreach ($orderItems as $item) {
@@ -118,6 +197,23 @@ class AdminPOSController extends Controller
     }
 
     /**
+     * The money a discount is worth, whichever way the cashier expressed it.
+     *
+     * Capped at the subtotal either way: a sale can be given away, but it
+     * cannot come out owing the customer money.
+     */
+    private function discountFor(array $validated, float $subtotal): float
+    {
+        $value = (float) $validated['discount_amount'];
+
+        if (($validated['discount_type'] ?? 'flat') === 'percent') {
+            $value = $subtotal * (min($value, 100) / 100);
+        }
+
+        return round(min($value, $subtotal), 2);
+    }
+
+    /**
      * Flat shape the POS Vue component consumes, for both the initial grid and
      * the search endpoint. Accessors like image_url are not serialised by
      * default, so they are spelled out here.
@@ -129,8 +225,14 @@ class AdminPOSController extends Controller
             'name' => $variant->name,
             'sku' => $variant->sku,
             'price' => (float) ($variant->sale_price ?? $variant->price),
+            // The list price too, so a tile can strike it through when the
+            // variant is on offer instead of silently selling at the lower one.
+            'list_price' => (float) $variant->price,
+            'on_sale' => $variant->is_on_sale,
             'stock' => $variant->available_stock,
             'product_name' => $variant->product->name,
+            'category_id' => $variant->product->category_id,
+            'category' => $variant->product->category?->name,
             'image' => $variant->product->image_url,
         ];
     }
