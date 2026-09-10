@@ -30,6 +30,10 @@
         .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
         .summary-row.total { border-top: 2px solid #4f0e94; margin-top: 10px; padding-top: 12px; font-weight: 800; font-size: 18px; color: #4f0e94; }
         
+        .in-words { margin-top: 18px; padding: 12px 16px; border: 1px dashed #4f0e94; border-radius: 6px; background: #faf6ff; }
+        .in-words .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #4f0e94; font-weight: 700; display: block; margin-bottom: 2px; }
+        .in-words .words { font-size: 14px; font-weight: 600; color: #333; }
+
         .footer { margin-top: 60px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 20px; }
         .footer p { margin: 4px 0; }
 
@@ -159,6 +163,14 @@
             </div>
             @endif
         </div>
+    </div>
+
+    {{-- The figure written out. A printed invoice is a document people argue
+         over, and a total in words is what settles it: a digit can be altered
+         by hand, a sentence cannot. --}}
+    <div class="in-words">
+        <span class="label">{{ app()->getLocale() == 'bn' ? 'কথায়' : 'Amount in words' }}</span>
+        <span class="words">{{ \App\Support\AmountInWords::taka($order->total) }}</span>
     </div>
 
     @if($order->notes)

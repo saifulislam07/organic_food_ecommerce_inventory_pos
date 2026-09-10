@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminChatSettingController;
 use App\Http\Controllers\Admin\AdminComboController;
 use App\Http\Controllers\Admin\AdminCouponController;
+use App\Http\Controllers\Admin\AdminCourierSettingController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminExpenseController;
 use App\Http\Controllers\Admin\AdminHeroSlideController;
@@ -159,9 +160,19 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
 
+    // Catalogue search for the order editor. Before /orders/{order} so
+    // "products" is not read as an order id.
+    Route::get('/orders/products', [AdminOrderController::class, 'products'])->name('orders.products');
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/edit', [AdminOrderController::class, 'edit'])->name('orders.edit');
+    Route::put('/orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
     Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
+
+    // What the delivery actually settled for, and who is carrying the parcel.
+    Route::post('/orders/{order}/settle', [AdminOrderController::class, 'settle'])->name('orders.settle');
+    Route::post('/orders/{order}/courier', [AdminOrderController::class, 'sendToCourier'])->name('orders.sendToCourier');
+    Route::post('/orders/{order}/courier/sync', [AdminOrderController::class, 'syncCourier'])->name('orders.syncCourier');
     // Settings & Pages
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
@@ -171,6 +182,8 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::get('/settings/sms', [AdminSmsSettingController::class, 'edit'])->name('settings.sms.edit');
     Route::post('/settings/sms', [AdminSmsSettingController::class, 'update'])->name('settings.sms.update');
     Route::post('/settings/sms/test', [AdminSmsSettingController::class, 'test'])->name('settings.sms.test');
+    Route::get('/settings/couriers', [AdminCourierSettingController::class, 'edit'])->name('settings.couriers.edit');
+    Route::post('/settings/couriers', [AdminCourierSettingController::class, 'update'])->name('settings.couriers.update');
     Route::get('/settings/seo', [AdminSeoSettingController::class, 'edit'])->name('settings.seo.edit');
     Route::post('/settings/seo', [AdminSeoSettingController::class, 'update'])->name('settings.seo.update');
     Route::get('/reports/profit-loss', [AdminReportController::class, 'profitLoss'])->name('reports.profitLoss');

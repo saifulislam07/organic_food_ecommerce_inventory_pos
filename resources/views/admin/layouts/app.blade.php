@@ -216,6 +216,7 @@
                         ['route' => 'admin.blocks.index', 'active' => 'admin.blocks.*', 'label' => 'Storefront Blocks', 'can' => 'blocks.view'],
                         ['route' => 'admin.settings.mail.edit', 'active' => 'admin.settings.mail.*', 'label' => 'Email / SMTP', 'can' => 'settings.edit'],
                         ['route' => 'admin.settings.sms.edit', 'active' => 'admin.settings.sms.*', 'label' => 'SMS Gateway', 'can' => 'settings.edit'],
+                        ['route' => 'admin.settings.couriers.edit', 'active' => 'admin.settings.couriers.*', 'label' => 'Couriers', 'can' => 'settings.edit'],
                         ['route' => 'admin.settings.seo.edit', 'active' => 'admin.settings.seo.*', 'label' => 'SEO & Analytics', 'can' => 'settings.edit'],
                         ['route' => 'admin.settings.chat.edit', 'active' => 'admin.settings.chat.*', 'label' => 'WhatsApp & Messenger', 'can' => 'settings.edit'],
                         ['route' => 'admin.users.index', 'active' => 'admin.users.*', 'label' => 'Users', 'can' => 'users.view'],

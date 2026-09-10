@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\PresentsSellableVariants;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -16,6 +17,8 @@ use Illuminate\Validation\Rule;
 
 class AdminPOSController extends Controller
 {
+    use PresentsSellableVariants;
+
     public function index()
     {
         $items = ProductVariant::with('product.category', 'comboItems.component')
@@ -44,23 +47,7 @@ class AdminPOSController extends Controller
 
     public function search(Request $request)
     {
-        $query = trim((string) $request->get('q'));
-
-        $variants = ProductVariant::with('product.category', 'comboItems.component')
-            ->where(function ($builder) use ($query) {
-                $builder
-                    ->whereHas('product', fn ($q) => $q->where('name', 'like', "%{$query}%"))
-                    ->orWhere('sku', 'like', "%{$query}%");
-            })
-            ->limit(20)
-            ->get();
-
-        return response()->json(
-            $variants
-                ->filter(fn (ProductVariant $variant) => $variant->product !== null)
-                ->map(fn (ProductVariant $variant) => $this->presentVariant($variant))
-                ->values()
-        );
+        return response()->json($this->searchVariants(trim((string) $request->get('q'))));
     }
 
     /**
@@ -211,29 +198,5 @@ class AdminPOSController extends Controller
         }
 
         return round(min($value, $subtotal), 2);
-    }
-
-    /**
-     * Flat shape the POS Vue component consumes, for both the initial grid and
-     * the search endpoint. Accessors like image_url are not serialised by
-     * default, so they are spelled out here.
-     */
-    private function presentVariant(ProductVariant $variant): array
-    {
-        return [
-            'id' => $variant->id,
-            'name' => $variant->name,
-            'sku' => $variant->sku,
-            'price' => (float) ($variant->sale_price ?? $variant->price),
-            // The list price too, so a tile can strike it through when the
-            // variant is on offer instead of silently selling at the lower one.
-            'list_price' => (float) $variant->price,
-            'on_sale' => $variant->is_on_sale,
-            'stock' => $variant->available_stock,
-            'product_name' => $variant->product->name,
-            'category_id' => $variant->product->category_id,
-            'category' => $variant->product->category?->name,
-            'image' => $variant->product->image_url,
-        ];
     }
 }

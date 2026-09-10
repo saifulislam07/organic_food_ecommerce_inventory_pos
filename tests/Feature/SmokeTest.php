@@ -129,6 +129,7 @@ class SmokeTest extends TestCase
             'settings' => ['/admin/settings'],
             'mail settings' => ['/admin/settings/mail'],
             'sms settings' => ['/admin/settings/sms'],
+            'courier settings' => ['/admin/settings/couriers'],
             'seo settings' => ['/admin/settings/seo'],
             'users' => ['/admin/users'],
             'user create' => ['/admin/users/create'],
@@ -153,6 +154,7 @@ class SmokeTest extends TestCase
         $order = $this->seedOrder($admin);
 
         $this->actingAs($admin)->get(route('admin.orders.show', $order))->assertOk();
+        $this->actingAs($admin)->get(route('admin.orders.edit', $order))->assertOk();
         $this->actingAs($admin)->get(route('admin.orders.invoice', $order))->assertOk();
     }
 

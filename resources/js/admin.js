@@ -9,6 +9,7 @@ import VariantRepeater from './admin/components/VariantRepeater.vue';
 import PurchaseForm from './admin/components/PurchaseForm.vue';
 import AdjustmentForm from './admin/components/AdjustmentForm.vue';
 import OrderStatusControl from './admin/components/OrderStatusControl.vue';
+import OrderEditor from './admin/components/OrderEditor.vue';
 import ImageUpload from './admin/components/ImageUpload.vue';
 import ProductGallery from './admin/components/ProductGallery.vue';
 import ComboComposer from './admin/components/ComboComposer.vue';
@@ -23,6 +24,7 @@ const components = {
     PurchaseForm,
     AdjustmentForm,
     OrderStatusControl,
+    OrderEditor,
     ImageUpload,
     ProductGallery,
     ComboComposer,

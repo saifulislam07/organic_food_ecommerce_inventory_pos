@@ -60,9 +60,9 @@
             <div class="card-body">
                 <div class="text-muted small text-uppercase fw-bold mb-1">Costs</div>
                 <div class="h4 fw-bold text-danger mb-0">
-                    {{ $money($report['cost_of_goods'] + $report['expenses'] + $report['damage']) }}
+                    {{ $money($report['cost_of_goods'] + $report['expenses'] + $report['damage'] + $report['courier_charges']) }}
                 </div>
-                <div class="small text-muted">goods, expenses, damage</div>
+                <div class="small text-muted">goods, expenses, damage, courier</div>
             </div>
         </div>
     </div>
@@ -122,6 +122,13 @@
                                 <td class="text-end pe-4">−{{ $money($amount) }}</td>
                             </tr>
                         @endforeach
+                        <tr>
+                            <td class="ps-4">
+                                Courier charges
+                                <span class="text-muted small">kept by the delivery company</span>
+                            </td>
+                            <td class="text-end pe-4 text-danger">−{{ $money($report['courier_charges']) }}</td>
+                        </tr>
                         <tr>
                             <td class="ps-4">
                                 Damage &amp; loss
@@ -203,6 +210,19 @@
                     Includes {{ $money($report['invested']) }} put in by investors and
                     {{ $money($report['withdrawn']) }} taken out.
                     Neither is profit or loss, so neither appears on the left.
+                </div>
+            @endif
+            @if($report['unsettled_orders'] > 0)
+                {{-- How much of the "in" column is a guess. An order nobody has
+                     settled is counted at its face value, which is always at
+                     least the courier's fee too high. --}}
+                <div class="card-footer bg-white small">
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                    <strong>{{ $report['unsettled_orders'] }}</strong> order(s) worth
+                    {{ $money($report['unsettled_value']) }} have no settlement recorded, so they are
+                    counted at face value here.
+                    <a href="{{ route('admin.orders.index', ['settlement' => 'pending']) }}">Record what came in</a>
+                    to make this exact.
                 </div>
             @endif
         </div>

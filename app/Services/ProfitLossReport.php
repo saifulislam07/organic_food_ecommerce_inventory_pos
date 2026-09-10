@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Purchase;
 use App\Models\Withdrawal;
 use App\Support\PaymentAccounts;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -27,6 +28,14 @@ use Illuminate\Support\Facades\DB;
  *                    capital, in either direction — it moves real cash without
  *                    being either revenue or a cost, which is exactly the
  *                    distinction these two stories exist to keep.
+ *
+ * The courier fee sits across the two on purpose. It is a real cost, so it
+ * comes off the profit; but on cash on delivery it never passes through an
+ * account of ours — the courier keeps it out of what it collects and remits the
+ * rest — so it is not an outgoing in the account table. What lands there is the
+ * net figure the delivery settled for, which is why recording a settlement
+ * matters: without one the report can only assume the order was worth its face
+ * value, and every unsettled delivery quietly overstates the cash.
  */
 class ProfitLossReport
 {
@@ -88,7 +97,7 @@ class ProfitLossReport
         $capital = $this->capital();
 
         $grossProfit = $sales['revenue'] - $sales['cost'];
-        $netProfit = $grossProfit - $expenses['total'] - $damage['total'];
+        $netProfit = $grossProfit - $expenses['total'] - $damage['total'] - $sales['courier_charges'];
 
         return [
             'orders' => $sales['orders'],
@@ -102,6 +111,13 @@ class ProfitLossReport
             'expenses_by_category' => $expenses['by_category'],
             'damage' => $damage['total'],
             'damage_units' => $damage['units'],
+            // What the delivery companies kept. A cost, but never an outgoing
+            // in the account table — see the note at the top of this class.
+            'courier_charges' => $sales['courier_charges'],
+            // How much of the "in" column is an assumption rather than a
+            // recorded settlement, so the reader knows how far to trust it.
+            'unsettled_orders' => $sales['unsettled_orders'],
+            'unsettled_value' => $sales['unsettled_value'],
             'net_profit' => $netProfit,
             'net_margin' => $sales['revenue'] > 0 ? $netProfit / $sales['revenue'] * 100 : 0.0,
             'purchases' => $purchases['total'],
@@ -128,13 +144,12 @@ class ProfitLossReport
      */
     private function sales(): array
     {
-        $totals = Order::query()
-            ->whereIn('status', self::EARNED)
-            ->whereBetween('created_at', [$this->from, $this->to])
+        $totals = $this->earned()
             ->selectRaw('COUNT(*) as orders')
             ->selectRaw('COALESCE(SUM(total), 0) as revenue')
             ->selectRaw('COALESCE(SUM(delivery_charge), 0) as delivery')
             ->selectRaw('COALESCE(SUM(discount_amount), 0) as discount')
+            ->selectRaw('COALESCE(SUM(courier_charge), 0) as courier_charges')
             ->first();
 
         $cost = DB::table('order_items')
@@ -144,21 +159,64 @@ class ProfitLossReport
             ->whereBetween('orders.created_at', [$this->from, $this->to])
             ->sum(DB::raw('order_items.quantity * COALESCE(product_variants.cost_price, 0)'));
 
-        $byAccount = Order::query()
-            ->whereIn('status', self::EARNED)
-            ->whereBetween('created_at', [$this->from, $this->to])
-            ->groupBy('payment_method')
-            ->pluck(DB::raw('COALESCE(SUM(total), 0)'), 'payment_method')
-            ->all();
+        $unsettled = $this->earned()
+            ->whereNull('collected_amount')
+            ->selectRaw('COUNT(*) as orders')
+            ->selectRaw('COALESCE(SUM(total), 0) as value')
+            ->first();
 
         return [
             'orders' => (int) $totals->orders,
             'revenue' => (float) $totals->revenue,
             'delivery' => (float) $totals->delivery,
             'discount' => (float) $totals->discount,
+            'courier_charges' => (float) $totals->courier_charges,
             'cost' => (float) $cost,
-            'by_account' => $byAccount,
+            'unsettled_orders' => (int) $unsettled->orders,
+            'unsettled_value' => (float) $unsettled->value,
+            'by_account' => $this->collections(),
         ];
+    }
+
+    /**
+     * Money in, per account head — what actually arrived, not what was owed.
+     *
+     * Two passes, because an order can be in one of two states and they are
+     * counted differently. A settled order says what it really brought in and
+     * which head it landed in, so it is taken at its word. An unsettled one has
+     * nobody's word to take, so it falls back to its face value in whatever
+     * head its payment method names — an assumption, which summary() reports
+     * separately so nobody mistakes it for a fact.
+     *
+     * @return array<string, float>
+     */
+    private function collections(): array
+    {
+        $settled = $this->earned()
+            ->whereNotNull('collected_amount')
+            ->groupBy('collected_in')
+            ->pluck(DB::raw('COALESCE(SUM(collected_amount), 0)'), 'collected_in')
+            ->all();
+
+        $assumed = $this->earned()
+            ->whereNull('collected_amount')
+            ->groupBy('payment_method')
+            ->pluck(DB::raw('COALESCE(SUM(total), 0)'), 'payment_method')
+            ->all();
+
+        foreach ($assumed as $head => $amount) {
+            $settled[$head] = (float) ($settled[$head] ?? 0) + (float) $amount;
+        }
+
+        return $settled;
+    }
+
+    /** Orders that count as earned, inside the range. */
+    private function earned(): Builder
+    {
+        return Order::query()
+            ->whereIn('status', self::EARNED)
+            ->whereBetween('created_at', [$this->from, $this->to]);
     }
 
     private function expenses(): array

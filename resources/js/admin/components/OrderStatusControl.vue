@@ -6,6 +6,8 @@ const props = defineProps({
     current: { type: String, required: true },
     updateUrl: { type: String, required: true },
     updatedAt: { type: String, default: '' },
+    /** Whether this order already has a settlement recorded against it. */
+    settled: { type: Boolean, default: false },
 });
 
 const STATUSES = [
@@ -23,6 +25,7 @@ const stamp = ref(props.updatedAt);
 const saving = ref(false);
 const saved = ref(false);
 const error = ref(null);
+const needsSettlement = ref(props.current === 'delivered' && !props.settled);
 
 const badge = computed(
     () => STATUSES.find((option) => option.value === status.value) || { label: 'Unknown', badge: 'bg-dark' }
@@ -41,6 +44,7 @@ async function save() {
         status.value = data.status ?? draft.value;
         stamp.value = data.updated_at ?? stamp.value;
         saved.value = true;
+        needsSettlement.value = Boolean(data.needs_settlement);
 
         setTimeout(() => {
             saved.value = false;
@@ -77,5 +81,16 @@ async function save() {
         </div>
 
         <div v-if="error" class="text-danger small mt-2">{{ error }}</div>
+
+        <!--
+            Marking an order delivered is the moment the money question arises,
+            so the prompt appears right where the change was made rather than
+            waiting to be noticed further down the page.
+        -->
+        <div v-if="needsSettlement" class="alert alert-warning py-2 px-3 small mt-3 mb-0">
+            <i class="bi bi-cash-coin"></i>
+            Delivered — now record what came in.
+            <a href="#settlement" class="fw-bold">Settlement</a>
+        </div>
     </div>
 </template>
