@@ -988,6 +988,217 @@ main { padding-bottom: 74px; }
 .pc-page-head + .section { padding-top: 0; }
 
 
+/* === 11b. STATIC & POLICY PAGES ========================================
+   Terms, privacy, returns, shipping. These were a bare white card with a
+   full-opacity leaf emoji from the old organic-food theme sitting across the
+   text, and rich-text markup that nothing styled — every heading came out the
+   same weight, so a page of policy read as one undifferentiated block.
+
+   The prose scale below is the whole point: an admin writes h2/h3/ul/ol in the
+   editor and gets a readable document without touching CSS.
+*/
+.legal-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 28px 30px 34px;
+    overflow: hidden;
+}
+/* --- the prose scale ---------------------------------------------------- */
+/* A measure, not the full card width: policy text runs long, and a 120-character
+   line is where people start losing which row they were on. */
+.legal-prose {
+    max-width: 68ch;
+    color: #3d3548;
+    font-size: 1.02rem;
+    line-height: 1.85;
+}
+.legal-prose > *:first-child { margin-top: 0; }
+.legal-prose > *:last-child { margin-bottom: 0; }
+
+/* h2 opens a section and carries a brand rule; h3 is a heading inside one. */
+.legal-prose h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin: 2.2rem 0 0.85rem;
+    padding-left: 14px;
+    border-left: 4px solid var(--accent);
+    line-height: 1.4;
+}
+.legal-prose h3 {
+    font-size: 1.06rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin: 1.9rem 0 0.6rem;
+    line-height: 1.5;
+}
+.legal-prose h4 {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: #4a4155;
+    margin: 1.5rem 0 0.5rem;
+}
+.legal-prose p { margin: 0 0 1.05rem; }
+.legal-prose strong { color: var(--primary-dark); font-weight: 700; }
+.legal-prose a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.legal-prose a:hover { color: var(--accent-dark); }
+
+/* Markers in the brand colour, and the text hanging off them rather than
+   wrapping back under the bullet. */
+.legal-prose ul,
+.legal-prose ol {
+    margin: 0 0 1.15rem;
+    padding-left: 0;
+    list-style: none;
+}
+.legal-prose li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 0.55rem;
+}
+.legal-prose ul > li::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0.72em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+.legal-prose ol { counter-reset: legal-step; }
+.legal-prose ol > li { counter-increment: legal-step; }
+.legal-prose ol > li::before {
+    content: counter(legal-step);
+    position: absolute;
+    left: 0;
+    top: 0.28em;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 21px;
+    text-align: center;
+}
+.legal-prose blockquote {
+    margin: 1.2rem 0;
+    padding: 14px 18px;
+    border-left: 3px solid var(--primary-light);
+    background: var(--cream);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: #4a4155;
+}
+.legal-prose table {
+    width: 100%;
+    margin: 1.2rem 0;
+    border-collapse: collapse;
+    font-size: 0.94rem;
+}
+.legal-prose th,
+.legal-prose td {
+    border: 1px solid var(--gray-200);
+    padding: 9px 12px;
+    text-align: left;
+}
+.legal-prose th { background: var(--cream-dark); color: var(--primary-dark); font-weight: 700; }
+.legal-prose img { max-width: 100%; height: auto; border-radius: var(--radius-sm); }
+.legal-prose hr { margin: 1.8rem 0; border: 0; border-top: 1px solid var(--gray-200); }
+
+/* --- the sidebar -------------------------------------------------------- */
+.legal-aside { position: sticky; top: 90px; }
+.legal-nav {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 18px 16px;
+}
+.legal-nav h2 {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-500);
+    margin: 0 0 12px;
+    padding: 0 6px;
+}
+.legal-nav ul { list-style: none; padding: 0; margin: 0; }
+.legal-nav li + li { margin-top: 2px; }
+.legal-nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    color: #4a4155;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+.legal-nav a i { font-size: 0.55rem; opacity: 0.4; }
+.legal-nav a:hover {
+    background: var(--cream-dark);
+    color: var(--primary);
+}
+.legal-nav a:hover i { opacity: 0.7; }
+.legal-nav a.is-current {
+    background: linear-gradient(135deg, var(--primary), var(--primary-brand));
+    color: #fff;
+    font-weight: 600;
+}
+.legal-nav a.is-current i { opacity: 1; }
+
+.legal-help {
+    margin-top: 16px;
+    background: linear-gradient(150deg, var(--cream-dark), var(--gold-tint));
+    border-radius: var(--radius);
+    padding: 20px 18px;
+    text-align: center;
+}
+.legal-help > i {
+    font-size: 1.7rem;
+    color: var(--primary);
+    display: block;
+    margin-bottom: 8px;
+}
+.legal-help h3 {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--primary-darker);
+    margin: 0 0 4px;
+}
+.legal-help p {
+    font-size: 0.82rem;
+    color: var(--gray-500);
+    margin: 0 0 14px;
+    line-height: 1.6;
+}
+.legal-help .btn-primary-custom {
+    font-size: 0.85rem;
+    padding: 9px 18px;
+    justify-content: center;
+    width: 100%;
+}
+
+@media (max-width: 991.98px) {
+    /* Sticky is pointless once the sidebar sits above the article. */
+    .legal-aside { position: static; }
+    .legal-help { margin-bottom: 4px; }
+}
+@media (max-width: 575.98px) {
+    .legal-card { padding: 20px 18px 26px; border-radius: var(--radius); }
+    .legal-prose { font-size: 0.97rem; line-height: 1.8; }
+    .legal-prose h2 { font-size: 1.13rem; }
+}
+
 /* === 12. ACCOUNT PAGES ================================================ */
 /*
    The dashboard, the profile screen and an order's detail page all draw the

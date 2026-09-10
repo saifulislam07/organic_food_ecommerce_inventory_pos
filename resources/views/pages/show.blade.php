@@ -2,38 +2,61 @@
 
 @section('title', $page->title . ' – ' . \App\Models\Setting::get('site_title', 'BaburhashiBD'))
 
+@php $bn = app()->getLocale() === 'bn'; @endphp
+
 @section('content')
 @include('partials.page-head', [
     'title' => $page->title,
-    'icon' => 'file-text',
+    'icon' => 'file-earmark-text',
+    'lead' => ($bn ? 'সর্বশেষ হালনাগাদ ' : 'Last updated ').$page->updated_at->translatedFormat('d F Y'),
     'crumbs' => [$page->title],
 ])
 
-<section class="section py-5">
+<section class="section">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-8">
-                <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white position-relative overflow-hidden">
-                    <!-- Decorative Corner -->
-                    <div class="position-absolute top-0 end-0 opacity-05" style="transform: translate(25%, -25%);">
-                        <span style="font-size: 15rem;">🍃</span>
-                    </div>
+        <div class="row g-4">
+            {{-- The policies are read as a set — somebody checking the return
+                 window usually wants the delivery times next. One page on its
+                 own is not a set, and a nav listing only the page you are
+                 already on is furniture. --}}
+            @php $hasSiblings = $related->count() > 1; @endphp
+            @if($hasSiblings)
+            <div class="col-lg-4 col-xl-3">
+                <aside class="legal-aside">
+                    <nav class="legal-nav">
+                        <h2>{{ $bn ? 'আরও পড়ুন' : 'More information' }}</h2>
+                        <ul>
+                            @foreach($related as $item)
+                                <li>
+                                    <a href="{{ route('pages.show', $item->slug) }}"
+                                       class="{{ $item->slug === $page->slug ? 'is-current' : '' }}"
+                                       @if($item->slug === $page->slug) aria-current="page" @endif>
+                                        <i class="bi bi-{{ $item->slug === $page->slug ? 'record-circle' : 'circle' }}"></i>
+                                        <span>{{ $item->title }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </nav>
 
-                    <div class="page-content position-relative z-index-1" style="line-height: 1.8; color: var(--dark); font-size: 1.05rem;">
+                    <div class="legal-help">
+                        <i class="bi bi-headset"></i>
+                        <h3>{{ $bn ? 'কিছু বুঝতে অসুবিধা?' : 'Still not sure?' }}</h3>
+                        <p>{{ $bn ? 'আমাদের সাথে কথা বলুন, আমরা বুঝিয়ে দেব।' : 'Talk to us and we will walk you through it.' }}</p>
+                        <a href="{{ route('contact') }}" class="btn-primary-custom">
+                            <i class="bi bi-chat-dots"></i> {{ $bn ? 'যোগাযোগ করুন' : 'Contact us' }}
+                        </a>
+                    </div>
+                </aside>
+            </div>
+            @endif
+
+            <div class="{{ $hasSiblings ? 'col-lg-8 col-xl-9' : 'col-lg-10 mx-auto' }}">
+                <article class="legal-card">
+                    <div class="legal-prose">
                         {!! \App\Support\RichText::display($page->content) !!}
                     </div>
-
-                    <div class="mt-5 pt-4 border-top">
-                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                            <div class="text-muted small italic">
-                                {{ app()->getLocale() == 'bn' ? 'শেষ আপডেট:' : 'Last updated:' }} {{ $page->updated_at->format('M d, Y') }}
-                            </div>
-                            <a href="{{ route('contact') }}" class="btn btn-outline-primary btn-sm rounded-pill px-4">
-                                {{ app()->getLocale() == 'bn' ? 'প্রশ্ন আছে? যোগাযোগ করুন' : 'Have questions? Contact us' }}
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                </article>
             </div>
         </div>
     </div>

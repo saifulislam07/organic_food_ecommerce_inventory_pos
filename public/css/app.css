@@ -1185,10 +1185,15 @@ body {
     gap: 10px;
     transition: var(--transition);
     cursor: pointer;
+    /* Bootstrap underlines every <a> by default, and this class is used on
+       anchors as often as on buttons — without this the link-shaped ones came
+       out with a line under the label. */
+    text-decoration: none;
 }
 .btn-primary-custom:hover {
     background: linear-gradient(135deg, var(--primary-dark), var(--primary));
     color: white;
+    text-decoration: none;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.3);
 }
