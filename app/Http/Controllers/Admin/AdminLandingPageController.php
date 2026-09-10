@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Admin\Concerns\PresentsVariantOptions;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\LandingPage;
@@ -21,6 +22,7 @@ use Illuminate\Validation\Validator;
 class AdminLandingPageController extends Controller
 {
     use BulkDeletes, GeneratesUniqueSlug, PresentsVariantOptions, SearchesRecords;
+    use SortsRecords;
 
     /** Where this screen's uploads live under public/uploads. */
     private const IMAGE_FOLDER = 'landing';
@@ -38,9 +40,18 @@ class AdminLandingPageController extends Controller
             ->withCount('orders')
             // Cancelled orders were never money, so they do not count as sales.
             ->withSum(['orders as revenue' => fn ($q) => $q->where('status', '!=', 'cancelled')], 'total')
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
+        ;
+
+        $this->applySort($pages, $request, [
+            'page' => 'internal_name',
+            'status' => 'is_active',
+            'views' => 'views',
+            'orders' => 'orders_count',
+            'revenue' => 'revenue',
+            'created_at' => 'created_at',
+        ], 'created_at');
+
+        $pages = $pages->paginate(20)->withQueryString();
 
         return view('admin.landing-pages.index', compact('pages'));
     }

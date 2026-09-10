@@ -4,9 +4,6 @@
 @section('page_title', 'Users & Roles')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.users.index'), 'placeholder' => 'Name, email or mobile'])
-</div>
 @can('users.delete')
 <form id="bulk-users" method="POST" action="{{ route('admin.users.bulkDestroy') }}"
       data-bulk data-bulk-noun="users">
@@ -18,8 +15,9 @@
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
                 <h5 class="mb-0 fw-bold text-dark">Staff Accounts</h5>
+                @include('admin.partials.search', ['route' => route('admin.users.index'), 'placeholder' => 'Name, email or mobile'])
                 @can('users.create')
                     <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
                         <i class="bi bi-person-plus"></i> Add User
@@ -29,11 +27,11 @@
 
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light text-muted small text-uppercase">
+                    <table class="table table-hover align-middle admin-table">
+                        <thead>
                             <tr>
                                 @can('users.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-users"></th>@endcan
-                                <th class="ps-4">Name</th>
+                                @include('admin.partials.sort', ['key' => 'name', 'label' => 'Name', 'first' => 'asc'])
                                 <th>Contact</th>
                                 <th>Access</th>
                                 <th class="text-end pe-4">Actions</th>
@@ -83,7 +81,7 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr><td colspan="5" class="text-center py-5 text-muted">No staff accounts yet.</td></tr>
+                            <tr><td colspan="5" class="admin-table__empty">No staff accounts yet.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -91,7 +89,7 @@
             </div>
 
             @if($users->hasPages())
-                <div class="card-footer bg-white">{{ $users->links() }}</div>
+                <div class="card-footer bg-white admin-pager">{{ $users->links() }}</div>
             @endif
         </div>
     </div>

@@ -6,6 +6,7 @@ use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Setting;
+use App\Support\Preorder;
 use Illuminate\Support\Facades\Session;
 
 /**
@@ -132,7 +133,9 @@ class CartService
             return [];
         }
 
-        $variants = ProductVariant::with('product')
+        // comboItems.component because a bundle's stock is worked out from its
+        // parts, and available_stock is what decides a pre-order line.
+        $variants = ProductVariant::with('product.variants', 'comboItems.component')
             ->findMany(array_column($cart, 'variant_id'))
             ->keyBy('id');
 
@@ -155,6 +158,10 @@ class CartService
             $quantity = (int) $item['quantity'];
 
             $cart[$key] = array_merge($item, [
+                // Decided here rather than stored at add time: stock arrives
+                // while carts sit open, and a line that can now be shipped
+                // should stop calling itself a pre-order.
+                'is_preorder' => Preorder::allows($variant?->product, $variant),
                 'original_price' => $list,
                 'price' => $offer,
                 'payable_price' => $payable,
@@ -299,6 +306,48 @@ class CartService
     }
 
     /* ----------------------------------------------------------- the rest */
+
+    /** True when anything in the cart is still to come in. */
+    public function hasPreorder(): bool
+    {
+        foreach ($this->getItems() as $item) {
+            if ($item['is_preorder'] ?? false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The distinct terms covering the pre-ordered lines.
+     *
+     * Distinct because two products often share the shop-wide note, and the
+     * shopper should not be asked to read it twice.
+     *
+     * @return list<string>
+     */
+    public function preorderNotes(): array
+    {
+        $preordered = array_filter($this->getItems(), fn ($item) => $item['is_preorder'] ?? false);
+
+        if (! $preordered) {
+            return [];
+        }
+
+        $products = Product::findMany(array_column($preordered, 'product_id'))->keyBy('id');
+        $notes = [];
+
+        foreach ($preordered as $item) {
+            $note = Preorder::note($products->get($item['product_id']));
+
+            if (filled($note) && ! in_array($note, $notes, true)) {
+                $notes[] = $note;
+            }
+        }
+
+        return $notes;
+    }
 
     public function count(): int
     {

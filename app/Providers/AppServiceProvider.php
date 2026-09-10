@@ -3,11 +3,14 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Models\ProductVariant;
 use App\Models\Setting;
 use App\Notifications\Channels\SmsChannel;
+use App\Observers\ProductVariantObserver;
 use App\Sms\SmsManager;
 use App\Support\AdminModules;
 use App\Support\MailSettings;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -24,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Every admin list paginates, and the framework default emits Tailwind
+        // markup this Bootstrap panel has no styles for, so the links rendered
+        // as bare text.
+        Paginator::useBootstrapFive();
+
         // SMTP credentials are managed from the admin panel, not .env.
         MailSettings::apply();
 
@@ -40,6 +48,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Lets a notification declare toSms() and reach the configured gateway.
         Notification::extend('sms', fn ($app) => $app->make(SmsChannel::class));
+
+        // Stock arriving is what a pre-order has been waiting for, and it can
+        // arrive from a purchase, an adjustment or a stock edit — an observer
+        // catches all three rather than each of them remembering to tell.
+        ProductVariant::observe(ProductVariantObserver::class);
 
         // The storefront header carries an "All Categories" menu on every page,
         // so the list is composed into the layout rather than repeated in each

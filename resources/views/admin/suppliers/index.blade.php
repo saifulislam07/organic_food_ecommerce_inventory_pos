@@ -4,9 +4,6 @@
 @section('page_title', 'Supplier Management')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.suppliers.index'), 'placeholder' => 'Name, phone or email'])
-</div>
 @can('suppliers.delete')
 <form id="bulk-suppliers" method="POST" action="{{ route('admin.suppliers.bulkDestroy') }}"
       data-bulk data-bulk-noun="suppliers">
@@ -16,22 +13,23 @@
 </form>
 @endcan
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 text-dark fw-bold">Supplier List</h5>
+        @include('admin.partials.search', ['route' => route('admin.suppliers.index'), 'placeholder' => 'Name, phone or email'])
         <a href="{{ route('admin.suppliers.create') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg"></i> Add Supplier
         </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle admin-table">
+                <thead>
                     <tr>
                         @can('suppliers.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-suppliers"></th>@endcan
-                        <th class="ps-4">Name</th>
-                        <th>Contact Person</th>
-                        <th>Phone</th>
-                        <th>Email</th>
+                        @include('admin.partials.sort', ['key' => 'name', 'label' => 'Name', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'contact_person', 'label' => 'Contact Person', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'phone', 'label' => 'Phone', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'email', 'label' => 'Email', 'first' => 'asc'])
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -62,7 +60,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">No suppliers found.</td>
+                        <td colspan="6" class="admin-table__empty">No suppliers found.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -70,7 +68,7 @@
         </div>
     </div>
     @if($suppliers->hasPages())
-    <div class="card-footer bg-white">
+    <div class="card-footer bg-white admin-pager">
         {{ $suppliers->links() }}
     </div>
     @endif

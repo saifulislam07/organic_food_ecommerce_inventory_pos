@@ -44,6 +44,10 @@ class AdminSettingController extends Controller
         'section_bestsellers' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:120']],
         'section_featured' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:120']],
         'section_trending' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:120']],
+
+        // The shop-wide pre-order terms. A product may override it with its
+        // own; with neither filled in, no pre-order button is offered at all.
+        'preorder_note' => ['type' => 'textarea', 'rules' => ['nullable', 'string', 'max:2000']],
     ];
 
     public function index()

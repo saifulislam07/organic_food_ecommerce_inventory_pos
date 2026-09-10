@@ -45,6 +45,7 @@ class Order extends Model
         'customer_area', 'notes', 'subtotal', 'discount_amount', 'coupon_id', 'coupon_code',
         'delivery_charge', 'total', 'paid_amount',
         'status', 'payment_method', 'source', 'pickup_point',
+        'has_preorder', 'preorder_terms', 'preorder_accepted_at',
         'landing_page_id', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'fbclid',
         'collected_amount', 'collected_in', 'courier_charge', 'settlement_note', 'delivered_at',
     ];
@@ -74,7 +75,15 @@ class Order extends Model
         'courier_charge' => 'decimal:2',
         'delivered_at' => 'datetime',
         'courier_synced_at' => 'datetime',
+        'has_preorder' => 'boolean',
+        'preorder_accepted_at' => 'datetime',
     ];
+
+    /** Lines the shop cannot ship yet, because the stock is not in. */
+    public function preorderItems()
+    {
+        return $this->items()->where('is_preorder', true);
+    }
 
     /** True for a sale rung up at the counter, whichever channel it came in by. */
     public function isCounterSale(): bool

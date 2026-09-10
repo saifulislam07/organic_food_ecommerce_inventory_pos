@@ -2,11 +2,9 @@
 @section('page_title', 'Products')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <form action="{{ route('admin.products.index') }}" method="GET" class="d-flex gap-2">
-        <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ request('search') }}">
-        <button class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
-    </form>
+<div class="admin-toolbar">
+    <h6 class="admin-toolbar__title">Products <span class="admin-toolbar__count">{{ number_format($products->total()) }}</span></h6>
+    @include('admin.partials.search', ['route' => route('admin.products.index'), 'placeholder' => 'Product name'])
     <a href="{{ route('admin.products.create') }}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Product</a>
 </div>
 
@@ -21,15 +19,15 @@
 <div class="card admin-card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead style="background: var(--gray-100);">
+            <table class="table table-hover admin-table">
+                <thead>
                     <tr>
                         @can('products.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-products"></th>@endcan
-                        <th style="padding: 14px 16px;">Image</th>
-                        <th>Name</th>
-                        <th>Category</th>
+                        <th>Image</th>
+                        @include('admin.partials.sort', ['key' => 'name', 'label' => 'Name', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'category', 'label' => 'Category', 'first' => 'asc'])
                         <th>Variants</th>
-                        <th>Status</th>
+                        @include('admin.partials.sort', ['key' => 'status', 'label' => 'Status'])
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -76,6 +74,6 @@
         </div>
     </div>
 </div>
-<div class="mt-3">{{ $products->links() }}</div>
+<div class="admin-pager">{{ $products->links() }}</div>
 
 @endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Support\PaymentAccounts;
@@ -13,6 +14,7 @@ use Illuminate\Validation\Rule;
 class AdminExpenseController extends Controller
 {
     use BulkDeletes, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -20,7 +22,16 @@ class AdminExpenseController extends Controller
             Expense::query(),
             $request->input('search'),
             ['title', 'category', 'notes']
-        )->orderBy('expense_date', 'desc')->paginate(20)->withQueryString();
+        );
+
+        $this->applySort($expenses, $request, [
+            'expense_date' => 'expense_date',
+            'title' => 'title',
+            'category' => 'category',
+            'amount' => 'amount',
+        ], 'expense_date');
+
+        $expenses = $expenses->paginate(20)->withQueryString();
         $totalAmount = Expense::sum('amount');
 
         return view('admin.expenses.index', compact('expenses', 'totalAmount'));

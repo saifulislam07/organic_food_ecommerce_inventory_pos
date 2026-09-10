@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Investment;
 use App\Models\Investor;
@@ -21,6 +22,7 @@ use Illuminate\Validation\Rule;
 class AdminInvestmentController extends Controller
 {
     use BulkDeletes, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -28,11 +30,16 @@ class AdminInvestmentController extends Controller
             Investment::with('investor'),
             $request->input('search'),
             ['notes', 'investor.name', 'investor.phone']
-        )
-            ->orderBy('invested_at', 'desc')
-            ->orderBy('id', 'desc')
-            ->paginate(20)
-            ->withQueryString();
+        );
+
+        $this->applySort($investments, $request, [
+            'invested_at' => 'invested_at',
+            'investor' => 'investor_id',
+            'account' => 'received_in',
+            'amount' => 'amount',
+        ], 'invested_at');
+
+        $investments = $investments->paginate(20)->withQueryString();
 
         return view('admin.investments.index', [
             'investments' => $investments,

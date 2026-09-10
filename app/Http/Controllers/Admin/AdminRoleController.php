@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Support\AdminModules;
 use Illuminate\Http\Request;
@@ -18,15 +19,24 @@ class AdminRoleController extends Controller
 {
     use BulkDeletes;
     use SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
+        $roles = $this->applySearch(
+            Role::withCount('users', 'permissions'),
+            $request->input('search'),
+            ['name']
+        );
+
+        $this->applySort($roles, $request, [
+            'name' => 'name',
+            'permissions' => 'permissions_count',
+            'staff' => 'users_count',
+        ], 'name', 'asc');
+
         return view('admin.roles.index', [
-            'roles' => $this->applySearch(
-                Role::withCount('users', 'permissions'),
-                $request->input('search'),
-                ['name']
-            )->orderBy('name')->paginate(20)->withQueryString(),
+            'roles' => $roles->paginate(20)->withQueryString(),
         ]);
     }
 

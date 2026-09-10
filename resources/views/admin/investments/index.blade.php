@@ -4,10 +4,6 @@
 @section('page_title', 'Investments — Money In')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.investments.index'), 'placeholder' => 'Investor name, phone or note'])
-</div>
-
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card bg-white border-0 shadow-sm">
@@ -29,8 +25,9 @@
 @endcan
 
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0">Investment List</h5>
+        @include('admin.partials.search', ['route' => route('admin.investments.index'), 'placeholder' => 'Investor or note'])
         @can('investments.create')
         <a href="{{ route('admin.investments.create') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg"></i> Record Investment
@@ -39,14 +36,14 @@
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle admin-table">
+                <thead>
                     <tr>
                         @can('investments.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-investments"></th>@endcan
-                        <th class="ps-4">Date</th>
-                        <th>Investor</th>
-                        <th>Received in</th>
-                        <th class="text-end">Amount</th>
+                        @include('admin.partials.sort', ['key' => 'invested_at', 'label' => 'Date'])
+                        @include('admin.partials.sort', ['key' => 'investor', 'label' => 'Investor', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'account', 'label' => 'Received in', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'amount', 'label' => 'Amount', 'class' => 'text-end'])
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -90,7 +87,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">No investments recorded yet.</td>
+                        <td colspan="6" class="admin-table__empty">No investments recorded yet.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -98,7 +95,7 @@
         </div>
     </div>
     @if($investments->hasPages())
-    <div class="card-footer bg-white">{{ $investments->links() }}</div>
+    <div class="card-footer bg-white admin-pager">{{ $investments->links() }}</div>
     @endif
 </div>
 @endsection

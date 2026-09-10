@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\CleansUpImages;
 use App\Support\ImageStore;
+use App\Support\Preorder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,7 +32,8 @@ class Product extends Model
         'short_description', 'short_description_en', 'short_description_bn',
         'description', 'description_en', 'description_bn',
         'image', 'gallery', 'is_active', 'is_featured', 'is_bestseller',
-        'is_trending', 'is_preorder', 'is_combo', 'meta_title', 'meta_description', 'sort_order',
+        'is_trending', 'is_preorder', 'preorder_note_en', 'preorder_note_bn',
+        'is_combo', 'meta_title', 'meta_description', 'sort_order',
     ];
 
     /**
@@ -206,5 +208,26 @@ class Product extends Model
     public function getIsInStockAttribute(): bool
     {
         return $this->variants->contains(fn ($v) => $v->is_active && $v->available_stock > 0);
+    }
+
+    /**
+     * Sold out, but the admin has said it may still be taken as a pre-order —
+     * and there are terms to show. What the product card reads.
+     */
+    public function getIsPreorderableAttribute(): bool
+    {
+        return $this->is_preorder && ! $this->is_in_stock && Preorder::configured($this);
+    }
+
+    /** The same question for one variant, which is what actually gets bought. */
+    public function allowsPreorderOf(ProductVariant $variant): bool
+    {
+        return Preorder::allows($this, $variant) && Preorder::configured($this);
+    }
+
+    /** The terms this product's pre-orders carry, in the language being read. */
+    public function preorderNote(): ?string
+    {
+        return Preorder::note($this);
     }
 }

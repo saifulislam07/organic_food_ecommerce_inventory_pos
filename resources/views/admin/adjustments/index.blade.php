@@ -4,9 +4,6 @@
 @section('page_title', 'Stock Analysis & Adjustments')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.adjustments.index'), 'placeholder' => 'Product, type or reason'])
-</div>
 @can('adjustments.delete')
 <form id="bulk-adjustments" method="POST" action="{{ route('admin.adjustments.bulkDestroy') }}"
       data-bulk data-bulk-noun="adjustments">
@@ -16,23 +13,24 @@
 </form>
 @endcan
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 text-dark fw-bold">Adjustment History</h5>
+        @include('admin.partials.search', ['route' => route('admin.adjustments.index'), 'placeholder' => 'Product, type or reason'])
         <a href="{{ route('admin.adjustments.create') }}" class="btn btn-warning btn-sm">
             <i class="bi bi-tools"></i> New Adjustment
         </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle admin-table">
+                <thead>
                     <tr>
                         @can('adjustments.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-adjustments"></th>@endcan
-                        <th class="ps-4">Date</th>
-                        <th>Product & Variant</th>
-                        <th>Type</th>
-                        <th>Quantity</th>
-                        <th>Reason</th>
+                        @include('admin.partials.sort', ['key' => 'adjustment_date', 'label' => 'Date'])
+                        @include('admin.partials.sort', ['key' => 'product', 'label' => 'Product & Variant', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'type', 'label' => 'Type', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'quantity', 'label' => 'Quantity'])
+                        @include('admin.partials.sort', ['key' => 'reason', 'label' => 'Reason', 'first' => 'asc'])
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -74,7 +72,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">No adjustment records found.</td>
+                        <td colspan="7" class="admin-table__empty">No adjustment records found.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -82,7 +80,7 @@
         </div>
     </div>
     @if($adjustments->hasPages())
-    <div class="card-footer bg-white">
+    <div class="card-footer bg-white admin-pager">
         {{ $adjustments->links() }}
     </div>
     @endif

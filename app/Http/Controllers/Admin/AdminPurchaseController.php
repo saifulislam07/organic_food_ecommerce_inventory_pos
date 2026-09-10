@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\PresentsVariantOptions;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariant;
 use App\Models\Purchase;
@@ -19,6 +20,7 @@ class AdminPurchaseController extends Controller
     use BulkDeletes;
     use PresentsVariantOptions;
     use SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -26,10 +28,17 @@ class AdminPurchaseController extends Controller
             Purchase::with(['supplier', 'productVariant.product']),
             $request->input('search'),
             ['notes', 'supplier.name', 'productVariant.name', 'productVariant.product.name']
-        )
-            ->latest('purchase_date')
-            ->paginate(20)
-            ->withQueryString();
+        );
+
+        $this->applySort($purchases, $request, [
+            'purchase_date' => 'purchase_date',
+            'supplier' => 'supplier_id',
+            'product' => 'product_variant_id',
+            'unit_price' => 'purchase_price',
+            'quantity' => 'quantity',
+        ], 'purchase_date');
+
+        $purchases = $purchases->paginate(20)->withQueryString();
 
         return view('admin.purchases.index', compact('purchases'));
     }

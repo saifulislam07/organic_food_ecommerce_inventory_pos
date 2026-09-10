@@ -150,6 +150,10 @@ async function dropCoupon() {
                                             <i class="bi bi-ticket-perforated-fill"></i>
                                             {{ label('couponOnLine', 'Coupon applied') }}
                                         </span>
+                                        <span v-if="line.is_preorder" class="cart-preorder-flag">
+                                            <i class="bi bi-clock-history"></i>
+                                            {{ label('preorderOnLine', 'Pre-order') }}
+                                        </span>
                                     </div>
                                 </div>
                             </td>

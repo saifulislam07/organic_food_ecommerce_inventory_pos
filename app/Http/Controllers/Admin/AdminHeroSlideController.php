@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\HeroSlide;
 use App\Support\ImageStore;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 class AdminHeroSlideController extends Controller
 {
     use BulkDeletes, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -19,7 +21,15 @@ class AdminHeroSlideController extends Controller
             HeroSlide::query(),
             $request->input('search'),
             ['title_en', 'title_bn']
-        )->sorted()->paginate(20)->withQueryString();
+        );
+
+        $this->applySort($slides, $request, [
+            'title' => 'title_en',
+            'status' => 'is_active',
+            'sort_order' => ['sort_order', 'id'],
+        ], 'sort_order', 'asc');
+
+        $slides = $slides->paginate(20)->withQueryString();
 
         return view('admin.sliders.index', compact('slides'));
     }

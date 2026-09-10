@@ -43,10 +43,12 @@ class CheckoutController extends Controller
         $delivery = $this->cart->getDeliveryCharge($defaultAddress->area ?? 'dhaka_inside');
         $total = $this->cart->getTotal($defaultAddress->area ?? 'dhaka_inside');
 
+        $preorderNotes = $this->cart->preorderNotes();
+
         return view('checkout.index', compact(
             'items', 'subtotal', 'discount', 'coupon', 'delivery', 'total',
             'shippingFeeInside', 'shippingFeeOutside', 'threshold',
-            'userAddresses', 'defaultAddress'
+            'userAddresses', 'defaultAddress', 'preorderNotes'
         ));
     }
 
@@ -65,6 +67,17 @@ class CheckoutController extends Controller
 
         if ($this->cart->isEmpty()) {
             return redirect()->route('shop')->with('error', 'Your cart is empty');
+        }
+
+        // Asked for only when it applies, and checked on the server: the terms
+        // are the shop's protection against "nobody told me it would take a
+        // fortnight", so the browser does not get to decide they were agreed.
+        $preorderNotes = $this->cart->preorderNotes();
+
+        if ($preorderNotes && ! $request->boolean('preorder_accept')) {
+            return back()->withInput()->withErrors([
+                'preorder_accept' => __('Please accept the pre-order conditions before placing this order.'),
+            ]);
         }
 
         if (auth()->check() && $request->filled('save_address')) {
@@ -88,7 +101,7 @@ class CheckoutController extends Controller
 
         try {
             $order = DB::transaction(fn () => $this->placeOrder(
-                $validated, $subtotal, $discount, $deliveryCharge, $coupon
+                $validated, $subtotal, $discount, $deliveryCharge, $coupon, $preorderNotes
             ));
         } catch (\RuntimeException $e) {
             return back()->withInput()->withErrors(['cart' => $e->getMessage()]);
@@ -110,7 +123,8 @@ class CheckoutController extends Controller
         float $subtotal,
         float $discount,
         float $deliveryCharge,
-        ?Coupon $coupon
+        ?Coupon $coupon,
+        array $preorderNotes = []
     ): Order {
         $inventory = app(InventoryService::class);
 
@@ -132,6 +146,13 @@ class CheckoutController extends Controller
             'total' => $subtotal - $discount + $deliveryCharge,
             'payment_method' => 'cod',
             'source' => 'website',
+            'has_preorder' => $preorderNotes !== [],
+            // Stored as shown, not as a reference: editing the note next month
+            // must not rewrite what this shopper agreed to today.
+            'preorder_terms' => $preorderNotes ? implode("
+
+", $preorderNotes) : null,
+            'preorder_accepted_at' => $preorderNotes ? now() : null,
         ]);
 
         // Counted once the order exists, so an order that fails on stock does
@@ -145,9 +166,17 @@ class CheckoutController extends Controller
                 throw new \RuntimeException("{$item['product_name']} is no longer available.");
             }
 
+            $isPreorder = (bool) ($item['is_preorder'] ?? false);
+
             // Website orders never used to touch stock at all — they do now, and
-            // a combo draws its components down instead of itself.
-            $inventory->deduct($variant, (int) $item['quantity']);
+            // a combo draws its components down instead of itself. A pre-order
+            // is the one line that must not: there is nothing to take, and
+            // driving the count negative would misreport every stock figure in
+            // the panel. It is drawn down when the goods arrive and the order
+            // is fulfilled.
+            if (! $isPreorder) {
+                $inventory->deduct($variant, (int) $item['quantity']);
+            }
 
             OrderItem::create([
                 'order_id' => $order->id,
@@ -156,6 +185,7 @@ class CheckoutController extends Controller
                 'product_name' => $item['product_name'],
                 'variant_name' => $item['variant_name'],
                 'quantity' => $item['quantity'],
+                'is_preorder' => $isPreorder,
                 'unit_price' => $item['price'],
                 'total' => $item['subtotal'],
             ]);

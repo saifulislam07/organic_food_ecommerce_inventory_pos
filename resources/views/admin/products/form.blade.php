@@ -166,9 +166,36 @@
                         <div class="form-check form-switch">
                             <input type="hidden" name="is_preorder" value="0">
                             <input class="form-check-input" type="checkbox" name="is_preorder" value="1"
+                                   id="is_preorder" data-preorder-toggle
                                    {{ old('is_preorder', $product->is_preorder ?? false) ? 'checked' : '' }}>
-                            <label class="form-check-label">Pre-order</label>
+                            <label class="form-check-label" for="is_preorder">Pre-order when out of stock</label>
                         </div>
+                    </div>
+
+                    {{-- Only meaningful while the switch above is on, so it
+                         stays out of the way until it is. --}}
+                    <div class="mb-3 preorder-fields" data-preorder-fields
+                         @unless(old('is_preorder', $product->is_preorder ?? false)) hidden @endunless>
+                        <label class="form-label fw-bold">Pre-order conditions</label>
+                        <p class="text-muted small mb-2">
+                            শর্তগুলো কাস্টমারকে দেখানো হবে এবং টিক দিয়ে রাজি হতে হবে।
+                            খালি রাখলে Site Settings-এর সাধারণ শর্তই দেখাবে।
+                        </p>
+
+                        <label class="form-label small text-muted mb-1">English</label>
+                        <textarea name="preorder_note_en" class="form-control mb-2" rows="3"
+                                  placeholder="Leave blank to use the shop-wide note">{{ old('preorder_note_en', $product->preorder_note_en ?? '') }}</textarea>
+
+                        <label class="form-label small text-muted mb-1">বাংলা</label>
+                        <textarea name="preorder_note_bn" class="form-control" rows="3"
+                                  placeholder="খালি রাখলে সাধারণ শর্ত দেখাবে">{{ old('preorder_note_bn', $product->preorder_note_bn ?? '') }}</textarea>
+
+                        @if(! \App\Support\Preorder::note())
+                            <div class="alert alert-warning small mt-2 mb-0 py-2">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Site Settings-এ কোনো সাধারণ শর্ত লেখা নেই। এখানে না লিখলে প্রি-অর্ডার বাটন দেখাবে না।
+                            </div>
+                        @endif
                     </div>
 
                     <button type="submit" class="btn btn-success w-100 mt-3">
@@ -180,3 +207,19 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // The conditions only apply while pre-order is on.
+    document.querySelectorAll('[data-preorder-toggle]').forEach((toggle) => {
+        const fields = document.querySelector('[data-preorder-fields]');
+
+        if (!fields) return;
+
+        toggle.addEventListener('change', () => {
+            fields.hidden = !toggle.checked;
+        });
+    });
+</script>
+@endpush
+

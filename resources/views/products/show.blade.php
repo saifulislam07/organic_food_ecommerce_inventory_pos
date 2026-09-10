@@ -92,7 +92,9 @@ Please provide delivery info.";
                             ])->values(),
                             'whatsappNumber' => \App\Models\Setting::get('whatsapp', '8801716952365'),
                             'whatsappTemplate' => $whatsappTemplate,
-                            'labels' => [
+                            'preorderEnabled' => $product->is_preorder && \App\Support\Preorder::configured($product),
+                            'preorderNote' => $product->preorderNote(),
+                            'labels' => \App\Support\Preorder::labels() + [
                                 'selectLabel' => $bn ? 'অপশন সিলেক্ট করুন' : 'Select option',
                                 'quantityLabel' => $bn ? 'পরিমান' : 'Quantity',
                                 'addToCart' => $bn ? 'কার্টে যোগ করুন' : 'Add to Cart',
@@ -105,23 +107,31 @@ Please provide delivery info.";
                     ></div>
 
                     <ul class="product-facts">
-                        <li class="{{ $stock > 0 ? 'is-good' : 'is-bad' }}">
-                            <i class="bi {{ $stock > 0 ? 'bi-check-circle-fill' : 'bi-x-circle-fill' }}"></i>
-                            {{ $stock > 0
-                                ? ($bn ? 'স্টকে আছে' : 'In stock')
-                                : ($bn ? 'স্টক শেষ' : 'Out of stock') }}
+                        @php $preorderable = $stock <= 0 && $product->is_preorder && \App\Support\Preorder::configured($product); @endphp
+                        <li class="{{ $stock > 0 ? 'is-good' : ($preorderable ? 'is-note' : 'is-bad') }}">
+                            <i class="bi {{ $stock > 0 ? 'bi-check-circle-fill' : ($preorderable ? 'bi-clock-history' : 'bi-x-circle-fill') }}"></i>
+                            @if($stock > 0)
+                                {{ $bn ? 'স্টকে আছে' : 'In stock' }}
+                            @elseif($preorderable)
+                                {{ $bn ? 'স্টক শেষ — প্রি-অর্ডার নেওয়া হচ্ছে' : 'Out of stock — pre-order open' }}
+                            @else
+                                {{ $bn ? 'স্টক শেষ' : 'Out of stock' }}
+                            @endif
                         </li>
                         <li>
                             <i class="bi bi-tag"></i>
                             <a href="{{ route('shop', ['category' => $product->category->slug]) }}">{{ $product->category->name }}</a>
                         </li>
-                        @if($product->is_preorder)
-                            <li class="is-note">
-                                <i class="bi bi-clock-history"></i>
-                                {{ $bn ? 'প্রি-অর্ডার পাওয়া যাবে' : 'Pre-order available' }}
-                            </li>
-                        @endif
                     </ul>
+
+                    @if($preorderable)
+                        {{-- The same terms the dialog will ask them to tick, in
+                             front of them before they commit to reading it. --}}
+                        <div class="preorder-callout">
+                            <h3><i class="bi bi-clock-history"></i> {{ $bn ? 'প্রি-অর্ডারের শর্ত' : 'Pre-order conditions' }}</h3>
+                            <div class="preorder-terms">{{ $product->preorderNote() }}</div>
+                        </div>
+                    @endif
 
                     @if($product->is_combo)
                         @include('products._combo-contents', ['product' => $product])

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Coupon;
@@ -14,6 +15,7 @@ use Illuminate\Validation\Rule;
 class AdminCouponController extends Controller
 {
     use BulkDeletes, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -21,7 +23,18 @@ class AdminCouponController extends Controller
             Coupon::query()->withCount('orders'),
             $request->input('search'),
             ['code', 'label_en', 'label_bn']
-        )->latest()->paginate(20)->withQueryString();
+        );
+
+        $this->applySort($coupons, $request, [
+            'code' => 'code',
+            'discount' => ['type', 'value'],
+            'window' => 'starts_at',
+            'used' => 'orders_count',
+            'status' => 'is_active',
+            'created_at' => 'created_at',
+        ], 'created_at');
+
+        $coupons = $coupons->paginate(20)->withQueryString();
 
         return view('admin.coupons.index', compact('coupons'));
     }

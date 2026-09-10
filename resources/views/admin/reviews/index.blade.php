@@ -2,11 +2,8 @@
 @section('page_title', 'Reviews')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.reviews.index'), 'placeholder' => 'Customer, title or review text'])
-</div>
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <ul class="nav nav-pills">
+<div class="admin-toolbar">
+    <ul class="nav nav-pills gap-1">
         <li class="nav-item">
             <a class="nav-link {{ $status === 'all' ? 'active' : '' }}"
                href="{{ route('admin.reviews.index', ['status' => 'all']) }}">All</a>
@@ -22,6 +19,7 @@
                href="{{ route('admin.reviews.index', ['status' => 'approved']) }}">Approved</a>
         </li>
     </ul>
+    @include('admin.partials.search', ['route' => route('admin.reviews.index'), 'placeholder' => 'Customer, title or review text'])
     @can('reviews.create')
     <a href="{{ route('admin.reviews.create') }}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Review</a>
     @endcan
@@ -38,16 +36,16 @@
 <div class="card admin-card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead style="background: var(--gray-100);">
+            <table class="table table-hover admin-table">
+                <thead>
                     <tr>
                         @can('reviews.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-reviews"></th>@endcan
-                        <th style="padding: 14px 16px;">Product</th>
-                        <th>Customer</th>
-                        <th>Rating</th>
+                        @include('admin.partials.sort', ['key' => 'product', 'label' => 'Product', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'customer', 'label' => 'Customer', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'rating', 'label' => 'Rating'])
                         <th>Review</th>
                         <th>Source</th>
-                        <th>Status</th>
+                        @include('admin.partials.sort', ['key' => 'status', 'label' => 'Status'])
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -103,5 +101,5 @@
         </div>
     </div>
 </div>
-<div class="mt-3">{{ $reviews->links() }}</div>
+<div class="admin-pager">{{ $reviews->links() }}</div>
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\LandingPage;
@@ -17,6 +18,7 @@ class AdminCategoryController extends Controller
 {
     use BulkDeletes, GeneratesUniqueSlug;
     use SearchesRecords;
+    use SortsRecords;
 
     /** Posted fields that belong in the landing_defaults json, not in a column. */
     private const DRAFT_FIELDS = ['sections', 'features', 'faqs', 'specs', 'cta_text'];
@@ -27,7 +29,17 @@ class AdminCategoryController extends Controller
             Category::withCount('products'),
             $request->input('search'),
             ['name', 'name_en', 'name_bn', 'slug']
-        )->sorted()->paginate(15)->withQueryString();
+        );
+
+        $this->applySort($categories, $request, [
+            'name' => 'name',
+            'products' => 'products_count',
+            'status' => 'is_active',
+            // The hand-arranged storefront order, and the list's resting state.
+            'sort_order' => ['sort_order', 'name'],
+        ], 'sort_order', 'asc');
+
+        $categories = $categories->paginate(15)->withQueryString();
 
         return view('admin.categories.index', compact('categories'));
     }

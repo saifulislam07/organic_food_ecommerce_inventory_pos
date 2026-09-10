@@ -4,9 +4,6 @@
 @section('page_title', 'Roles')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.roles.index'), 'placeholder' => 'Role name'])
-</div>
 @can('roles.delete')
 <form id="bulk-roles" method="POST" action="{{ route('admin.roles.bulkDestroy') }}"
       data-bulk data-bulk-noun="roles">
@@ -16,8 +13,9 @@
 </form>
 @endcan
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 fw-bold text-dark">Roles</h5>
+        @include('admin.partials.search', ['route' => route('admin.roles.index'), 'placeholder' => 'Role name'])
         @can('roles.create')
             <a href="{{ route('admin.roles.create') }}" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg"></i> New Role
@@ -27,13 +25,13 @@
 
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle admin-table">
+                <thead>
                     <tr>
                         @can('roles.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-roles"></th>@endcan
-                        <th class="ps-4">Role</th>
-                        <th>Can reach</th>
-                        <th class="text-center">Staff</th>
+                        @include('admin.partials.sort', ['key' => 'name', 'label' => 'Role', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'permissions', 'label' => 'Can reach'])
+                        @include('admin.partials.sort', ['key' => 'staff', 'label' => 'Staff', 'class' => 'text-center'])
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -91,7 +89,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
+                            <td colspan="5" class="admin-table__empty">
                                 <i class="bi bi-person-badge fs-1 d-block mb-2 opacity-25"></i>
                                 No roles yet. A role bundles permissions so you can hand the same
                                 access to several people at once.
@@ -104,7 +102,7 @@
     </div>
 
     @if($roles->hasPages())
-        <div class="card-footer bg-white">{{ $roles->links() }}</div>
+        <div class="card-footer bg-white admin-pager">{{ $roles->links() }}</div>
     @endif
 </div>
 

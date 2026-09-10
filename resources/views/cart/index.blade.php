@@ -189,6 +189,7 @@
                     'couponRemove' => app()->getLocale() == 'bn' ? 'সরান' : 'Remove',
                     'couponDiscount' => app()->getLocale() == 'bn' ? 'কুপন ছাড়' : 'Coupon discount',
                     'couponOnLine' => app()->getLocale() == 'bn' ? 'কুপন প্রযোজ্য' : 'Coupon applied',
+                    'preorderOnLine' => app()->getLocale() == 'bn' ? 'প্রি-অর্ডার' : 'Pre-order',
                     'coupon_not_found' => app()->getLocale() == 'bn' ? 'এই কোডটি সঠিক নয়।' : 'That code is not valid.',
                     'coupon_inactive' => app()->getLocale() == 'bn' ? 'কোডটি এখন চালু নেই।' : 'That code is not active right now.',
                     'coupon_expired' => app()->getLocale() == 'bn' ? 'কোডটির মেয়াদ শেষ।' : 'That code has expired.',

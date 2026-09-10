@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Admin\Concerns\HandlesProductImages;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ComboItem;
@@ -18,6 +19,7 @@ use Illuminate\Validation\ValidationException;
 class AdminProductController extends Controller
 {
     use BulkDeletes, GeneratesUniqueSlug, HandlesProductImages;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -29,7 +31,15 @@ class AdminProductController extends Controller
             $query->where('name', 'like', '%'.$request->search.'%');
         }
 
-        $products = $query->latest()->paginate(15);
+        $this->applySort($query, $request, [
+            'name' => 'name',
+            'category' => 'category_id',
+            'status' => 'is_active',
+            'created_at' => 'created_at',
+        ], 'created_at');
+
+        // withQueryString, or the search term is dropped the moment you page.
+        $products = $query->paginate(15)->withQueryString();
 
         return view('admin.products.index', compact('products'));
     }
@@ -62,6 +72,8 @@ class AdminProductController extends Controller
             'is_bestseller' => 'boolean',
             'is_trending' => 'boolean',
             'is_preorder' => 'boolean',
+            'preorder_note_en' => 'nullable|string|max:2000',
+            'preorder_note_bn' => 'nullable|string|max:2000',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'variants' => 'required|array|min:1',
@@ -133,6 +145,8 @@ class AdminProductController extends Controller
             'is_bestseller' => 'boolean',
             'is_trending' => 'boolean',
             'is_preorder' => 'boolean',
+            'preorder_note_en' => 'nullable|string|max:2000',
+            'preorder_note_bn' => 'nullable|string|max:2000',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'variants' => 'required|array|min:1',

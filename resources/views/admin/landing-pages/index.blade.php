@@ -2,17 +2,16 @@
 @section('page_title', 'Landing Pages')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.landing-pages.index'), 'placeholder' => 'নাম, URL বা হেডলাইন'])
+<div class="mb-3">
+    <h5 class="fw-bold mb-1">ক্যাম্পেইন ল্যান্ডিং পেজ</h5>
+    <p class="text-muted small mb-0">
+        ফেসবুক বুস্টের জন্য আলাদা পেজ — নিজস্ব অফার, নিজস্ব লিংক, কার্ট ছাড়া সরাসরি অর্ডার।
+    </p>
 </div>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h5 class="fw-bold mb-1">ক্যাম্পেইন ল্যান্ডিং পেজ</h5>
-        <p class="text-muted small mb-0">
-            ফেসবুক বুস্টের জন্য আলাদা পেজ — নিজস্ব অফার, নিজস্ব লিংক, কার্ট ছাড়া সরাসরি অর্ডার।
-        </p>
-    </div>
+<div class="admin-toolbar">
+    <h6 class="admin-toolbar__title">পেজ <span class="admin-toolbar__count">{{ number_format($pages->total()) }}</span></h6>
+    @include('admin.partials.search', ['route' => route('admin.landing-pages.index'), 'placeholder' => 'নাম, URL বা হেডলাইন'])
     @can('landing-pages.create')
     <a href="{{ route('admin.landing-pages.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> নতুন পেজ
@@ -31,16 +30,16 @@
 
 <div class="card admin-card p-0">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead style="background: var(--gray-100);">
+        <table class="table table-hover align-middle admin-table">
+            <thead>
                 <tr>
                     @can('landing-pages.delete')<th style="width:38px;" class="px-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-landing-pages"></th>@endcan
-                    <th class="px-4 py-3">পেজ</th>
-                    <th>স্ট্যাটাস</th>
-                    <th class="text-end">ভিউ</th>
-                    <th class="text-end">অর্ডার</th>
+                    @include('admin.partials.sort', ['key' => 'page', 'label' => 'পেজ', 'first' => 'asc'])
+                    @include('admin.partials.sort', ['key' => 'status', 'label' => 'স্ট্যাটাস'])
+                    @include('admin.partials.sort', ['key' => 'views', 'label' => 'ভিউ', 'class' => 'text-end'])
+                    @include('admin.partials.sort', ['key' => 'orders', 'label' => 'অর্ডার', 'class' => 'text-end'])
                     <th class="text-end">কনভার্শন</th>
-                    <th class="text-end">বিক্রি</th>
+                    @include('admin.partials.sort', ['key' => 'revenue', 'label' => 'বিক্রি', 'class' => 'text-end'])
                     <th class="text-end px-4">অ্যাকশন</th>
                 </tr>
             </thead>
@@ -134,6 +133,6 @@
 </div>
 
 @if($pages->hasPages())
-    <div class="mt-3">{{ $pages->links() }}</div>
+    <div class="admin-pager">{{ $pages->links() }}</div>
 @endif
 @endsection

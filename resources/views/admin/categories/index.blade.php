@@ -2,10 +2,9 @@
 @section('page_title', 'Categories')
 
 @section('content')
-<div class="d-flex mb-3">
+<div class="admin-toolbar">
+    <h6 class="admin-toolbar__title">Categories <span class="admin-toolbar__count">{{ number_format($categories->total()) }}</span></h6>
     @include('admin.partials.search', ['route' => route('admin.categories.index'), 'placeholder' => 'Category name'])
-</div>
-<div class="d-flex justify-content-end mb-4">
     <a href="{{ route('admin.categories.create') }}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Category</a>
 </div>
 
@@ -20,15 +19,15 @@
 <div class="card admin-card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead style="background: var(--gray-100);">
+            <table class="table table-hover admin-table">
+                <thead>
                     <tr>
                         @can('categories.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-categories"></th>@endcan
-                        <th style="padding: 14px 16px;">Image</th>
-                        <th>Name</th>
-                        <th>Products</th>
-                        <th>Status</th>
-                        <th>Sort Order</th>
+                        <th>Image</th>
+                        @include('admin.partials.sort', ['key' => 'name', 'label' => 'Name', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'products', 'label' => 'Products'])
+                        @include('admin.partials.sort', ['key' => 'status', 'label' => 'Status'])
+                        @include('admin.partials.sort', ['key' => 'sort_order', 'label' => 'Sort Order', 'first' => 'asc'])
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -64,6 +63,6 @@
         </div>
     </div>
 </div>
-<div class="mt-3">{{ $categories->links() }}</div>
+<div class="admin-pager">{{ $categories->links() }}</div>
 
 @endsection

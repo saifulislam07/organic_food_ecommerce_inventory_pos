@@ -17,6 +17,8 @@ const props = defineProps({
     user: { type: Object, default: () => ({ name: '', mobile: '' }) },
     old: { type: Object, default: () => ({}) },
     errors: { type: Object, default: () => ({}) },
+    /** Distinct pre-order terms covering the lines still to come in. */
+    preorderNotes: { type: Array, default: () => [] },
     labels: { type: Object, default: () => ({}) },
 });
 
@@ -34,6 +36,12 @@ const address = ref(props.old.customer_address ?? defaultAddress.value?.address 
 const pickupPoint = ref(props.old.pickup_point ?? props.pickupPoints[0]?.value ?? '');
 const notes = ref(props.old.notes ?? '');
 const saveAddress = ref(true);
+
+// Re-asked here even though it was ticked on the way into the cart: stock can
+// arrive or run out while a cart sits open, so what is being pre-ordered at the
+// moment of ordering is not necessarily what was agreed to an hour ago.
+const preorderAccepted = ref(false);
+const hasPreorder = computed(() => props.preorderNotes.length > 0);
 
 const isPickup = computed(() => deliveryType.value === 'pickup');
 
@@ -261,7 +269,37 @@ function error(field) {
                     <span>{{ money(total) }}</span>
                 </div>
 
-                <button type="submit" class="btn-primary-custom w-100 justify-content-center mt-4" style="font-size:1.1rem;padding:16px;">
+                <div v-if="hasPreorder" class="preorder-callout mt-4">
+                    <h3><i class="bi bi-clock-history"></i> {{ label('preorderTitle', 'Pre-order conditions') }}</h3>
+                    <p class="preorder-callout__lead">
+                        {{ label('preorderLead', 'Some items in this order are not in stock yet.') }}
+                    </p>
+                    <div v-for="(note, index) in preorderNotes" :key="index" class="preorder-terms">{{ note }}</div>
+
+                    <div class="form-check mt-3">
+                        <input
+                            id="preorder_accept"
+                            v-model="preorderAccepted"
+                            class="form-check-input"
+                            type="checkbox"
+                            name="preorder_accept"
+                            value="1"
+                        >
+                        <label class="form-check-label fw-bold small" for="preorder_accept">
+                            {{ label('preorderAccept', 'I have read and accept these conditions') }}
+                        </label>
+                    </div>
+                    <div v-if="errors.preorder_accept" class="text-danger small mt-2">
+                        {{ errors.preorder_accept[0] }}
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn-primary-custom w-100 justify-content-center mt-4"
+                    style="font-size:1.1rem;padding:16px;"
+                    :disabled="hasPreorder && !preorderAccepted"
+                >
                     <i class="bi bi-check-circle"></i> {{ label('placeOrder', 'Place Order') }}
                 </button>
             </div>

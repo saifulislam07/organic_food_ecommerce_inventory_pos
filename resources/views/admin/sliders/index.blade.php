@@ -2,14 +2,13 @@
 @section('page_title', 'Hero Slider')
 
 @section('content')
-<div class="d-flex mb-3">
+<p class="text-muted small">
+    হোমপেজের উপরের স্লাইডার। একাধিক স্লাইড থাকলে নিজে থেকেই ঘুরবে;
+    কোনো স্লাইড না থাকলে Site Settings-এর হিরো লেখাই দেখানো হবে।
+</p>
+<div class="admin-toolbar">
+    <h6 class="admin-toolbar__title">Slides <span class="admin-toolbar__count">{{ number_format($slides->total()) }}</span></h6>
     @include('admin.partials.search', ['route' => route('admin.sliders.index'), 'placeholder' => 'Slide title'])
-</div>
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <p class="text-muted small mb-0">
-        হোমপেজের উপরের স্লাইডার। একাধিক স্লাইড থাকলে নিজে থেকেই ঘুরবে;
-        কোনো স্লাইড না থাকলে Site Settings-এর হিরো লেখাই দেখানো হবে।
-    </p>
     <a href="{{ route('admin.sliders.create') }}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Slide</a>
 </div>
 
@@ -24,15 +23,15 @@
 <div class="card admin-card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead style="background: var(--gray-100);">
+            <table class="table table-hover admin-table">
+                <thead>
                     <tr>
                         @can('sliders.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-sliders"></th>@endcan
-                        <th style="padding: 14px 16px;">Image</th>
-                        <th>Title</th>
+                        <th>Image</th>
+                        @include('admin.partials.sort', ['key' => 'title', 'label' => 'Title', 'first' => 'asc'])
                         <th>Button</th>
-                        <th>Status</th>
-                        <th>Sort Order</th>
+                        @include('admin.partials.sort', ['key' => 'status', 'label' => 'Status'])
+                        @include('admin.partials.sort', ['key' => 'sort_order', 'label' => 'Sort Order', 'first' => 'asc'])
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -76,5 +75,5 @@
         </div>
     </div>
 </div>
-<div class="mt-3">{{ $slides->links() }}</div>
+<div class="admin-pager">{{ $slides->links() }}</div>
 @endsection

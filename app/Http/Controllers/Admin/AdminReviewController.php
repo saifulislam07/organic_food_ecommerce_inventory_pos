@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Review;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 class AdminReviewController extends Controller
 {
     use BulkDeletes, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -24,9 +26,17 @@ class AdminReviewController extends Controller
         )
             ->when($status === 'pending', fn ($q) => $q->pending())
             ->when($status === 'approved', fn ($q) => $q->approved())
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
+        ;
+
+        $this->applySort($reviews, $request, [
+            'product' => 'product_id',
+            'customer' => 'customer_name',
+            'rating' => 'rating',
+            'status' => 'is_approved',
+            'created_at' => 'created_at',
+        ], 'created_at');
+
+        $reviews = $reviews->paginate(20)->withQueryString();
 
         $pendingCount = Review::pending()->count();
 

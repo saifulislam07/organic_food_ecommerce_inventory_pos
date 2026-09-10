@@ -17,19 +17,21 @@
     @endforeach
 </ul>
 
-<div class="d-flex mb-3">
+<div class="admin-toolbar">
+    <h6 class="admin-toolbar__title">
+        {{ $groups[$group]['label'] }}
+        <span class="admin-toolbar__count">{{ number_format($blocks->total()) }}</span>
+    </h6>
     @include('admin.partials.search', [
         'route' => route('admin.blocks.index', ['group' => $group]),
         'placeholder' => 'Item title',
     ])
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-4 gap-3">
-    <p class="text-muted small mb-0">{{ $groups[$group]['hint'] }}</p>
     <a href="{{ route('admin.blocks.create', ['group' => $group]) }}" class="btn btn-success flex-shrink-0">
         <i class="bi bi-plus-circle"></i> Add Item
     </a>
 </div>
+
+<p class="text-muted small">{{ $groups[$group]['hint'] }}</p>
 
 @can('blocks.delete')
 <form id="bulk-blocks" method="POST" action="{{ route('admin.blocks.bulkDestroy') }}"
@@ -43,14 +45,14 @@
 <div class="card admin-card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead style="background: var(--gray-100);">
+            <table class="table table-hover admin-table">
+                <thead>
                     <tr>
                         @can('blocks.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-blocks"></th>@endcan
-                        <th style="padding: 14px 16px;">Title</th>
+                        @include('admin.partials.sort', ['key' => 'title', 'label' => 'Title', 'first' => 'asc'])
                         @if(\App\Models\SiteBlock::groupHasField($group, 'url'))<th>Link</th>@endif
-                        <th>Status</th>
-                        <th>Sort Order</th>
+                        @include('admin.partials.sort', ['key' => 'status', 'label' => 'Status'])
+                        @include('admin.partials.sort', ['key' => 'sort_order', 'label' => 'Sort Order', 'first' => 'asc'])
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -106,5 +108,5 @@
         </div>
     </div>
 </div>
-<div class="mt-3">{{ $blocks->links() }}</div>
+<div class="admin-pager">{{ $blocks->links() }}</div>
 @endsection

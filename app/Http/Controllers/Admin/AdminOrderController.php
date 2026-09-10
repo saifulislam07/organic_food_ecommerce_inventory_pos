@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Courier\CourierManager;
 use App\Http\Controllers\Admin\Concerns\PresentsSellableVariants;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -21,6 +22,7 @@ use RuntimeException;
 class AdminOrderController extends Controller
 {
     use PresentsSellableVariants;
+    use SortsRecords;
 
     public function __construct(
         private readonly OrderWorkflow $workflow,
@@ -46,6 +48,14 @@ class AdminOrderController extends Controller
             $query->where('courier', $request->courier);
         }
 
+        // Orders carrying something not yet in stock. "waiting" is the queue
+        // that matters: the ones nobody has shipped or cancelled yet.
+        if ($request->input('preorder') === 'waiting') {
+            $query->where('has_preorder', true)->whereNotIn('status', Order::CLOSED);
+        } elseif ($request->input('preorder') === 'all') {
+            $query->where('has_preorder', true);
+        }
+
         // Delivered but never settled is the queue that actually costs money:
         // every row in it is an order the books are still valuing at its face
         // amount because nobody has said what the courier handed over.
@@ -64,13 +74,27 @@ class AdminOrderController extends Controller
             });
         }
 
-        $orders = $query->latest()->paginate(15)->withQueryString();
+        $this->applySort($query, $request, [
+            'order_number' => 'order_number',
+            'created_at' => 'created_at',
+            'customer_name' => 'customer_name',
+            'total' => 'total',
+            'collected_amount' => 'collected_amount',
+            'courier' => 'courier',
+            'source' => 'source',
+            'status' => 'status',
+        ], 'created_at');
+
+        $orders = $query->paginate(15)->withQueryString();
 
         return view('admin.orders.index', [
             'orders' => $orders,
             'couriers' => $this->couriers,
             'courierOptions' => CourierSettings::driverClasses(),
             'awaitingSettlement' => Order::where('status', 'delivered')->whereNull('collected_amount')->count(),
+            'awaitingPreorder' => Order::where('has_preorder', true)
+                ->whereNotIn('status', Order::CLOSED)
+                ->count(),
         ]);
     }
 

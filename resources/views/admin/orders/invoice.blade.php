@@ -1,189 +1,332 @@
+@php
+    use App\Models\Setting;
+    use App\Support\AmountInWords;
+    use App\Support\ImageStore;
+
+    $bn = app()->getLocale() === 'bn';
+    $t = fn ($en, $bengali) => $bn ? $bengali : $en;
+    $money = fn ($n) => '৳'.number_format((float) $n);
+
+    $siteTitle = Setting::get('site_title', 'BaburhashiBD');
+    $logo = Setting::value('logo');
+
+    // The domain the shop actually runs on, rather than one written into the
+    // template — a rebrand should not leave the old address on every invoice.
+    $host = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+    // A part payment is the only case where the balance is worth restating;
+    // on an ordinary unpaid order it would just repeat the total.
+    $showBalance = $order->paid_amount !== null && $order->amount_due > 0;
+@endphp
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ app()->getLocale() == 'bn' ? 'ইনভয়েস' : 'Invoice' }} - {{ $order->order_number }}</title>
+    <title>{{ $t('Invoice', 'ইনভয়েস') }} — {{ $order->order_number }}</title>
+
+    {{-- The rest of the panel loads this; the invoice never did, so its Bangla
+         fell back to whatever the machine happened to have. --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Hind Siliguri'; color: #333; line-height: 1.5; margin: 0; padding: 20px; background: #f0f0f0; }
-        .invoice-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 50px; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; }
-        .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4f0e94; padding-bottom: 30px; margin-bottom: 30px; }
-        .brand-section h1 { color: #4f0e94; margin: 0; font-size: 32px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .invoice-logo { height: 56px; width: auto; max-width: 260px; display: block; margin-bottom: 4px; }
-        .brand-section p { margin: 5px 0 0; color: #666; font-size: 14px; }
-        .invoice-meta { text-align: right; }
-        .invoice-meta h2 { margin: 0; color: #333; font-size: 24px; font-weight: 700; }
-        .invoice-meta p { margin: 5px 0; color: #666; font-size: 14px; }
+        /*
+         | A5, portrait. The sheet is drawn at its true size on screen too, so
+         | what you see is what comes out of the printer rather than a wide page
+         | that reflows the moment it is printed.
+         */
+        @page { size: A5 portrait; margin: 10mm 9mm; }
 
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
-        .info-block h3 { font-size: 14px; text-transform: uppercase; color: #4f0e94; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; font-weight: 700; letter-spacing: 0.5px; }
-        .info-block p { margin: 4px 0; font-size: 14px; color: #444; }
+        * { box-sizing: border-box; }
 
-        .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .invoice-table th { background: #f5ecff; border-bottom: 2px solid #4f0e94; padding: 12px 15px; text-align: left; font-size: 13px; font-weight: 700; text-transform: uppercase; color: #4f0e94; }
-        .invoice-table td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 14px; }
-        .invoice-table .text-right { text-align: right; }
-        .invoice-table .text-center { text-align: center; }
+        /* Hind Siliguri carries the Bangla; the Latin faces come first so
+           English still sets in the system UI font. sans-serif goes LAST — put
+           it earlier and it wins outright, which is what used to happen. */
+        body {
+            font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, 'Hind Siliguri', sans-serif;
+            font-size: 9.5pt;
+            line-height: 1.45;
+            color: #16181d;
+            margin: 0;
+            padding: 16px;
+            background: #eceef1;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        .summary-section { display: flex; justify-content: flex-end; }
-        .summary-table { width: 250px; }
-        .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
-        .summary-row.total { border-top: 2px solid #4f0e94; margin-top: 10px; padding-top: 12px; font-weight: 800; font-size: 18px; color: #4f0e94; }
-        
-        .in-words { margin-top: 18px; padding: 12px 16px; border: 1px dashed #4f0e94; border-radius: 6px; background: #faf6ff; }
-        .in-words .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #4f0e94; font-weight: 700; display: block; margin-bottom: 2px; }
-        .in-words .words { font-size: 14px; font-weight: 600; color: #333; }
+        .sheet {
+            width: 148mm;
+            min-height: 210mm;
+            padding: 10mm 9mm;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08);
+        }
 
-        .footer { margin-top: 60px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 20px; }
-        .footer p { margin: 4px 0; }
+        /* One hairline weight everywhere, so nothing shouts. */
+        .rule { border: 0; border-top: 1px solid #d9dce1; margin: 0; }
 
-        .no-print-area { text-align: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 100; }
-        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 14px; transition: 0.2s; cursor: pointer; border: none; }
-        .btn-print { background: #4f0e94; color: white; }
-        .btn-print:hover { background: #3a0775; }
-        .btn-back { background: #6c757d; color: white; margin-left: 10px; }
-        
+        /* ------------------------------------------------------------ head */
+
+        .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10mm; }
+        .brand { min-width: 0; }
+        .brand img { height: 13mm; width: auto; max-width: 60mm; display: block; }
+        .brand .wordmark { font-size: 15pt; font-weight: 700; letter-spacing: -.01em; margin: 0; }
+        .brand .tagline { margin: 3px 0 0; font-size: 7.5pt; color: #6b7280; }
+
+        .doc { text-align: right; white-space: nowrap; }
+        .doc .kind { font-size: 13pt; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; margin: 0; }
+        .doc dl { margin: 6px 0 0; font-size: 8pt; }
+        .doc dt { display: inline; color: #6b7280; }
+        .doc dd { display: inline; margin: 0 0 0 4px; font-weight: 600; }
+        .doc .line { margin-top: 2px; }
+
+        /* ----------------------------------------------------------- panes */
+
+        .parties { display: flex; gap: 8mm; margin: 5mm 0; }
+        .party { flex: 1; min-width: 0; }
+        .label {
+            font-size: 6.5pt; font-weight: 700; letter-spacing: .14em;
+            text-transform: uppercase; color: #8a9099; margin: 0 0 3px;
+        }
+        .party .who { font-weight: 600; }
+        .party p { margin: 0; font-size: 8.5pt; color: #3f434a; word-wrap: break-word; }
+
+        /* ----------------------------------------------------------- items */
+
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            font-size: 6.5pt; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+            color: #8a9099; text-align: left; padding: 0 0 4px;
+            border-bottom: 1px solid #16181d;
+        }
+        tbody td { padding: 5px 0; border-bottom: 1px solid #eceef1; vertical-align: top; font-size: 8.5pt; }
+        tbody tr:last-child td { border-bottom: 0; }
+        .num { text-align: right; white-space: nowrap; }
+        .mid { text-align: center; white-space: nowrap; }
+        .item-name { font-weight: 600; }
+        .item-variant { display: block; font-size: 7.5pt; color: #8a9099; }
+
+        /* --------------------------------------------------------- totals */
+
+        .totals { display: flex; justify-content: flex-end; margin-top: 4mm; }
+        .totals table { width: 62mm; }
+        .totals td { padding: 3px 0; font-size: 8.5pt; border: 0; }
+        .totals .grand td {
+            border-top: 1px solid #16181d; padding-top: 6px;
+            font-size: 11pt; font-weight: 700;
+        }
+        .totals .settle td { color: #6b7280; font-size: 8pt; }
+        .totals .settle.first td { padding-top: 6px; }
+        .totals .due td { font-weight: 700; color: #16181d; }
+
+        /* ---------------------------------------------------------- words */
+
+        .words { margin-top: 4mm; padding-top: 3mm; border-top: 1px solid #d9dce1; }
+        .words p { margin: 0; font-size: 8.5pt; font-weight: 600; }
+
+        .notes { margin-top: 4mm; }
+        .notes p { margin: 0; font-size: 8pt; color: #3f434a; }
+
+        .foot { margin-top: 6mm; padding-top: 3mm; border-top: 1px solid #d9dce1; text-align: center; }
+        .foot p { margin: 0; font-size: 7.5pt; color: #8a9099; }
+        .foot .thanks { color: #3f434a; font-weight: 600; margin-bottom: 2px; }
+
+        /* --------------------------------------------------------- screen */
+
+        .toolbar { max-width: 148mm; margin: 0 auto 14px; display: flex; gap: 8px; justify-content: center; }
+        .btn {
+            font: inherit; font-size: 9pt; font-weight: 600; padding: 8px 18px; border-radius: 6px;
+            border: 1px solid transparent; cursor: pointer; text-decoration: none; display: inline-flex;
+            align-items: center; gap: 6px;
+        }
+        .btn-print { background: #16181d; color: #fff; }
+        .btn-back { background: #fff; color: #3f434a; border-color: #d9dce1; }
+
+        /* A true-size A5 preview is wider than a phone. Let the sheet shrink on
+           screen rather than push the page sideways — printing is unaffected,
+           since the print rules below re-fix it to the paper. */
+        @media screen and (max-width: 170mm) {
+            body { padding: 10px; }
+            .sheet { width: 100%; min-height: 0; padding: 6mm; }
+            .toolbar { max-width: 100%; }
+        }
+
         @media print {
-            .invoice-logo { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             body { background: #fff; padding: 0; }
-            .invoice-container { box-shadow: none; border: none; width: 100%; max-width: none; padding: 0; }
-            .no-print-area { display: none; }
+            .sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
+            .toolbar { display: none; }
+
+            /* The logo is the one piece of colour on the page; browsers drop
+               images' colour in print by default. */
+            .brand img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+            /* An order long enough to run onto a second sheet keeps its column
+               headings, never splits a line across the fold, and never leaves
+               the totals stranded on their own page. */
+            thead { display: table-header-group; }
+            tr { page-break-inside: avoid; }
+            .totals, .words, .foot { page-break-inside: avoid; }
         }
     </style>
 </head>
 <body>
 
-<div class="no-print-area">
+<div class="toolbar">
     <button onclick="window.print()" class="btn btn-print">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm6 4v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h7z"/></svg>
-        {{ app()->getLocale() == 'bn' ? 'প্রিন্ট ইনভয়েস' : 'Print Invoice' }}
+        {{ $t('Print', 'প্রিন্ট') }}
     </button>
-    <a href="{{ auth()->user()->isAdmin() ? route('admin.orders.show', $order) : route('customer.orders.show', $order->order_number) }}" class="btn btn-back">
-        {{ app()->getLocale() == 'bn' ? 'ফিরে যান' : 'Back' }}
+    <a class="btn btn-back"
+       href="{{ auth()->user()->isAdmin() ? route('admin.orders.show', $order) : route('customer.orders.show', $order->order_number) }}">
+        {{ $t('Back', 'ফিরে যান') }}
     </a>
 </div>
 
-<div class="invoice-container">
-    <div class="invoice-header">
-        <div class="brand-section">
-            @php $invoiceLogo = \App\Models\Setting::value('logo'); @endphp
-            @if($invoiceLogo)
-                <img class="invoice-logo" src="{{ \App\Support\ImageStore::url($invoiceLogo) }}"
-                     alt="{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}">
+<div class="sheet">
+
+    <div class="head">
+        <div class="brand">
+            {{-- An uploaded logo wins; otherwise the packaged wordmark, so a
+                 fresh install still prints as the brand. Same rule as
+                 partials.brand, inlined because this page has no app layout. --}}
+            @if($logo)
+                <img src="{{ ImageStore::url($logo) }}" alt="{{ $siteTitle }}">
             @else
-                <h1>{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}</h1>
+                <picture>
+                    <source srcset="{{ asset('assets/img/logo.webp') }}" type="image/webp">
+                    <img src="{{ asset('assets/img/logo.png') }}" alt="{{ $siteTitle }}">
+                </picture>
             @endif
-            <p>{{ app()->getLocale() == 'bn' ? 'আপনার বিশ্বস্ত শিশু পণ্যের পার্টনার' : 'Your Trusted Kids Store Partner' }}</p>
+            <p class="tagline">{{ $t('Your Trusted Kids Store Partner', 'আপনার বিশ্বস্ত শিশু পণ্যের পার্টনার') }}</p>
         </div>
-        <div class="invoice-meta">
-            <h2>{{ app()->getLocale() == 'bn' ? 'ইনভয়েস' : 'Invoice' }}</h2>
-            <p><strong>#{{ $order->order_number }}</strong></p>
-            <p>{{ app()->getLocale() == 'bn' ? 'তারিখ:' : 'Date:' }} {{ $order->created_at->format('d M, Y') }}</p>
-            <p>{{ app()->getLocale() == 'bn' ? 'অবস্থা:' : 'Status:' }} {{ strtoupper($order->status) }}</p>
+
+        <div class="doc">
+            <p class="kind">{{ $t('Invoice', 'ইনভয়েস') }}</p>
+            <dl>
+                <div class="line"><dt>{{ $t('No.', 'নং') }}</dt><dd>{{ $order->order_number }}</dd></div>
+                <div class="line"><dt>{{ $t('Date', 'তারিখ') }}</dt><dd>{{ $order->created_at->format('d M Y') }}</dd></div>
+                <div class="line"><dt>{{ $t('Status', 'অবস্থা') }}</dt><dd>{{ strtoupper($order->status_label) }}</dd></div>
+            </dl>
         </div>
     </div>
 
-    <div class="info-grid">
-        <div class="info-block">
-            <h3>{{ app()->getLocale() == 'bn' ? 'কার কাছে পাঠানো হবে' : 'Bill To' }}</h3>
-            <p><strong>{{ $order->customer_name }}</strong></p>
+    <hr class="rule" style="margin-top: 5mm;">
+
+    <div class="parties">
+        <div class="party">
+            <p class="label">{{ $t('Billed to', 'গ্রাহক') }}</p>
+            <p class="who">{{ $order->customer_name }}</p>
             <p>{{ $order->customer_phone }}</p>
             <p>{{ $order->customer_address }}</p>
             @if($order->customer_area)
-                <p>{{ app()->getLocale() == 'bn' ? 'এলাকা:' : 'Area:' }} {{ ucwords(str_replace('_', ' ', $order->customer_area)) }}</p>
+                <p>{{ ucwords(str_replace('_', ' ', $order->customer_area)) }}</p>
             @endif
         </div>
-        <div class="info-block">
-            <h3>{{ app()->getLocale() == 'bn' ? 'প্রেরক' : 'Ship From' }}</h3>
-            <p><strong>{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }}</strong></p>
-            <p>{{ \App\Models\Setting::get('phone', '+880 1XXX-XXXXXX') }}</p>
-            <p>{{ \App\Models\Setting::get('address', 'Dhaka, Bangladesh') }}</p>
-            <p>www.baburhashibd.com</p>
+        <div class="party">
+            <p class="label">{{ $t('From', 'প্রেরক') }}</p>
+            <p class="who">{{ $siteTitle }}</p>
+            <p>{{ Setting::get('phone', '+880 1XXX-XXXXXX') }}</p>
+            <p>{{ Setting::get('address', 'Dhaka, Bangladesh') }}</p>
+            @if($host)<p>{{ $host }}</p>@endif
         </div>
     </div>
 
-    <table class="invoice-table">
+    <table>
         <thead>
             <tr>
-                <th>{{ app()->getLocale() == 'bn' ? 'পণ্যের নাম' : 'Description' }}</th>
-                <th class="text-center">{{ app()->getLocale() == 'bn' ? 'পরিমাণ' : 'Qty' }}</th>
-                <th class="text-right">{{ app()->getLocale() == 'bn' ? 'একক মূল্য' : 'Unit Price' }}</th>
-                <th class="text-right">{{ app()->getLocale() == 'bn' ? 'মোট' : 'Total' }}</th>
+                <th>{{ $t('Description', 'পণ্য') }}</th>
+                <th class="mid" style="width: 12mm;">{{ $t('Qty', 'পরিমাণ') }}</th>
+                <th class="num" style="width: 22mm;">{{ $t('Rate', 'দর') }}</th>
+                <th class="num" style="width: 24mm;">{{ $t('Amount', 'মোট') }}</th>
             </tr>
         </thead>
         <tbody>
             @foreach($order->items as $item)
             <tr>
                 <td>
-                    <strong>{{ $item->product_name }}</strong>
+                    <span class="item-name">{{ $item->product_name }}</span>
                     @if($item->variant_name)
-                        <br><small style="color: #666;">{{ $item->variant_name }}</small>
+                        <span class="item-variant">{{ $item->variant_name }}</span>
                     @endif
                 </td>
-                <td class="text-center">{{ $item->quantity }}</td>
-                <td class="text-right">৳{{ number_format($item->unit_price) }}</td>
-                <td class="text-right">৳{{ number_format($item->total) }}</td>
+                <td class="mid">{{ $item->quantity }}</td>
+                <td class="num">{{ $money($item->unit_price) }}</td>
+                <td class="num">{{ $money($item->total) }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
 
-    <div class="summary-section">
-        <div class="summary-table">
-            <div class="summary-row">
-                <span>{{ app()->getLocale() == 'bn' ? 'সাবটোটাল' : 'Subtotal' }}</span>
-                <span>৳{{ number_format($order->subtotal) }}</span>
-            </div>
-            <div class="summary-row">
-                <span>{{ app()->getLocale() == 'bn' ? 'ডেলিভারি চার্জ' : 'Delivery Charge' }}</span>
-                <span>৳{{ number_format($order->delivery_charge) }}</span>
-            </div>
-            @if($order->discount_amount > 0)
-            <div class="summary-row">
-                <span>
-                    {{ app()->getLocale() == 'bn' ? 'ডিসকাউন্ট' : 'Discount' }}
-                    @if($order->coupon_code)({{ $order->coupon_code }})@endif
-                </span>
-                <span style="color: #dc3545;">-৳{{ number_format($order->discount_amount) }}</span>
-            </div>
-            @endif
-            <div class="summary-row total">
-                <span>{{ app()->getLocale() == 'bn' ? 'সর্বমোট' : 'Grand Total' }}</span>
-                <span>৳{{ number_format($order->total) }}</span>
-            </div>
-            {{-- Counter sales record what was handed over, so the slip shows the change. --}}
-            @if($order->paid_amount !== null)
-            <div class="summary-row">
-                <span>{{ app()->getLocale() == 'bn' ? 'জমা' : 'Paid' }}</span>
-                <span>৳{{ number_format($order->paid_amount) }}</span>
-            </div>
-            <div class="summary-row">
-                <span>{{ app()->getLocale() == 'bn' ? 'ফেরত' : 'Change' }}</span>
-                <span>৳{{ number_format($order->change_due) }}</span>
-            </div>
-            @endif
-        </div>
+    <div class="totals">
+        <table>
+            <tbody>
+                <tr>
+                    <td>{{ $t('Subtotal', 'সাবটোটাল') }}</td>
+                    <td class="num">{{ $money($order->subtotal) }}</td>
+                </tr>
+                @if($order->discount_amount > 0)
+                <tr>
+                    <td>
+                        {{ $t('Discount', 'ডিসকাউন্ট') }}
+                        @if($order->coupon_code)<span class="item-variant" style="display:inline">({{ $order->coupon_code }})</span>@endif
+                    </td>
+                    <td class="num">−{{ $money($order->discount_amount) }}</td>
+                </tr>
+                @endif
+                <tr>
+                    <td>{{ $t('Delivery', 'ডেলিভারি') }}</td>
+                    <td class="num">{{ $money($order->delivery_charge) }}</td>
+                </tr>
+                <tr class="grand">
+                    <td>{{ $t('Total', 'সর্বমোট') }}</td>
+                    <td class="num">{{ $money($order->total) }}</td>
+                </tr>
+
+                {{-- Counter sales record what was handed over, so the slip shows
+                     the change; a part payment shows what is still owed. --}}
+                @if($order->paid_amount !== null)
+                <tr class="settle first">
+                    <td>{{ $t('Paid', 'জমা') }}</td>
+                    <td class="num">{{ $money($order->paid_amount) }}</td>
+                </tr>
+                @if($order->change_due > 0)
+                <tr class="settle">
+                    <td>{{ $t('Change', 'ফেরত') }}</td>
+                    <td class="num">{{ $money($order->change_due) }}</td>
+                </tr>
+                @endif
+                @if($showBalance)
+                <tr class="settle due">
+                    <td>{{ $t('Balance due', 'বাকি') }}</td>
+                    <td class="num">{{ $money($order->amount_due) }}</td>
+                </tr>
+                @endif
+                @endif
+            </tbody>
+        </table>
     </div>
 
     {{-- The figure written out. A printed invoice is a document people argue
          over, and a total in words is what settles it: a digit can be altered
          by hand, a sentence cannot. --}}
-    <div class="in-words">
-        <span class="label">{{ app()->getLocale() == 'bn' ? 'কথায়' : 'Amount in words' }}</span>
-        <span class="words">{{ \App\Support\AmountInWords::taka($order->total) }}</span>
+    <div class="words">
+        <p class="label">{{ $t('Amount in words', 'কথায়') }}</p>
+        <p>{{ AmountInWords::taka($order->total) }}</p>
     </div>
 
     @if($order->notes)
-    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
-        <h4 style="font-size: 14px; margin-bottom: 5px;">{{ app()->getLocale() == 'bn' ? 'অতিরিক্ত তথ্য:' : 'Notes:' }}</h4>
-        <p style="font-size: 13px; color: #666; margin: 0;">{{ $order->notes }}</p>
+    <div class="notes">
+        <p class="label">{{ $t('Notes', 'অতিরিক্ত তথ্য') }}</p>
+        <p>{{ $order->notes }}</p>
     </div>
     @endif
 
-    <div class="footer">
-        <p>{{ app()->getLocale() == 'bn' ? 'আমাদের কাছ থেকে কেনাকাটা করার জন্য ধন্যবাদ!' : 'Thank you for shopping with '.\App\Models\Setting::get('site_title', 'BaburhashiBD').'!' }}</p>
-        <p>{{ app()->getLocale() == 'bn' ? 'এটি একটি কম্পিউটার জেনারেটেড ইনভয়েস' : 'This is a computer generated invoice' }}</p>
+    <div class="foot">
+        <p class="thanks">{{ $t('Thank you for shopping with '.$siteTitle.'.', 'আমাদের কাছ থেকে কেনাকাটা করার জন্য ধন্যবাদ!') }}</p>
+        <p>{{ $t('This is a computer generated invoice.', 'এটি একটি কম্পিউটার জেনারেটেড ইনভয়েস') }}</p>
     </div>
+
 </div>
 
 </body>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 class AdminSupplierController extends Controller
 {
     use BulkDeletes, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -18,7 +20,16 @@ class AdminSupplierController extends Controller
             Supplier::query(),
             $request->input('search'),
             ['name', 'contact_person', 'phone', 'email']
-        )->orderBy('name')->paginate(20)->withQueryString();
+        );
+
+        $this->applySort($suppliers, $request, [
+            'name' => 'name',
+            'contact_person' => 'contact_person',
+            'phone' => 'phone',
+            'email' => 'email',
+        ], 'name', 'asc');
+
+        $suppliers = $suppliers->paginate(20)->withQueryString();
 
         return view('admin.suppliers.index', compact('suppliers'));
     }

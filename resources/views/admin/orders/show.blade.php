@@ -36,6 +36,11 @@
                 <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                     <h4 class="fw-bold mb-0" style="color: var(--primary-dark);">{{ $order->order_number }}</h4>
                     {!! $order->status_badge !!}
+                    @if($order->has_preorder)
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-clock-history"></i> Pre-order
+                        </span>
+                    @endif
                     @php
                         // The counter can log a sale as phone, Facebook or WhatsApp,
                         // so the badge follows the list rather than three fixed cases.
@@ -97,6 +102,32 @@
     </div>
 </div>
 
+@if($order->has_preorder)
+{{-- The terms as they were shown at checkout, not as they read today: the
+     admin can edit the note at any time, and this is the record of what this
+     customer actually agreed to. --}}
+<div class="card admin-card mb-4 border-warning-subtle">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-1" style="color: var(--primary-dark);">
+            <i class="bi bi-clock-history text-warning"></i> Pre-order
+        </h5>
+        <p class="text-muted small mb-3">
+            এই অর্ডারে এমন পণ্য আছে যা অর্ডারের সময় স্টকে ছিল না। ওই লাইনগুলোর স্টক কাটা হয়নি —
+            মাল আসার পর পাঠাতে হবে।
+            @if($order->preorder_accepted_at)
+                কাস্টমার শর্তে রাজি হয়েছে {{ $order->preorder_accepted_at->format('d M Y, h:i A') }}-এ।
+            @endif
+        </p>
+
+        @if($order->preorder_terms)
+            <div class="preorder-terms">{{ $order->preorder_terms }}</div>
+        @else
+            <p class="text-muted small fst-italic mb-0">No terms were recorded with this order.</p>
+        @endif
+    </div>
+</div>
+@endif
+
 <div class="row g-4">
     <div class="col-lg-8">
         {{-- Items --}}
@@ -123,6 +154,13 @@
                             <td>
                                 <strong class="text-dark">{{ $item->product_name }}</strong><br>
                                 <small class="text-muted">{{ $item->variant_name }}</small>
+                                @if($item->is_preorder)
+                                    {{-- No stock was taken for this line; it is drawn
+                                         down when the goods arrive. --}}
+                                    <br><span class="badge bg-warning text-dark" style="font-size:0.65rem;">
+                                        <i class="bi bi-clock-history"></i> Pre-order — stock not deducted
+                                    </span>
+                                @endif
                             </td>
                             <td>{{ $flat($item->unit_price) }}</td>
                             <td>{{ $item->quantity }}</td>

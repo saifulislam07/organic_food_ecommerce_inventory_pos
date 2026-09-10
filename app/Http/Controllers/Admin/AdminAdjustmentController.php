@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\PresentsVariantOptions;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Adjustment;
 use App\Models\ProductVariant;
@@ -16,6 +17,7 @@ class AdminAdjustmentController extends Controller
     use BulkDeletes;
     use PresentsVariantOptions;
     use SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -23,10 +25,17 @@ class AdminAdjustmentController extends Controller
             Adjustment::with('productVariant.product'),
             $request->input('search'),
             ['reason', 'type', 'productVariant.name', 'productVariant.product.name']
-        )
-            ->latest('adjustment_date')
-            ->paginate(20)
-            ->withQueryString();
+        );
+
+        $this->applySort($adjustments, $request, [
+            'adjustment_date' => 'adjustment_date',
+            'product' => 'product_variant_id',
+            'type' => 'type',
+            'quantity' => 'quantity',
+            'reason' => 'reason',
+        ], 'adjustment_date');
+
+        $adjustments = $adjustments->paginate(20)->withQueryString();
 
         return view('admin.adjustments.index', compact('adjustments'));
     }

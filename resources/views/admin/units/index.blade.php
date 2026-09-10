@@ -4,9 +4,6 @@
 @section('page_title', 'Measurement Units')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.units.index'), 'placeholder' => 'Name or short code'])
-</div>
 @can('units.delete')
 <form id="bulk-units" method="POST" action="{{ route('admin.units.bulkDestroy') }}"
       data-bulk data-bulk-noun="units">
@@ -16,23 +13,24 @@
 </form>
 @endcan
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 text-dark fw-bold">Units</h5>
+        @include('admin.partials.search', ['route' => route('admin.units.index'), 'placeholder' => 'Name or short code'])
         <a href="{{ route('admin.units.create') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg"></i> Add Unit
         </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle admin-table">
+                <thead>
                     <tr>
                         @can('units.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-units"></th>@endcan
-                        <th class="ps-4">Name</th>
+                        @include('admin.partials.sort', ['key' => 'name', 'label' => 'Name', 'first' => 'asc'])
                         <th>বাংলা</th>
-                        <th>Short Code</th>
-                        <th class="text-center">Used By</th>
-                        <th>Status</th>
+                        @include('admin.partials.sort', ['key' => 'short_code', 'label' => 'Short Code', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'used_by', 'label' => 'Used By', 'class' => 'text-center'])
+                        @include('admin.partials.sort', ['key' => 'status', 'label' => 'Status'])
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -73,7 +71,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
+                        <td colspan="7" class="admin-table__empty">
                             No units yet. Add one, or run <code>php artisan db:seed --class=UnitSeeder</code>.
                         </td>
                     </tr>
@@ -83,7 +81,7 @@
         </div>
     </div>
     @if($units->hasPages())
-    <div class="card-footer bg-white">{{ $units->links() }}</div>
+    <div class="card-footer bg-white admin-pager">{{ $units->links() }}</div>
     @endif
 </div>
 

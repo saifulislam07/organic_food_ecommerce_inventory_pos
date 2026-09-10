@@ -5,28 +5,24 @@
 
 @section('content')
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex flex-wrap gap-3 justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 text-dark fw-bold">
-            Customers <span class="badge bg-secondary-subtle text-secondary ms-1">{{ $customers->total() }}</span>
+            Customers <span class="admin-toolbar__count">{{ number_format($customers->total()) }}</span>
         </h5>
-        <form action="{{ route('admin.customers.index') }}" method="GET" class="d-flex gap-2" style="max-width:340px;">
-            <input type="search" name="search" class="form-control form-control-sm"
-                   placeholder="Name, email or mobile" value="{{ request('search') }}">
-            <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-search"></i></button>
-        </form>
+        @include('admin.partials.search', ['route' => route('admin.customers.index'), 'placeholder' => 'Name, email or mobile'])
     </div>
 
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle admin-table">
+                <thead>
                     <tr>
-                        <th class="ps-4">Customer</th>
-                        <th>Mobile</th>
-                        <th>Email</th>
-                        <th class="text-center">Orders</th>
-                        <th class="text-end">Lifetime Value</th>
-                        <th>Joined</th>
+                        @include('admin.partials.sort', ['key' => 'name', 'label' => 'Customer', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'mobile', 'label' => 'Mobile', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'email', 'label' => 'Email', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'orders', 'label' => 'Orders', 'class' => 'text-center'])
+                        @include('admin.partials.sort', ['key' => 'lifetime', 'label' => 'Lifetime Value', 'class' => 'text-end'])
+                        @include('admin.partials.sort', ['key' => 'created_at', 'label' => 'Joined'])
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -61,7 +57,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
+                        <td colspan="7" class="admin-table__empty">
                             {{ request('search') ? 'No customer matches that search.' : 'No customers yet.' }}
                         </td>
                     </tr>
@@ -72,7 +68,7 @@
     </div>
 
     @if($customers->hasPages())
-    <div class="card-footer bg-white">
+    <div class="card-footer bg-white admin-pager">
         {{ $customers->links() }}
     </div>
     @endif

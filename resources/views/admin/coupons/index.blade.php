@@ -2,14 +2,13 @@
 @section('page_title', 'Coupons')
 
 @section('content')
-<div class="d-flex mb-3">
+<p class="text-muted small">
+    ডিসকাউন্ট কোড। কোনো পণ্যে আগে থেকেই অফার থাকলে দুটো ছাড় যোগ হয় না —
+    প্রতি ইউনিটে <strong>যেটার ছাড় বেশি সেটাই</strong> বসে।
+</p>
+<div class="admin-toolbar">
+    <h6 class="admin-toolbar__title">Coupons <span class="admin-toolbar__count">{{ number_format($coupons->total()) }}</span></h6>
     @include('admin.partials.search', ['route' => route('admin.coupons.index'), 'placeholder' => 'Code or label'])
-</div>
-<div class="d-flex justify-content-between align-items-center mb-4 gap-3">
-    <p class="text-muted small mb-0">
-        ডিসকাউন্ট কোড। কোনো পণ্যে আগে থেকেই অফার থাকলে দুটো ছাড় যোগ হয় না —
-        প্রতি ইউনিটে <strong>যেটার ছাড় বেশি সেটাই</strong> বসে।
-    </p>
     <a href="{{ route('admin.coupons.create') }}" class="btn btn-success flex-shrink-0">
         <i class="bi bi-plus-circle"></i> Add Coupon
     </a>
@@ -27,16 +26,16 @@
 <div class="card admin-card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead style="background: var(--gray-100);">
+            <table class="table table-hover admin-table">
+                <thead>
                     <tr>
                         @can('coupons.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-coupons"></th>@endcan
-                        <th style="padding: 14px 16px;">Code</th>
-                        <th>Discount</th>
+                        @include('admin.partials.sort', ['key' => 'code', 'label' => 'Code', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'discount', 'label' => 'Discount'])
                         <th>Applies to</th>
-                        <th>Window</th>
-                        <th>Used</th>
-                        <th>Status</th>
+                        @include('admin.partials.sort', ['key' => 'window', 'label' => 'Window'])
+                        @include('admin.partials.sort', ['key' => 'used', 'label' => 'Used'])
+                        @include('admin.partials.sort', ['key' => 'status', 'label' => 'Status'])
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -114,5 +113,5 @@
         </div>
     </div>
 </div>
-<div class="mt-3">{{ $coupons->links() }}</div>
+<div class="admin-pager">{{ $coupons->links() }}</div>
 @endsection

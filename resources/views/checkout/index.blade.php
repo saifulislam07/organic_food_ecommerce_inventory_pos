@@ -137,7 +137,15 @@
                     ],
                     'old' => (object) old(),
                     'errors' => $errors->toArray(),
+                    'preorderNotes' => $preorderNotes,
                     'labels' => [
+                        'preorderTitle' => app()->getLocale() == 'bn' ? 'প্রি-অর্ডারের শর্ত' : 'Pre-order conditions',
+                        'preorderLead' => app()->getLocale() == 'bn'
+                            ? 'এই অর্ডারের কিছু পণ্য এখনো স্টকে আসেনি।'
+                            : 'Some items in this order are not in stock yet.',
+                        'preorderAccept' => app()->getLocale() == 'bn'
+                            ? 'আমি শর্তগুলো পড়েছি ও রাজি আছি'
+                            : 'I have read and accept these conditions',
                         'deliveryInfo' => app()->getLocale() == 'bn' ? 'ডেলিভারি তথ্য' : 'Delivery Information',
                         'name' => app()->getLocale() == 'bn' ? 'নাম *' : 'Full Name *',
                         'namePlaceholder' => app()->getLocale() == 'bn' ? 'আপনার নাম' : 'Your name',

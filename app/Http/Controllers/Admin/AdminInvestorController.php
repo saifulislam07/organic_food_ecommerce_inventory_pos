@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Investment;
 use App\Models\Investor;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 class AdminInvestorController extends Controller
 {
     use BulkDeletes, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -28,9 +30,16 @@ class AdminInvestorController extends Controller
             // investors would otherwise be forty extra queries.
             ->withSum('investments', 'amount')
             ->withSum('withdrawals', 'amount')
-            ->sorted()
-            ->paginate(20)
-            ->withQueryString();
+        ;
+
+        $this->applySort($investors, $request, [
+            'name' => 'name',
+            'phone' => 'phone',
+            'invested' => 'investments_sum_amount',
+            'withdrawn' => 'withdrawals_sum_amount',
+        ], 'name', 'asc');
+
+        $investors = $investors->paginate(20)->withQueryString();
 
         return view('admin.investors.index', [
             'investors' => $investors,

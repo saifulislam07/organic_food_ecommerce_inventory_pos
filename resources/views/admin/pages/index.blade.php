@@ -2,15 +2,13 @@
 @section('page_title', 'Static Pages')
 
 @section('content')
-<div class="d-flex mb-3">
+<div class="admin-toolbar">
+    <h6 class="admin-toolbar__title">Manage Pages <span class="admin-toolbar__count">{{ number_format($pages->total()) }}</span></h6>
     @include('admin.partials.search', ['route' => route('admin.pages.index'), 'placeholder' => 'Slug or title'])
+    <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Create New Page
+    </a>
 </div>
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="fw-bold mb-0">Manage Pages</h5>
-        <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Create New Page
-        </a>
-    </div>
 
 @can('pages.delete')
 <form id="bulk-pages" method="POST" action="{{ route('admin.pages.bulkDestroy') }}"
@@ -22,13 +20,13 @@
 @endcan
     <div class="card admin-card p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead style="background: var(--gray-100);">
+            <table class="table table-hover admin-table">
+                <thead>
                     <tr>
                         @can('pages.delete')<th style="width:38px;" class="px-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-pages"></th>@endcan
-                        <th class="px-4 py-3">Title (EN)</th>
-                        <th>Slug</th>
-                        <th>Status</th>
+                        @include('admin.partials.sort', ['key' => 'title', 'label' => 'Title (EN)', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'slug', 'label' => 'Slug', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'status', 'label' => 'Status'])
                         <th class="text-end px-4">Actions</th>
                     </tr>
                 </thead>
@@ -77,7 +75,7 @@
     </div>
 
 @if($pages->hasPages())
-    <div class="mt-3">{{ $pages->links() }}</div>
+    <div class="admin-pager">{{ $pages->links() }}</div>
 @endif
 
 @endsection

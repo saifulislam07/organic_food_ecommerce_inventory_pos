@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\AdminModules;
@@ -16,6 +17,7 @@ class AdminUserController extends Controller
 {
     use BulkDeletes;
     use SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -23,10 +25,15 @@ class AdminUserController extends Controller
             User::where('role', 'admin')->with('roles'),
             $request->input('search'),
             ['name', 'email', 'mobile']
-        )
-            ->orderBy('name')
-            ->paginate(20)
-            ->withQueryString();
+        );
+
+        $this->applySort($users, $request, [
+            'name' => 'name',
+            'email' => 'email',
+            'created_at' => 'created_at',
+        ], 'name', 'asc');
+
+        $users = $users->paginate(20)->withQueryString();
 
         return view('admin.users.index', [
             'users' => $users,

@@ -4,9 +4,6 @@
 @section('page_title', 'Purchase Management')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.purchases.index'), 'placeholder' => 'Supplier, product or note'])
-</div>
 @can('purchases.delete')
 <form id="bulk-purchases" method="POST" action="{{ route('admin.purchases.bulkDestroy') }}"
       data-bulk data-bulk-noun="purchases">
@@ -16,23 +13,24 @@
 </form>
 @endcan
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 text-dark fw-bold">Recent Purchases</h5>
+        @include('admin.partials.search', ['route' => route('admin.purchases.index'), 'placeholder' => 'Supplier, product or note'])
         <a href="{{ route('admin.purchases.create') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-cart-plus"></i> New Purchase
         </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle admin-table">
+                <thead>
                     <tr>
                         @can('purchases.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-purchases"></th>@endcan
-                        <th class="ps-4">Date</th>
-                        <th>Supplier</th>
-                        <th>Product & Variant</th>
-                        <th>Price/unit</th>
-                        <th>Quantity</th>
+                        @include('admin.partials.sort', ['key' => 'purchase_date', 'label' => 'Date'])
+                        @include('admin.partials.sort', ['key' => 'supplier', 'label' => 'Supplier', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'product', 'label' => 'Product & Variant', 'first' => 'asc'])
+                        @include('admin.partials.sort', ['key' => 'unit_price', 'label' => 'Price/unit'])
+                        @include('admin.partials.sort', ['key' => 'quantity', 'label' => 'Quantity'])
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
@@ -60,7 +58,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">No purchase records found.</td>
+                        <td colspan="7" class="admin-table__empty">No purchase records found.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -68,7 +66,7 @@
         </div>
     </div>
     @if($purchases->hasPages())
-    <div class="card-footer bg-white">
+    <div class="card-footer bg-white admin-pager">
         {{ $purchases->links() }}
     </div>
     @endif

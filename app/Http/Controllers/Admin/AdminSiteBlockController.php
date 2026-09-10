@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\SiteBlock;
 use App\Support\ImageStore;
@@ -18,6 +19,7 @@ use Illuminate\Validation\Rule;
 class AdminSiteBlockController extends Controller
 {
     use BulkDeletes, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -27,7 +29,15 @@ class AdminSiteBlockController extends Controller
             SiteBlock::query()->group($group),
             $request->input('search'),
             ['title_en', 'title_bn']
-        )->sorted()->paginate(30)->withQueryString();
+        );
+
+        $this->applySort($blocks, $request, [
+            'title' => 'title_en',
+            'status' => 'is_active',
+            'sort_order' => ['sort_order', 'id'],
+        ], 'sort_order', 'asc');
+
+        $blocks = $blocks->paginate(30)->withQueryString();
 
         return view('admin.blocks.index', compact('blocks', 'group'));
     }

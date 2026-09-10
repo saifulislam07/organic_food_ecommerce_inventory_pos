@@ -159,6 +159,33 @@
                 <div class="form-text">Orders above this amount will have 0 delivery charge.</div>
             </div>
 
+            <!-- Pre-order -->
+            <div class="col-12 mt-5">
+                <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: var(--primary-dark);">
+                    <i class="bi bi-clock-history"></i> Pre-order
+                </h5>
+                <p class="text-muted small">
+                    স্টক শেষ হওয়া পণ্যে প্রি-অর্ডার নিতে হলে দুটো জিনিস লাগে — পণ্যের ফর্মে
+                    <strong>Pre-order</strong> সুইচটা চালু করা, আর নিচের শর্তগুলো লেখা।
+                    কোনো পণ্যে আলাদা শর্ত লিখলে সেই পণ্যে সেটাই দেখাবে।
+                    <strong>দুটোর একটাও না থাকলে প্রি-অর্ডার বাটন দেখাবে না।</strong>
+                </p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Pre-order Conditions (English)</label>
+                <textarea name="preorder_note[value_en]" class="form-control" rows="4"
+                          placeholder="e.g. Delivery takes 7–15 days. Advance is not refundable.">{{ \App\Models\Setting::value('preorder_note', 'en', '') }}</textarea>
+                <div class="form-text">Shown to the shopper, who must tick to accept before ordering.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">প্রি-অর্ডারের শর্ত (বাংলা)</label>
+                <textarea name="preorder_note[value_bn]" class="form-control" rows="4"
+                          placeholder="যেমন: মাল আসতে ৭–১৫ দিন সময় লাগবে। অগ্রিম ফেরতযোগ্য নয়।">{{ \App\Models\Setting::value('preorder_note', 'bn', '') }}</textarea>
+                <div class="form-text">প্রতিটি শর্ত আলাদা লাইনে লিখলে আলাদা লাইনেই দেখাবে।</div>
+            </div>
+
             <!-- Storefront Text -->
             <div class="col-12 mt-5">
                 <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: var(--primary-dark);">

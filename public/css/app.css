@@ -997,6 +997,88 @@ body {
 }
 .variant-btn.active .variant-price { color: var(--primary); }
 
+/* === PRE-ORDER ============================================================
+   A sold-out thing the admin still takes orders for. Amber throughout — it is
+   neither the green of "in stock" nor the grey of "you cannot have this", and
+   the shopper has to notice they are agreeing to wait. */
+
+/* The terms themselves, wherever they appear: product page, dialog, checkout.
+   Plain text on its own lines, so an admin writing three bullet points gets
+   three lines rather than one run-on paragraph. */
+.preorder-terms {
+    white-space: pre-line;
+    background: #fff8e6;
+    border: 1px solid #ffe2a8;
+    border-left: 3px solid #e8a33d;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: #5c4008;
+    max-height: 260px;
+    overflow-y: auto;
+}
+.preorder-callout {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: var(--radius);
+    background: #fffdf7;
+    border: 1px solid #ffe9c2;
+}
+.preorder-callout h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #8a6413;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.preorder-callout__lead {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+    margin: 0 0 10px;
+}
+
+/* The buy button when what it buys has not arrived yet. */
+.btn-add-cart.is-preorder,
+.btn-primary-custom.is-preorder {
+    background: linear-gradient(135deg, #e8a33d, #d98324);
+    border-color: transparent;
+    color: #fff;
+}
+.btn-add-cart.is-preorder:hover,
+.btn-primary-custom.is-preorder:hover {
+    background: linear-gradient(135deg, #d98324, #bf6f18);
+}
+
+/* Which options on the product page are on the shelf and which are not. */
+.variant-btn .variant-preorder,
+.variant-btn .variant-soldout {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.variant-btn .variant-preorder { color: #b8791c; }
+.variant-btn .variant-soldout { color: var(--gray-500); }
+
+/* Cart line badge, matching the coupon flag beside it. */
+.cart-preorder-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 4px;
+    background: #fff3d6;
+    color: #8a6413;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
 /* Labels above the size and quantity pickers. Block, or the quantity stepper
    would sit on the same line as its own label. */
 .product-detail-info .form-label {
@@ -1349,6 +1431,250 @@ body {
    metric without Bootstrap blue shouting next to the greens. */
 .bg-gradient-info { background: linear-gradient(135deg, #2f4858, #3d6b7d); }
 .bg-gradient-success { background: linear-gradient(135deg, var(--primary-dark), var(--primary-brand)); }
+
+/* === ADMIN LIST PAGES ===
+   One look for every table in the panel: the filter bar above it, the header
+   row, the click-to-sort columns, and the pager underneath. Individual index
+   views should carry no table styling of their own. */
+
+/* --- Filter / search bar ------------------------------------------------- */
+.admin-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+}
+/* Inside a card header the toolbar is already on a white panel, so it drops
+   its own card chrome and keeps only the layout. */
+.admin-toolbar--flush {
+    box-shadow: none;
+    border-radius: 0;
+    margin-bottom: 0;
+    background: transparent;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+/* Tab-style filters: the review status tabs, the storefront block groups.
+   The storefront navbar's own .nav-link rule further up carries !important and
+   reaches in here too, which painted the active tab's label the same violet as
+   the pill behind it — the label simply vanished. These take it back, and drop
+   the little underline the navbar draws under its current page. */
+.admin-content .nav-pills { margin: 0; }
+.admin-content .nav-pills .nav-link {
+    padding: 0.4rem 0.85rem !important;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    color: var(--gray-500) !important;
+}
+.admin-content .nav-pills .nav-link:hover {
+    background: var(--gray-100);
+    color: var(--primary) !important;
+}
+.admin-content .nav-pills .nav-link.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-brand));
+    color: #fff !important;
+}
+.admin-content .nav-pills .nav-link.active::after { display: none; }
+
+/* The filters group tight together on the left; actions are pushed right. */
+.admin-toolbar__filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+}
+.admin-toolbar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+.admin-toolbar__title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.admin-toolbar__count {
+    background: var(--gray-100);
+    color: var(--gray-500);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+/* Left to themselves the selects stretch to their widest option and the row
+   comes out ragged, so each filter gets the same footprint. */
+.admin-toolbar .form-select,
+.admin-toolbar .form-control {
+    font-size: 0.875rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    background-color: #fff;
+    color: #333;
+}
+.admin-toolbar .form-select { width: auto; min-width: 148px; padding-right: 2rem; }
+.admin-toolbar .form-control { min-width: 180px; }
+.admin-toolbar__search {
+    flex: 1 1 240px;
+    max-width: 340px;
+    min-width: 200px;
+}
+.admin-toolbar .input-group-text {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-right: 0;
+    color: var(--gray-500);
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+.admin-toolbar .input-group .form-control {
+    border-left: 0;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.admin-toolbar .form-select:focus,
+.admin-toolbar .form-control:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.12);
+}
+.admin-toolbar .input-group:focus-within .input-group-text { border-color: var(--primary-light); }
+/* Marks a filter that is actually narrowing the list, so it is obvious why the
+   table looks short. */
+.admin-toolbar .form-select.is-filtering,
+.admin-toolbar .form-control.is-filtering {
+    border-color: var(--primary-light);
+    background-color: rgba(var(--primary-rgb), 0.04);
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+/* --- Table --------------------------------------------------------------- */
+.admin-table { margin-bottom: 0; }
+.admin-table > thead > tr > th {
+    background: var(--gray-100);
+    color: var(--gray-500);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    vertical-align: middle;
+}
+.admin-table > tbody > tr > td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-color: var(--gray-200);
+}
+.admin-table > tbody > tr:last-child > td { border-bottom: 0; }
+.admin-table.table-hover > tbody > tr:hover > * {
+    background-color: rgba(var(--primary-rgb), 0.035);
+    --bs-table-accent-bg: transparent;
+}
+/* Bootstrap rounds the card but the table corners stay square underneath. */
+.admin-card > .card-body > .table-responsive { border-radius: var(--radius); }
+.admin-table__empty {
+    text-align: center;
+    color: var(--gray-500);
+    padding: 44px 16px !important;
+}
+.admin-table__empty i { font-size: 1.9rem; display: block; margin-bottom: 8px; opacity: 0.4; }
+
+/* --- Sortable headers ---------------------------------------------------- */
+/* The anchor carries the cell padding so the whole header is a click target. */
+.admin-table > thead > tr > th.admin-th-sort { padding: 0; }
+.admin-th-sort > a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 13px 16px;
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+.admin-th-sort.text-end > a { justify-content: flex-end; }
+.admin-th-sort.text-center > a { justify-content: center; }
+.admin-th-sort > a > i {
+    font-size: 0.8em;
+    opacity: 0.35;
+    transition: opacity 0.15s ease;
+}
+.admin-th-sort > a:hover {
+    color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.06);
+}
+.admin-th-sort > a:hover > i { opacity: 0.8; }
+.admin-th-sort.is-sorted > a { color: var(--primary); }
+.admin-th-sort.is-sorted > a > i { opacity: 1; }
+.admin-th-sort > a:focus-visible {
+    outline: 2px solid var(--primary-light);
+    outline-offset: -2px;
+}
+
+/* --- Pager --------------------------------------------------------------- */
+.admin-pager { margin-top: 18px; }
+.admin-pager nav { gap: 12px; }
+.admin-pager .pagination { margin-bottom: 0; gap: 4px; flex-wrap: wrap; }
+/* A border rather than a shadow, so the buttons read the same on the grey page
+   background and inside a white card footer. */
+.admin-pager .page-link {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    min-width: 38px;
+    padding: 0.4rem 0.7rem;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    background: #fff;
+    transition: var(--transition);
+}
+.admin-pager .page-link:hover {
+    background: var(--gray-100);
+    border-color: var(--primary-light);
+    color: var(--primary);
+}
+.admin-pager .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--primary), var(--primary-brand));
+    border-color: transparent;
+    color: #fff;
+}
+.admin-pager .page-item.disabled .page-link {
+    background: transparent;
+    border-color: transparent;
+    opacity: 0.45;
+}
+/* The "…" gap is a label, not a destination. */
+.admin-pager .page-item.disabled .page-link[aria-disabled="true"]:not([rel]) { cursor: default; }
+.admin-pager .page-link:focus {
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+}
+
+@media (max-width: 767px) {
+    .admin-toolbar { padding: 12px; }
+    .admin-toolbar__filters { width: 100%; }
+    .admin-toolbar .form-select,
+    .admin-toolbar .form-control { flex: 1 1 140px; min-width: 0; }
+    .admin-toolbar__actions { margin-left: 0; width: 100%; }
+    .admin-toolbar__search { max-width: none; }
+    .admin-table > thead > tr > th,
+    .admin-table > tbody > tr > td { padding: 11px 12px; }
+    .admin-th-sort > a { padding: 11px 12px; }
+}
 
 /* === EMPTY STATE === */
 .empty-state {

@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { addToCart, notify } from '../cart';
 import { money } from '../../shared/format';
+import PreorderDialog from './PreorderDialog.vue';
 
 const props = defineProps({
     productId: { type: [Number, String], required: true },
@@ -11,6 +12,10 @@ const props = defineProps({
     /** Placeholders: {product}, {variant}, {quantity} */
     whatsappTemplate: { type: String, default: '' },
     maxQuantity: { type: Number, default: 20 },
+    /** The admin marked this product pre-orderable; each variant still has to
+     *  be out of stock for the offer to apply to it. */
+    preorderEnabled: { type: Boolean, default: false },
+    preorderNote: { type: String, default: '' },
     labels: { type: Object, default: () => ({}) },
 });
 
@@ -33,6 +38,26 @@ const discount = computed(() =>
 );
 
 const inStock = computed(() => !!selected.value && selected.value.stock > 0);
+
+/** Sold out, but this one may still be taken as a pre-order. */
+const isPreorder = computed(() => !!selected.value && !inStock.value && props.preorderEnabled);
+
+/** Nothing to sell and no pre-order either: the button is simply off. */
+const canBuy = computed(() => inStock.value || isPreorder.value);
+
+const buyLabel = computed(() => {
+    if (inStock.value) return label('addToCart', 'Add to Cart');
+
+    return isPreorder.value ? label('preorder', 'Pre-order') : label('outOfStock', 'Out of Stock');
+});
+
+const buyIcon = computed(() => {
+    if (inStock.value) return 'bi-cart-plus';
+
+    return isPreorder.value ? 'bi-clock-history' : 'bi-x-circle';
+});
+
+const askingTerms = ref(false);
 
 const whatsappHref = computed(() => {
     if (!props.whatsappNumber) return '#';
@@ -61,15 +86,26 @@ function setQty(value) {
     quantity.value = Number.isFinite(next) ? Math.min(Math.max(next, 1), props.maxQuantity) : 1;
 }
 
-async function submit() {
+async function send() {
+    busy.value = true;
+    await addToCart(props.productId, selectedId.value, quantity.value);
+    busy.value = false;
+    askingTerms.value = false;
+}
+
+function submit() {
     if (!selectedId.value) {
         notify(label('selectOption', 'Please select an option'), 'warning');
         return;
     }
 
-    busy.value = true;
-    await addToCart(props.productId, selectedId.value, quantity.value);
-    busy.value = false;
+    // A pre-order stops for its terms; an ordinary line goes straight in.
+    if (isPreorder.value) {
+        askingTerms.value = true;
+        return;
+    }
+
+    send();
 }
 </script>
 
@@ -96,6 +132,12 @@ async function submit() {
                 >
                     <span class="variant-name">{{ variant.name }}</span>
                     <span class="variant-price">{{ money(variant.display_price) }}</span>
+                    <span v-if="variant.stock <= 0 && preorderEnabled" class="variant-preorder">
+                        {{ label('preorderShort', 'Pre-order') }}
+                    </span>
+                    <span v-else-if="variant.stock <= 0" class="variant-soldout">
+                        {{ label('outOfStock', 'Out of Stock') }}
+                    </span>
                 </button>
             </div>
         </div>
@@ -117,14 +159,29 @@ async function submit() {
         </div>
 
         <div class="d-flex flex-wrap gap-3 mb-4">
-            <button type="button" class="btn-primary-custom" :disabled="!inStock || busy" @click="submit">
+            <button
+                type="button"
+                class="btn-primary-custom"
+                :class="{ 'is-preorder': isPreorder }"
+                :disabled="!canBuy || busy"
+                @click="submit"
+            >
                 <span v-if="busy" class="spinner-border spinner-border-sm me-1"></span>
-                <i v-else class="bi" :class="inStock ? 'bi-cart-plus' : 'bi-x-circle'"></i>
-                {{ inStock ? label('addToCart', 'Add to Cart') : label('outOfStock', 'Out of Stock') }}
+                <i v-else class="bi" :class="buyIcon"></i>
+                {{ buyLabel }}
             </button>
             <a :href="whatsappHref" class="btn-whatsapp" target="_blank" rel="noopener">
                 <i class="bi bi-whatsapp"></i> {{ label('whatsapp', 'Order via WhatsApp') }}
             </a>
         </div>
+
+        <PreorderDialog
+            :open="askingTerms"
+            :note="preorderNote"
+            :busy="busy"
+            :labels="labels"
+            @confirm="send"
+            @close="askingTerms = false"
+        />
     </div>
 </template>

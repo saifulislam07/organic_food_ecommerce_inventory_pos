@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Unit;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Validation\Rule;
 class AdminUnitController extends Controller
 {
     use BulkDeletes, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -19,7 +21,17 @@ class AdminUnitController extends Controller
             Unit::withCount('variants'),
             $request->input('search'),
             ['name', 'name_bn', 'short_code']
-        )->sorted()->paginate(30)->withQueryString();
+        );
+
+        $this->applySort($units, $request, [
+            'name' => 'name',
+            'short_code' => 'short_code',
+            'used_by' => 'variants_count',
+            'status' => 'is_active',
+            'sort_order' => ['sort_order', 'name'],
+        ], 'sort_order', 'asc');
+
+        $units = $units->paginate(30)->withQueryString();
 
         return view('admin.units.index', compact('units'));
     }

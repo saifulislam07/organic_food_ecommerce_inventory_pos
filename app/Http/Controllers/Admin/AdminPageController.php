@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
 use App\Support\RichText;
@@ -14,6 +15,7 @@ class AdminPageController extends Controller
 {
     use BulkDeletes, GeneratesUniqueSlug;
     use SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -21,7 +23,15 @@ class AdminPageController extends Controller
             Page::query(),
             $request->input('search'),
             ['slug', 'title_en', 'title_bn']
-        )->orderBy('slug')->paginate(20)->withQueryString();
+        );
+
+        $this->applySort($pages, $request, [
+            'title' => 'title_en',
+            'slug' => 'slug',
+            'status' => 'is_active',
+        ], 'slug', 'asc');
+
+        $pages = $pages->paginate(20)->withQueryString();
 
         return view('admin.pages.index', compact('pages'));
     }

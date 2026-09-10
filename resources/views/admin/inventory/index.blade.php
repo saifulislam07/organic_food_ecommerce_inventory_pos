@@ -4,7 +4,8 @@
 @section('page_title', 'Inventory Management')
 
 @section('content')
-<div class="d-flex mb-3">
+<div class="admin-toolbar">
+    <h6 class="admin-toolbar__title">Stock <span class="admin-toolbar__count">{{ number_format($variants->total()) }} variants</span></h6>
     @include('admin.partials.search', ['route' => route('admin.inventory.index'), 'placeholder' => 'Product, variant or SKU'])
 </div>
     <div class="row mb-4">
@@ -27,7 +28,7 @@
     ></div>
 
     @if($variants->hasPages())
-        <div class="mt-3">
+        <div class="admin-pager">
             {{ $variants->links() }}
         </div>
     @endif

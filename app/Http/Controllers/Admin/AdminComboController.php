@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Concerns\BulkDeletes;
 use App\Http\Controllers\Admin\Concerns\GeneratesUniqueSlug;
 use App\Http\Controllers\Admin\Concerns\HandlesProductImages;
 use App\Http\Controllers\Admin\Concerns\SearchesRecords;
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ComboItem;
@@ -28,6 +29,7 @@ use Illuminate\Validation\ValidationException;
 class AdminComboController extends Controller
 {
     use BulkDeletes, GeneratesUniqueSlug, HandlesProductImages, SearchesRecords;
+    use SortsRecords;
 
     public function index(Request $request)
     {
@@ -35,10 +37,14 @@ class AdminComboController extends Controller
             Product::where('is_combo', true)->with(['variants.comboItems.component.product', 'category']),
             $request->input('search'),
             ['name', 'name_en', 'name_bn']
-        )
-            ->orderBy('name')
-            ->paginate(20)
-            ->withQueryString();
+        );
+
+        $this->applySort($combos, $request, [
+            'name' => 'name',
+            'created_at' => 'created_at',
+        ], 'name', 'asc');
+
+        $combos = $combos->paginate(20)->withQueryString();
 
         $inventory = app(InventoryService::class);
 

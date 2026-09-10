@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\SortsRecords;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
@@ -9,6 +10,8 @@ use Illuminate\Http\Request;
 
 class AdminCustomerController extends Controller
 {
+    use SortsRecords;
+
     public function index(Request $request)
     {
         $customers = User::query()
@@ -27,9 +30,18 @@ class AdminCustomerController extends Controller
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('mobile', 'like', "%{$search}%"));
             })
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
+        ;
+
+        $this->applySort($customers, $request, [
+            'name' => 'name',
+            'mobile' => 'mobile',
+            'email' => 'email',
+            'orders' => 'orders_count',
+            'lifetime' => 'orders_total',
+            'created_at' => 'created_at',
+        ], 'created_at');
+
+        $customers = $customers->paginate(20)->withQueryString();
 
         return view('admin.customers.index', compact('customers'));
     }

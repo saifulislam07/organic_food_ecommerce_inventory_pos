@@ -4,9 +4,6 @@
 @section('page_title', 'Combo Products')
 
 @section('content')
-<div class="d-flex mb-3">
-    @include('admin.partials.search', ['route' => route('admin.combos.index'), 'placeholder' => 'Combo name'])
-</div>
 @can('combos.delete')
 <form id="bulk-combos" method="POST" action="{{ route('admin.combos.bulkDestroy') }}"
       data-bulk data-bulk-noun="combos">
@@ -16,10 +13,11 @@
 </form>
 @endcan
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 fw-bold text-dark">
             Combos <span class="badge bg-secondary-subtle text-secondary ms-1">{{ $combos->total() }}</span>
         </h5>
+        @include('admin.partials.search', ['route' => route('admin.combos.index'), 'placeholder' => 'Combo name'])
         @can('combos.create')
             <a href="{{ route('admin.combos.create') }}" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg"></i> New Combo
@@ -29,11 +27,11 @@
 
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle admin-table">
+                <thead>
                     <tr>
                         @can('combos.delete')<th style="width:38px;" class="ps-4"><input type="checkbox" class="form-check-input" data-bulk-all form="bulk-combos"></th>@endcan
-                        <th class="ps-4">Combo</th>
+                        @include('admin.partials.sort', ['key' => 'name', 'label' => 'Combo', 'first' => 'asc'])
                         <th>Contents</th>
                         <th class="text-center">Can Build</th>
                         <th class="text-end pe-4">Actions</th>
@@ -94,7 +92,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
+                        <td colspan="5" class="admin-table__empty">
                             <i class="bi bi-box2 fs-1 d-block mb-2 opacity-25"></i>
                             No combos yet. A combo bundles existing products and draws its stock from them.
                         </td>
@@ -106,7 +104,7 @@
     </div>
 
     @if($combos->hasPages())
-        <div class="card-footer bg-white">{{ $combos->links() }}</div>
+        <div class="card-footer bg-white admin-pager">{{ $combos->links() }}</div>
     @endif
 </div>
 

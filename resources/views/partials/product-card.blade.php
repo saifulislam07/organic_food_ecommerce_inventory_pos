@@ -20,10 +20,11 @@
             @if($product->is_combo)
                 <span class="badge-combo"><i class="bi bi-box2-fill"></i> {{ app()->getLocale() == 'bn' ? 'কম্বো' : 'Combo' }}</span>
             @endif
-            @if($product->is_preorder)
+            {{-- Pre-order says something only once the shelf is empty; before
+                 that the product is simply for sale. --}}
+            @if($product->is_preorderable)
                 <span class="badge-preorder"><i class="bi bi-clock"></i> {{ app()->getLocale() == 'bn' ? 'প্রি-অর্ডার' : 'Pre-order' }}</span>
-            @endif
-            @if(!$product->is_in_stock && !$product->is_preorder)
+            @elseif(!$product->is_in_stock)
                 <span class="badge-outofstock">{{ app()->getLocale() == 'bn' ? 'স্টক শেষ' : 'Out of Stock' }}</span>
             @endif
         </div>
@@ -61,6 +62,19 @@
                     'productId' => $product->id,
                     'variantId' => $firstVariant->id,
                     'label' => app()->getLocale() == 'bn' ? 'কার্টে যোগ করুন' : 'Add to Cart',
+                ], JSON_UNESCAPED_UNICODE) }}"
+            ></div>
+        @elseif($firstVariant && $product->allowsPreorderOf($firstVariant))
+            {{-- Same button, but it stops for the terms before adding. --}}
+            <div
+                data-vue="AddToCartButton"
+                data-props="{{ json_encode([
+                    'productId' => $product->id,
+                    'variantId' => $firstVariant->id,
+                    'label' => \App\Support\Preorder::labels()['preorder'],
+                    'preorder' => true,
+                    'preorderNote' => $product->preorderNote(),
+                    'preorderLabels' => \App\Support\Preorder::labels(),
                 ], JSON_UNESCAPED_UNICODE) }}"
             ></div>
         @else
