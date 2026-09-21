@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Order;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\NewOrderReceived;
 use App\Notifications\OrderPlaced;
@@ -31,6 +32,19 @@ class OrderNotifier
                 Notification::send($admins, new NewOrderReceived($order));
             }
         }, 'order placed (admin)');
+
+        // A second pair of eyes on new orders who does not need — or does not
+        // yet have — an admin login of their own. NewOrderReceived is a
+        // database-only bell notification (it has no toMail and is meant for
+        // a logged-in admin's notification list), so this address gets the
+        // same receipt + invoice email the customer does, not that one.
+        $extra = Setting::get('admin_notify_email');
+
+        if (filled($extra)) {
+            $this->quietly(function () use ($order, $extra) {
+                Notification::route('mail', $extra)->notify(new OrderPlaced($order));
+            }, 'order placed (admin notify email)');
+        }
     }
 
     public function statusChanged(Order $order, string $previousStatus): void

@@ -115,6 +115,14 @@
                 <input type="hidden" name="phone[value_bn]" value="{{ \App\Models\Setting::value('phone', 'en', '') }}">
             </div>
 
+            <div class="col-md-6">
+                <label class="form-label">Extra Order Notification Email</label>
+                <input type="text" name="admin_notify_email[value_en]" class="form-control @error('admin_notify_email.value_en') is-invalid @enderror" value="{{ \App\Models\Setting::value('admin_notify_email', 'en', '') }}" placeholder="e.g. owner@example.com">
+                <input type="hidden" name="admin_notify_email[value_bn]" value="{{ \App\Models\Setting::value('admin_notify_email', 'en', '') }}">
+                @error('admin_notify_email.value_en') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                <div class="form-text">Gets a copy of every "new order received" email, in addition to admin accounts.</div>
+            </div>
+
             <div class="col-md-12">
                 <label class="form-label">Address (English)</label>
                 <textarea name="address[value_en]" class="form-control" rows="2">{{ \App\Models\Setting::value('address', 'en', '') }}</textarea>

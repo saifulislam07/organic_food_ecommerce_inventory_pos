@@ -25,6 +25,10 @@ class AdminSettingController extends Controller
         'hero_desc' => ['type' => 'textarea', 'rules' => ['nullable', 'string', 'max:2000']],
         'whatsapp' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:32']],
         'phone' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:32']],
+
+        // An extra new-order recipient who does not have an admin login of
+        // their own. Blank means only the admin accounts themselves get it.
+        'admin_notify_email' => ['type' => 'text', 'rules' => ['nullable', 'email', 'max:255']],
         'address' => ['type' => 'textarea', 'rules' => ['nullable', 'string', 'max:1000']],
         'facebook' => ['type' => 'text', 'rules' => ['nullable', 'url', 'max:255']],
         'youtube' => ['type' => 'text', 'rules' => ['nullable', 'url', 'max:255']],
