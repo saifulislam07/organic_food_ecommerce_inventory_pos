@@ -267,4 +267,210 @@ class SeoTest extends TestCase
 
         $this->assertStringNotContainsString('draft-page', $this->get('/sitemap.xml')->getContent());
     }
+
+    /* ------------------------------------------------- canonical urls */
+
+    public function test_the_canonical_keeps_the_parameters_that_change_the_listing(): void
+    {
+        $html = $this->get(route('shop', ['category' => 'fruits', 'page' => 2]))->getContent();
+
+        $this->assertStringContainsString(
+            '<link rel="canonical" href="'.e(route('shop', ['category' => 'fruits', 'page' => 2])).'"',
+            $html,
+            'Category pages pointed their canonical at a bare /shop, undoing the URLs the sitemap advertises.'
+        );
+    }
+
+    public function test_the_canonical_drops_tracking_parameters(): void
+    {
+        $html = $this->get(route('shop').'?category=fruits&fbclid=JUNK&utm_source=fb')->getContent();
+
+        $this->assertStringContainsString('<link rel="canonical" href="'.e(route('shop', ['category' => 'fruits'])).'"', $html);
+        $this->assertStringNotContainsString('fbclid', $html);
+    }
+
+    public function test_the_first_page_is_canonical_to_the_listing_itself(): void
+    {
+        $html = $this->get(route('shop', ['category' => 'fruits', 'page' => 1]))->getContent();
+
+        $this->assertStringContainsString('<link rel="canonical" href="'.e(route('shop', ['category' => 'fruits'])).'"', $html);
+    }
+
+    public function test_a_search_result_is_canonical_to_the_listing(): void
+    {
+        // Thin and endless; they should pool into /shop rather than compete with it.
+        $html = $this->get(route('shop', ['search' => 'mango']))->getContent();
+
+        $this->assertStringContainsString('<link rel="canonical" href="'.route('shop').'"', $html);
+    }
+
+    /* ---------------------------------------------------- page basics */
+
+    public function test_the_html_lang_follows_the_reading_locale(): void
+    {
+        $this->assertStringContainsString('<html lang="en">', $this->get(route('shop'))->getContent());
+
+        $this->assertStringContainsString(
+            '<html lang="bn">',
+            $this->withSession(['locale' => 'bn'])->get(route('shop'))->getContent()
+        );
+    }
+
+    public function test_the_home_page_has_exactly_one_h1(): void
+    {
+        $html = $this->get(route('home'))->getContent();
+
+        $this->assertSame(1, substr_count($html, '<h1'), 'The home page needs one h1, and only one.');
+    }
+
+    public function test_a_shared_product_link_carries_the_product_photo(): void
+    {
+        $product = $this->product();
+        $product->update(['image' => 'mango.jpg']);
+
+        $this->assertStringContainsString(
+            'property="og:image" content="'.asset('assets/img/products/mango.jpg').'"',
+            $this->get(route('product.show', $product->slug))->getContent(),
+            'Sharing a product showed the shop default picture instead of the product.'
+        );
+    }
+
+    /* ------------------------------------------------- structured data */
+
+    /** @return array<int, array<string, mixed>> Every JSON-LD block on the page, decoded. */
+    private function schemaBlocksOn(string $url): array
+    {
+        preg_match_all(
+            '~<script type="application/ld\+json">(.*?)</script>~s',
+            $this->get($url)->getContent(),
+            $matches
+        );
+
+        return array_map(function (string $json) {
+            $decoded = json_decode(trim($json), true);
+
+            $this->assertNotNull($decoded, 'A JSON-LD block did not parse: '.json_last_error_msg());
+
+            return $decoded;
+        }, $matches[1]);
+    }
+
+    private function schemaOfType(string $url, string $type): ?array
+    {
+        foreach ($this->schemaBlocksOn($url) as $block) {
+            if (($block['@type'] ?? null) === $type) {
+                return $block;
+            }
+        }
+
+        return null;
+    }
+
+    public function test_the_shop_identifies_itself_to_search_engines(): void
+    {
+        $store = $this->schemaOfType(route('shop'), 'OnlineStore');
+
+        $this->assertNotNull($store, 'No Organization/OnlineStore markup on the page.');
+        $this->assertSame(url('/'), $store['url']);
+        $this->assertNotEmpty($store['name']);
+    }
+
+    public function test_a_product_carries_its_price_and_availability(): void
+    {
+        $product = $this->product();
+
+        $schema = $this->schemaOfType(route('product.show', $product->slug), 'Product');
+
+        $this->assertNotNull($schema, 'No Product markup on the product page.');
+        $this->assertSame('Himsagar Mango', $schema['name']);
+        $this->assertSame('BDT', $schema['offers']['priceCurrency']);
+        // One variant, so a single price rather than a range.
+        $this->assertSame('Offer', $schema['offers']['@type']);
+        $this->assertSame('1200.00', $schema['offers']['price']);
+        $this->assertSame('https://schema.org/InStock', $schema['offers']['availability']);
+    }
+
+    public function test_a_sold_out_product_says_so(): void
+    {
+        $product = $this->product();
+        $product->variants()->update(['stock' => 0]);
+
+        $schema = $this->schemaOfType(route('product.show', $product->slug), 'Product');
+
+        $this->assertSame('https://schema.org/OutOfStock', $schema['offers']['availability']);
+    }
+
+    public function test_a_product_with_a_price_range_reports_both_ends(): void
+    {
+        $product = $this->product();
+        ProductVariant::create([
+            'product_id' => $product->id,
+            'name' => '5 কেজি',
+            'price' => 1900,
+            'stock' => 3,
+        ]);
+
+        $schema = $this->schemaOfType(route('product.show', $product->slug), 'Product');
+
+        $this->assertSame('AggregateOffer', $schema['offers']['@type']);
+        $this->assertSame('1200.00', $schema['offers']['lowPrice']);
+        $this->assertSame('1900.00', $schema['offers']['highPrice']);
+        $this->assertSame(2, $schema['offers']['offerCount']);
+    }
+
+    public function test_the_product_trail_is_published_for_search_results(): void
+    {
+        $product = $this->product();
+
+        $crumbs = $this->schemaOfType(route('product.show', $product->slug), 'BreadcrumbList');
+
+        $this->assertNotNull($crumbs);
+        $this->assertSame(
+            [route('home'), route('shop'), route('shop', ['category' => 'fruits']), route('product.show', $product->slug)],
+            array_column($crumbs['itemListElement'], 'item')
+        );
+    }
+
+    public function test_no_star_rating_is_claimed_while_reviews_are_hidden(): void
+    {
+        $product = $this->product();
+
+        $schema = $this->schemaOfType(route('product.show', $product->slug), 'Product');
+
+        // Google requires the rating to be visible on the page carrying the
+        // markup. Nothing renders reviews on a product page yet, so claiming
+        // one here is what earns a manual action.
+        $this->assertArrayNotHasKey('aggregateRating', $schema);
+    }
+
+    /* -------------------------------------------------------- robots.txt */
+
+    public function test_robots_txt_points_crawlers_at_the_sitemap(): void
+    {
+        $body = $this->get('/robots.txt')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->getContent();
+
+        $this->assertStringContainsString('Sitemap: '.url('/sitemap.xml'), $body);
+        $this->assertStringContainsString('User-agent: *', $body);
+    }
+
+    public function test_robots_txt_keeps_crawlers_out_of_private_areas(): void
+    {
+        $body = $this->get('/robots.txt')->getContent();
+
+        foreach (['/admin', '/cart', '/checkout', '/customer'] as $path) {
+            $this->assertStringContainsString('Disallow: '.$path, $body);
+        }
+    }
+
+    public function test_robots_txt_never_blocks_the_pages_carrying_a_noindex_tag(): void
+    {
+        SeoSettings::save(['seo_robots' => 'noindex, nofollow']);
+
+        // Blocking these would stop Google fetching the page at all, and a page
+        // it cannot fetch is one whose noindex it never reads.
+        $this->assertStringNotContainsString("Disallow: /\n", $this->get('/robots.txt')->getContent());
+    }
 }

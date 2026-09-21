@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
@@ -33,7 +33,7 @@
         <meta name="keywords" content="{{ $seoKeywords }}">
     @endif
     <meta name="robots" content="{{ \App\Support\SeoSettings::robots() }}">
-    <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="canonical" href="{{ \App\Support\SeoSettings::canonicalUrl() }}">
     @if ($seoVerification)
         <meta name="google-site-verification" content="{{ $seoVerification }}">
     @endif
@@ -75,6 +75,8 @@
     @endif
 
     @include('partials.meta-pixel', ['pixelId' => \App\Support\SeoSettings::facebookPixelId()])
+
+    @include('partials.schema-organization')
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

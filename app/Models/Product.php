@@ -200,6 +200,18 @@ class Product extends Model
         return ImageStore::url($this->image);
     }
 
+    /**
+     * Served as JPEG rather than the stored WebP — see {@see ImageStore::jpegUrl()}.
+     */
+    public function getOgImageUrlAttribute(): string
+    {
+        if (filled($this->image) && ! str_contains($this->image, '/')) {
+            return asset('assets/img/products/'.$this->image);
+        }
+
+        return ImageStore::jpegUrl($this->image) ?? $this->image_url;
+    }
+
     public function getIsOnSaleAttribute(): bool
     {
         return $this->variants->contains(fn ($v) => $v->sale_price !== null && $v->sale_price < $v->price);

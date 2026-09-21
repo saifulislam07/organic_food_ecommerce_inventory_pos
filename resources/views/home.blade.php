@@ -11,6 +11,19 @@
     @endphp
 
     {{--
+        The page's one h1. The hero slider's panels are h2 and there can be
+        several of them, so none of those is the heading of the page; this
+        names the shop for search engines and screen readers without touching
+        the hero's design.
+    --}}
+    <h1 class="visually-hidden">
+        {{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }} —
+        {{ app()->getLocale() == 'bn'
+            ? 'শিশুদের প্রিয় সবকিছুর অনলাইন শপ'
+            : 'Online shop for everything kids love' }}
+    </h1>
+
+    {{--
         Hero — the marketplace arrangement: the category rail on the left, the
         slider filling the rest. One carousel panel per hero_slides row; a shop
         with no slides gets a single panel built from the site settings, so

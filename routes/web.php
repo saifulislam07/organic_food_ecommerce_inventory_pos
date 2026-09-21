@@ -53,6 +53,7 @@ Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product
 Route::get('/about', fn () => view('pages.about'))->name('about');
 Route::get('/contact', fn () => view('pages.contact'))->name('contact');
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
+Route::get('/robots.txt', [SitemapController::class, 'robots']);
 
 // Cart Routes (AJAX)
 Route::prefix('cart')->name('cart.')->group(function () {
