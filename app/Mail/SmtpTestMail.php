@@ -19,6 +19,6 @@ class SmtpTestMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'emails.smtp-test');
+        return new Content(markdown: 'emails.smtp-test');
     }
 }

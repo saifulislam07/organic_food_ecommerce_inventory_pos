@@ -14,7 +14,7 @@ const props = defineProps({
     savedAddresses: { type: Array, default: () => [] },
     defaultAddressId: { type: [Number, String, null], default: null },
     authenticated: { type: Boolean, default: false },
-    user: { type: Object, default: () => ({ name: '', mobile: '' }) },
+    user: { type: Object, default: () => ({ name: '', mobile: '', email: '' }) },
     old: { type: Object, default: () => ({}) },
     errors: { type: Object, default: () => ({}) },
     /** Distinct pre-order terms covering the lines still to come in. */
@@ -31,6 +31,7 @@ const selectedAddressId = ref(props.defaultAddressId);
 const deliveryType = ref(props.old.delivery_type ?? 'home');
 const name = ref(props.old.customer_name ?? defaultAddress.value?.name ?? props.user.name ?? '');
 const phone = ref(props.old.customer_phone ?? defaultAddress.value?.phone ?? props.user.mobile ?? '');
+const email = ref(props.old.customer_email ?? props.user.email ?? '');
 const area = ref(props.old.customer_area ?? defaultAddress.value?.area ?? 'dhaka_inside');
 const address = ref(props.old.customer_address ?? defaultAddress.value?.address ?? '');
 const pickupPoint = ref(props.old.pickup_point ?? props.pickupPoints[0]?.value ?? '');
@@ -124,6 +125,19 @@ function error(field) {
                         required
                     >
                     <div v-if="error('customer_phone')" class="invalid-feedback d-block">{{ error('customer_phone') }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{{ label('email', 'Email (optional)') }}</label>
+                    <input
+                        v-model="email"
+                        type="email"
+                        name="customer_email"
+                        class="form-control"
+                        :class="{ 'is-invalid': error('customer_email') }"
+                        :placeholder="label('emailPlaceholder', 'To receive your invoice by email')"
+                    >
+                    <div v-if="error('customer_email')" class="invalid-feedback d-block">{{ error('customer_email') }}</div>
                 </div>
 
                 <div v-if="authenticated && savedAddresses.length" class="mb-4">

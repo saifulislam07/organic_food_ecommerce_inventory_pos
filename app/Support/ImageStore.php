@@ -134,6 +134,59 @@ class ImageStore
         }
     }
 
+    /**
+     * A JPEG rendition of a stored WebP file, generated once and cached
+     * beside the original.
+     *
+     * Facebook, WhatsApp and most other link-preview crawlers are unreliable
+     * with WebP as an og:image — the tag validates and the file loads fine in
+     * a browser, but the share preview still comes back with no picture (and,
+     * on WhatsApp, sometimes no title either). A JPEG copy is what actually
+     * renders.
+     */
+    public static function jpegUrl(?string $path): ?string
+    {
+        if (blank($path)) {
+            return null;
+        }
+
+        if (! self::isStored($path) || ! str_ends_with($path, '.webp')) {
+            return self::url($path);
+        }
+
+        $jpegPath = substr($path, 0, -strlen('webp')).'jpg';
+
+        if (! self::disk()->exists($jpegPath)) {
+            $source = @imagecreatefromwebp(self::disk()->path($path));
+
+            if (! $source) {
+                return self::url($path);
+            }
+
+            $width = imagesx($source);
+            $height = imagesy($source);
+
+            // A crawler's preview assumes an opaque photo; a transparent WebP
+            // composited straight to JPEG would otherwise turn black.
+            $canvas = imagecreatetruecolor($width, $height);
+            imagefill($canvas, 0, 0, imagecolorallocate($canvas, 255, 255, 255));
+            imagealphablending($canvas, true);
+            imagecopy($canvas, $source, 0, 0, 0, 0, $width, $height);
+
+            ob_start();
+            imagejpeg($canvas, null, self::QUALITY);
+            $bytes = (string) ob_get_clean();
+
+            if ($bytes === '') {
+                return self::url($path);
+            }
+
+            self::disk()->put($jpegPath, $bytes);
+        }
+
+        return asset($jpegPath);
+    }
+
     public static function isStored(?string $path): bool
     {
         return filled($path) && str_starts_with($path, self::ROOT.'/');

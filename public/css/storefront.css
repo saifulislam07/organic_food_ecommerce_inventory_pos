@@ -134,7 +134,7 @@ h3 { font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 600; color: var(--dark)
     gap: 24px;
 }
 .pc-header-brand { flex: 0 0 auto; }
-.pc-header-brand .brand-logo { height: 48px; }
+.pc-header-brand .brand-logo { height: 80px; }
 
 /* Search: a category select, the field, and a gold submit — one pill. */
 .pc-search { flex: 1 1 auto; max-width: 620px; margin: 0 auto; }

@@ -10,12 +10,8 @@
     $siteTitle = Setting::get('site_title', 'BaburhashiBD');
     $logo = Setting::value('logo');
 
-    // The domain the shop actually runs on, rather than one written into the
-    // template — a rebrand should not leave the old address on every invoice.
     $host = parse_url((string) config('app.url'), PHP_URL_HOST);
 
-    // A part payment is the only case where the balance is worth restating;
-    // on an ordinary unpaid order it would just repeat the total.
     $showBalance = $order->paid_amount !== null && $order->amount_due > 0;
 @endphp
 <!DOCTYPE html>
@@ -25,8 +21,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $t('Invoice', 'ইনভয়েস') }} — {{ $order->order_number }}</title>
 
-    {{-- The rest of the panel loads this; the invoice never did, so its Bangla
-         fell back to whatever the machine happened to have. --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -34,16 +28,6 @@
     @include('admin.orders.invoice-style')
 </head>
 <body>
-
-<div class="toolbar">
-    <button onclick="window.print()" class="btn btn-print">
-        {{ $t('Print', 'প্রিন্ট') }}
-    </button>
-    <a class="btn btn-back"
-       href="{{ auth()->user()->isAdmin() ? route('admin.orders.show', $order) : route('customer.orders.show', $order->order_number) }}">
-        {{ $t('Back', 'ফিরে যান') }}
-    </a>
-</div>
 
 @include('admin.orders.invoice-content', ['order' => $order])
 

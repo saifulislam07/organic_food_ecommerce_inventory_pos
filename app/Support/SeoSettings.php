@@ -55,12 +55,16 @@ class SeoSettings
         Setting::flush();
     }
 
-    /** Absolute URL of the default social sharing image, if one is uploaded. */
+    /**
+     * Absolute URL of the default social sharing image, if one is uploaded.
+     *
+     * Served as JPEG rather than the stored WebP — see {@see ImageStore::jpegUrl()}.
+     */
     public static function ogImageUrl(): ?string
     {
         $path = self::get('seo_og_image');
 
-        return blank($path) ? null : ImageStore::url($path);
+        return blank($path) ? null : ImageStore::jpegUrl($path);
     }
 
     /**

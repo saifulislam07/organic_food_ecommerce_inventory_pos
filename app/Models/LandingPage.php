@@ -224,9 +224,12 @@ class LandingPage extends Model
         return blank($this->hero_image) ? null : ImageStore::url($this->hero_image);
     }
 
+    /** Served as JPEG rather than the stored WebP — see {@see ImageStore::jpegUrl()}. */
     public function ogImageUrl(): ?string
     {
-        return blank($this->og_image) ? $this->heroImageUrl() : ImageStore::url($this->og_image);
+        $path = $this->og_image ?: $this->hero_image;
+
+        return blank($path) ? null : ImageStore::jpegUrl($path);
     }
 
     /* -------------------------------------------------------------- content */

@@ -134,6 +134,7 @@
                     'user' => [
                         'name' => auth()->user()->name ?? '',
                         'mobile' => auth()->user()->mobile ?? '',
+                        'email' => auth()->user()->email ?? '',
                     ],
                     'old' => (object) old(),
                     'errors' => $errors->toArray(),
@@ -150,6 +151,8 @@
                         'name' => app()->getLocale() == 'bn' ? 'নাম *' : 'Full Name *',
                         'namePlaceholder' => app()->getLocale() == 'bn' ? 'আপনার নাম' : 'Your name',
                         'phone' => app()->getLocale() == 'bn' ? 'মোবাইল নাম্বার *' : 'Phone Number *',
+                        'email' => app()->getLocale() == 'bn' ? 'ইমেইল (ঐচ্ছিক)' : 'Email (optional)',
+                        'emailPlaceholder' => app()->getLocale() == 'bn' ? 'ইনভয়েস পেতে ইমেইল দিন' : 'To receive your invoice by email',
                         'savedAddresses' => app()->getLocale() == 'bn' ? 'সেভ করা ঠিকানা থেকে বেছে নিন' : 'Choose from Saved Addresses',
                         'newAddress' => app()->getLocale() == 'bn' ? 'নতুন ঠিকানা' : 'New Address',
                         'home' => app()->getLocale() == 'bn' ? 'হোম ডেলিভারি' : 'Home',

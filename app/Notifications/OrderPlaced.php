@@ -22,9 +22,16 @@ class OrderPlaced extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $this->order->loadMissing('items');
+
+        $invoiceHtml = view('emails.orders.invoice', ['order' => $this->order])->render();
+
         return (new MailMessage)
             ->subject("Order {$this->order->order_number} received")
-            ->markdown('emails.orders.placed', ['order' => $this->order]);
+            ->markdown('emails.orders.placed', ['order' => $this->order])
+            ->attachData($invoiceHtml, "invoice-{$this->order->order_number}.html", [
+                'mime' => 'text/html',
+            ]);
     }
 
     public function toSms(object $notifiable): string

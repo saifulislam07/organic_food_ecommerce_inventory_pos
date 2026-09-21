@@ -50,7 +50,7 @@ class OrderNotifier
      */
     private function customerFor(Order $order)
     {
-        return Notification::route('mail', $order->user?->email)
+        return Notification::route('mail', $order->user?->email ?? $order->customer_email)
             ->route('sms', $order->customer_phone);
     }
 

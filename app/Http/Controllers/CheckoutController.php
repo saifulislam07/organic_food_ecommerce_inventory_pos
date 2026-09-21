@@ -57,6 +57,7 @@ class CheckoutController extends Controller
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
+            'customer_email' => 'nullable|email|max:255',
             'customer_address' => 'required_if:delivery_type,home|string',
             'customer_area' => 'nullable|string|max:255',
             'delivery_type' => 'required|in:home,pickup',
@@ -132,6 +133,7 @@ class CheckoutController extends Controller
             'user_id' => auth()->id(),
             'customer_name' => $validated['customer_name'],
             'customer_phone' => $validated['customer_phone'],
+            'customer_email' => $validated['customer_email'] ?? null,
             'customer_address' => $validated['delivery_type'] === 'pickup' ? 'Store Pickup' : $validated['customer_address'],
             'customer_area' => $validated['customer_area'] ?? null,
             'pickup_point' => $validated['pickup_point'] ?? null,

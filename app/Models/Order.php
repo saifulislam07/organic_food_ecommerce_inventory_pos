@@ -41,7 +41,7 @@ class Order extends Model
     public const CLOSED = ['delivered', 'cancelled'];
 
     protected $fillable = [
-        'user_id', 'order_number', 'customer_name', 'customer_phone', 'customer_address',
+        'user_id', 'order_number', 'customer_name', 'customer_phone', 'customer_email', 'customer_address',
         'customer_area', 'notes', 'subtotal', 'discount_amount', 'coupon_id', 'coupon_code',
         'delivery_charge', 'total', 'paid_amount',
         'status', 'payment_method', 'source', 'pickup_point',
