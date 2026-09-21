@@ -201,7 +201,7 @@
     <div class="auth-container">
         <!-- Left Side: Visual -->
         <div class="auth-image-side">
-            <img src="{{ asset('images/auth-bg.png') }}" alt="BaburhashiBD">
+            <img src="{{ \App\Models\Setting::get('customer_auth_image') ? \App\Support\ImageStore::url(\App\Models\Setting::get('customer_auth_image')) : asset('images/auth-bg.png') }}" alt="BaburhashiBD">
             <div class="auth-overlay-content">
                 <span class="badge mb-3 px-3 py-2 text-uppercase tracking-wider fw-bold auth-chip">Trusted by Parents</span>
                 <h1 class="display-4 fw-black text-white mb-3">আপনার সোনামণির জন্য, সবচেয়ে নিরাপদ পছন্দ।</h1>

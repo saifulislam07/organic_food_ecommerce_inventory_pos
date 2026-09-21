@@ -197,7 +197,7 @@
     <div class="auth-container">
         <!-- Visual Layered Info -->
         <div class="auth-image-side">
-            <img src="{{ asset('images/admin-auth-bg.png') }}" alt="{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }} Admin">
+            <img src="{{ \App\Models\Setting::get('admin_login_image') ? \App\Support\ImageStore::url(\App\Models\Setting::get('admin_login_image')) : asset('images/admin-auth-bg.png') }}" alt="{{ \App\Models\Setting::get('site_title', 'BaburhashiBD') }} Admin">
             <div class="auth-overlay-content">
                 <h1 class="display-3 fw-black text-white pe-5 mb-4">স্বাগতম এডমিন পোর্টাল</h1>
                 <p class="lead text-white-50 opacity-75">নিরাপদ এবং দক্ষভাবে আপনার ব্যবসা পরিচালনা করুন। BaburhashiBD ড্যাশবোর্ডে লগইন করুন।</p>

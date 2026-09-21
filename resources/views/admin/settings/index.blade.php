@@ -71,6 +71,33 @@
                 @endif
             </div>
 
+            <!-- Auth Pages -->
+            <div class="col-12 mt-5">
+                <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: var(--primary-dark);">
+                    <i class="bi bi-box-arrow-in-right"></i> Login &amp; Password Pages
+                </h5>
+                <p class="text-muted small">
+                    The side panel image on the login screens. The customer image also covers
+                    register, forgot-password and reset-password, since they share one layout.
+                </p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Admin Login Image</label>
+                <input type="file" name="admin_login_image[value_en]" class="form-control">
+                <div class="mt-2 text-center p-2 border rounded bg-light" style="max-width: 150px;">
+                    <img src="{{ \App\Models\Setting::get('admin_login_image') ? \App\Support\ImageStore::url(\App\Models\Setting::get('admin_login_image')) : asset('images/admin-auth-bg.png') }}" alt="Admin login" class="img-fluid" style="max-height: 80px;">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Customer Login / Register / Password Image</label>
+                <input type="file" name="customer_auth_image[value_en]" class="form-control">
+                <div class="mt-2 text-center p-2 border rounded bg-light" style="max-width: 150px;">
+                    <img src="{{ \App\Models\Setting::get('customer_auth_image') ? \App\Support\ImageStore::url(\App\Models\Setting::get('customer_auth_image')) : asset('images/auth-bg.png') }}" alt="Customer auth" class="img-fluid" style="max-height: 80px;">
+                </div>
+            </div>
+
             <!-- Hero Section -->
             <div class="col-12 mt-5">
                 <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: var(--primary-dark);">
