@@ -1,3 +1,8 @@
+@php
+    use App\Models\Setting;
+    use App\Support\AmountInWords;
+    use App\Support\ImageStore;
+@endphp
 <div class="sheet">
 
     <div class="head">
