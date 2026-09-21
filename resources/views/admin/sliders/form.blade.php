@@ -36,10 +36,10 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold d-flex align-items-center">
-                                    <img src="https://flagcdn.com/w20/gb.png" class="me-2" alt="EN"> Title (English) *
+                                    <img src="https://flagcdn.com/w20/gb.png" class="me-2" alt="EN"> Title (English)
                                 </label>
                                 <input type="text" name="title_en" class="form-control @error('title_en') is-invalid @enderror"
-                                       value="{{ old('title_en', $slide->title_en ?? '') }}" required>
+                                       value="{{ old('title_en', $slide->title_en ?? '') }}">
                                 @error('title_en') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
@@ -55,6 +55,7 @@
                             লাইন ভাঙতে <code>&lt;br&gt;</code> আর একটি শব্দ সোনালি রঙে দেখাতে
                             <code>&lt;span&gt;শব্দ&lt;/span&gt;</code> ব্যবহার করা যাবে।
                             বাংলা খালি রাখলে ইংরেজিটাই দেখানো হবে।
+                            টাইটেল লাগবেই এমন নয় — দুটোই খালি রাখলে স্লাইডে শুধু ছবি দেখাবে।
                         </div>
                     </div>
 

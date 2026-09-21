@@ -89,7 +89,7 @@ class AdminUserController extends Controller
             $user->update(['password' => Hash::make($validated['password'])]);
         }
 
-        $this->applyAccess($request, $user, $this->isLastSuperAdmin($user));
+        $this->applyAccess($request, $user, $user->isLastSuperAdmin());
 
         return redirect()->route('admin.users.index')->with('success', "{$user->name} updated.");
     }
@@ -98,12 +98,8 @@ class AdminUserController extends Controller
     {
         abort_unless($user->role === 'admin', 404);
 
-        if ($user->is($request->user())) {
-            return back()->withErrors(['user' => 'You cannot delete your own account.']);
-        }
-
-        if ($this->isLastSuperAdmin($user)) {
-            return back()->withErrors(['user' => 'This is the last super admin — promote someone else first.']);
+        if ($reason = $user->undeletableReason($request->user())) {
+            return back()->withErrors(['user' => $reason]);
         }
 
         $name = $user->name;
@@ -114,12 +110,11 @@ class AdminUserController extends Controller
 
     public function bulkDestroy(Request $request)
     {
-        $result = $this->bulkDelete($request, User::class, fn (User $user) => match (true) {
-            $user->role !== 'admin' => "{$user->name} is not a staff account.",
-            $user->is($request->user()) => 'You cannot delete your own account.',
-            $this->isLastSuperAdmin($user) => "{$user->name} is the last super admin.",
-            default => null,
-        });
+        $result = $this->bulkDelete(
+            $request,
+            User::class,
+            fn (User $user) => $user->undeletableReason($request->user())
+        );
 
         return $this->bulkResponse($result, 'users', 'admin.users.index');
     }
@@ -148,7 +143,7 @@ class AdminUserController extends Controller
             'modules' => AdminModules::grid(),
             'assignedRoles' => $user ? $user->roles->pluck('name')->all() : [],
             'assignedPermissions' => $user ? $user->getDirectPermissions()->pluck('name')->all() : [],
-            'isLastSuperAdmin' => $user ? $this->isLastSuperAdmin($user) : false,
+            'isLastSuperAdmin' => (bool) $user?->isLastSuperAdmin(),
         ];
     }
 
@@ -162,15 +157,5 @@ class AdminUserController extends Controller
 
         $user->syncRoles($roles);
         $user->syncPermissions($request->input('permissions', []));
-    }
-
-    /** Removing the last unrestricted account would lock everyone out. */
-    private function isLastSuperAdmin(User $user): bool
-    {
-        if (! $user->hasRole(AdminModules::SUPER_ADMIN)) {
-            return false;
-        }
-
-        return User::role(AdminModules::SUPER_ADMIN)->count() <= 1;
     }
 }

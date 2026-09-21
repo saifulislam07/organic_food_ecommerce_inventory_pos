@@ -39,8 +39,13 @@
                         </thead>
                         <tbody>
                             @forelse($users as $staff)
+                            @php
+                                // The same answer deleting would give. Asking it here keeps the
+                                // row from offering a button whose only reply is an error.
+                                $blocked = $staff->undeletableReason(auth()->user());
+                            @endphp
                             <tr>
-                                @can('users.delete')<td class="ps-4"><input type="checkbox" class="form-check-input" form="bulk-users" name="ids[]" value="{{ $staff->id }}" @disabled($staff->is(auth()->user()))></td>@endcan
+                                @can('users.delete')<td class="ps-4"><input type="checkbox" class="form-check-input" form="bulk-users" name="ids[]" value="{{ $staff->id }}" @disabled($blocked) title="{{ $blocked }}"></td>@endcan
                                 <td class="ps-4">
                                     <span class="fw-bold text-dark">{{ $staff->name }}</span>
                                     @if($staff->is(auth()->user()))
@@ -63,16 +68,18 @@
                                 <td class="text-end pe-4">
                                     <div class="btn-group btn-group-sm">
                                         @can('users.edit')
-                                            <a href="{{ route('admin.users.edit', $staff) }}" class="btn btn-outline-info">
+                                            <a href="{{ route('admin.users.edit', $staff) }}" class="btn btn-outline-info" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                         @endcan
                                         @can('users.delete')
+                                            {{-- The title sits on the form: a disabled button shows none. --}}
                                             <form action="{{ route('admin.users.destroy', $staff) }}" method="POST"
-                                                  data-confirm="Remove this user?">
+                                                  data-confirm="Remove {{ $staff->name }}?"
+                                                  title="{{ $blocked ?: 'Delete' }}">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-outline-danger" @disabled($staff->is(auth()->user()))>
+                                                <button class="btn btn-outline-danger" @disabled($blocked)>
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>

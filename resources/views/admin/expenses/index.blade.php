@@ -27,9 +27,11 @@
     <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0">Expense List</h5>
         @include('admin.partials.search', ['route' => route('admin.expenses.index'), 'placeholder' => 'Title, category or note'])
+        @can('expenses.create')
         <a href="{{ route('admin.expenses.create') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg"></i> Add Expense
         </a>
+        @endcan
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -58,16 +60,21 @@
                         <td><span class="badge bg-light text-dark border">{{ $expense->category }}</span></td>
                         <td class="text-danger fw-bold">৳{{ number_format($expense->amount, 2) }}</td>
                         <td class="text-end pe-4">
-                            <a href="{{ route('admin.expenses.edit', $expense) }}" class="btn btn-sm btn-outline-info me-1">
+                            @can('expenses.edit')
+                            <a href="{{ route('admin.expenses.edit', $expense) }}" class="btn btn-sm btn-outline-info me-1" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form action="{{ route('admin.expenses.destroy', $expense) }}" method="POST" class="d-inline" data-confirm="Are you sure?">
+                            @endcan
+                            @can('expenses.delete')
+                            <form action="{{ route('admin.expenses.destroy', $expense) }}" method="POST" class="d-inline"
+                                  data-confirm="Delete this expense?">
                                 @csrf
                                 @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger">
+                                <button class="btn btn-sm btn-outline-danger" title="Delete">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
+                            @endcan
                         </td>
                     </tr>
                     @empty

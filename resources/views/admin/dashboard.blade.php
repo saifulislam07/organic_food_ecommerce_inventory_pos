@@ -270,7 +270,7 @@
                 @empty
                     <p class="text-muted small mb-0 py-3">
                         No investors recorded yet.
-                        <a href="{{ route('admin.investors.create') }}">Add one</a>.
+                        @can('investors.create')<a href="{{ route('admin.investors.create') }}">Add one</a>.@endcan
                     </p>
                 @endforelse
             </div>
@@ -400,9 +400,14 @@
                     @foreach($campaigns['top'] as $page)
                         <tr>
                             <td>
-                                <a href="{{ route('admin.landing-pages.edit', $page) }}" class="text-decoration-none">
+                                {{-- The panel only needs landing-pages.view; the link needs more. --}}
+                                @can('landing-pages.edit')
+                                    <a href="{{ route('admin.landing-pages.edit', $page) }}" class="text-decoration-none">
+                                        {{ $page->internal_name }}
+                                    </a>
+                                @else
                                     {{ $page->internal_name }}
-                                </a>
+                                @endcan
                                 @unless($page->is_active)
                                     <span class="badge bg-secondary ms-1" style="font-size: .6rem;">Off</span>
                                 @endunless

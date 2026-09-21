@@ -16,9 +16,11 @@
     <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 text-dark fw-bold">Supplier List</h5>
         @include('admin.partials.search', ['route' => route('admin.suppliers.index'), 'placeholder' => 'Name, phone or email'])
+        @can('suppliers.create')
         <a href="{{ route('admin.suppliers.create') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg"></i> Add Supplier
         </a>
+        @endcan
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -45,16 +47,21 @@
                         <td>{{ $supplier->email ?? 'N/A' }}</td>
                         <td class="text-end pe-4">
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ route('admin.suppliers.edit', $supplier) }}" class="btn btn-outline-info">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form action="{{ route('admin.suppliers.destroy', $supplier) }}" method="POST" class="d-inline" data-confirm="Delete this supplier?">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                @can('suppliers.edit')
+                                    <a href="{{ route('admin.suppliers.edit', $supplier) }}" class="btn btn-outline-info" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                @endcan
+                                @can('suppliers.delete')
+                                    <form action="{{ route('admin.suppliers.destroy', $supplier) }}" method="POST"
+                                          data-confirm="Delete this supplier?">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-outline-danger" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

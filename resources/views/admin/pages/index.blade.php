@@ -5,9 +5,11 @@
 <div class="admin-toolbar">
     <h6 class="admin-toolbar__title">Manage Pages <span class="admin-toolbar__count">{{ number_format($pages->total()) }}</span></h6>
     @include('admin.partials.search', ['route' => route('admin.pages.index'), 'placeholder' => 'Slug or title'])
+    @can('pages.create')
     <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> Create New Page
     </a>
+    @endcan
 </div>
 
 @can('pages.delete')
@@ -48,9 +50,11 @@
                             </td>
                             <td class="text-end px-4">
                                 <div class="btn-group btn-group-sm">
+                                    @can('pages.edit')
                                     <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-outline-primary">
                                         <i class="bi bi-pencil"></i> Edit
                                     </a>
+                                    @endcan
                                     @can('pages.delete')
                                     <form action="{{ route('admin.pages.destroy', $page) }}" method="POST" class="d-inline"
                                           data-confirm="Delete the &quot;{{ $page->title_en }}&quot; page?">

@@ -3,10 +3,7 @@
 @section('title', 'BaburhashiBD – শিশুদের প্রিয় সবকিছুর অনলাইন শপ')
 
 @section('content')
-    {{-- Quoted in the service strip and again in the promo tiles further down. --}}
     @php
-        $threshold = \App\Models\Setting::get('free_delivery_threshold', 2000);
-
         // Section headings are editable in Settings > Storefront Text; an empty
         // box falls back to the wording the page shipped with.
         $t = fn (string $key, string $bn, string $en) => \App\Models\Setting::get($key)
@@ -38,7 +35,7 @@
                         @foreach($slides as $slide)
                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                             <div class="pc-slide-media">
-                                <img src="{{ $slide->image_url }}" alt="{{ strip_tags($slide->title) }}"
+                                <img src="{{ $slide->image_url }}" alt="{{ strip_tags($slide->title ?? '') }}"
                                      loading="{{ $loop->first ? 'eager' : 'lazy' }}">
                             </div>
                             <div class="pc-slide-body">
@@ -47,8 +44,10 @@
                                         <i class="bi bi-patch-check-fill"></i> {{ $slide->badge }}
                                     </span>
                                 @endif
-                                {{-- Admin-authored, and allowed the <br> and <span> the styling needs. --}}
-                                <h2 class="pc-slide-title">{!! $slide->title !!}</h2>
+                                @if($slide->title)
+                                    {{-- Admin-authored, and allowed the <br> and <span> the styling needs. --}}
+                                    <h2 class="pc-slide-title">{!! $slide->title !!}</h2>
+                                @endif
                                 @if($slide->subtitle)
                                     <p class="pc-slide-text">{{ $slide->subtitle }}</p>
                                 @endif
@@ -96,12 +95,7 @@
                             <span class="pc-service-icon"><i class="bi bi-{{ $service->icon_name }}"></i></span>
                             <div>
                                 <h4>{{ $service->title }}</h4>
-                                @if($service->subtitle)
-                                    <p>{{ strtr($service->subtitle, [
-                                        ':threshold' => number_format($threshold),
-                                        ':phone' => \App\Models\Setting::get('phone', '+880 1XXX-XXXXXX'),
-                                    ]) }}</p>
-                                @endif
+                                @if($service->subtitle)<p>{{ $service->subtitle }}</p>@endif
                             </div>
                         </div>
                     @endforeach
@@ -194,7 +188,7 @@
                        @if($promo->image_url) style="background-image: url('{{ $promo->image_url }}');" @endif
                        @if($promo->is_external) target="_blank" rel="noopener" @endif>
                         @if($promo->subtitle)<small>{{ $promo->subtitle }}</small>@endif
-                        <h3>{{ strtr($promo->title, [':threshold' => number_format($threshold)]) }}</h3>
+                        <h3>{{ $promo->title }}</h3>
                         <span>
                             {{ app()->getLocale() == 'bn' ? 'দেখুন' : 'Browse' }}
                             <i class="bi bi-arrow-right"></i>

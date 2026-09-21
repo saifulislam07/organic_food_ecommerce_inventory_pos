@@ -16,9 +16,11 @@
     <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 text-dark fw-bold">Recent Purchases</h5>
         @include('admin.partials.search', ['route' => route('admin.purchases.index'), 'placeholder' => 'Supplier, product or note'])
+        @can('purchases.create')
         <a href="{{ route('admin.purchases.create') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-cart-plus"></i> New Purchase
         </a>
+        @endcan
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -47,13 +49,17 @@
                         <td>৳{{ number_format($purchase->purchase_price) }}</td>
                         <td><span class="badge bg-success-subtle text-success fs-6">{{ $purchase->quantity }} units</span></td>
                         <td class="text-end pe-4">
-                            <form action="{{ route('admin.purchases.destroy', $purchase) }}" method="POST" class="d-inline" data-confirm="Revert this purchase? Stock will be decreased.">
+                            @can('purchases.delete')
+                            <form action="{{ route('admin.purchases.destroy', $purchase) }}" method="POST" class="d-inline"
+                                  data-confirm="Revert this purchase? Stock will be decreased."
+                                  data-confirm-label="Revert">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger">
                                     <i class="bi bi-trash"></i> Revert
                                 </button>
                             </form>
+                            @endcan
                         </td>
                     </tr>
                     @empty

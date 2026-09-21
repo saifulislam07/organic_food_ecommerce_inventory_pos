@@ -47,6 +47,30 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    /** Removing the last unrestricted account would lock everyone out. */
+    public function isLastSuperAdmin(): bool
+    {
+        return $this->isSuperAdmin()
+            && self::role(AdminModules::SUPER_ADMIN)->count() <= 1;
+    }
+
+    /**
+     * Why $actor may not delete this staff account, or null when they may.
+     *
+     * Deleting refuses on exactly these grounds, and the users list asks the
+     * same question — otherwise it offers a button whose only possible answer
+     * is an error, which is how you find out you are the last super admin.
+     */
+    public function undeletableReason(?self $actor): ?string
+    {
+        return match (true) {
+            ! $this->isAdmin() => "{$this->name} is not a staff account.",
+            $actor && $this->is($actor) => 'You cannot delete your own account.',
+            $this->isLastSuperAdmin() => "{$this->name} is the last super admin — promote someone else first.",
+            default => null,
+        };
+    }
+
     /**
      * Route name of the dashboard this user belongs on. Admins and customers
      * have separate ones, and sending a customer to the admin dashboard is a 403.

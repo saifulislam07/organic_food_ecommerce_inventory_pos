@@ -103,12 +103,27 @@ class SiteBlock extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Figures that belong to Settings, so a block never has to repeat one.
+     *
+     * Typing the amount out by hand is what let the seeded "Free Delivery"
+     * card go on promising ৳2,000 long after Settings said otherwise.
+     */
+    private static function placeholders(): array
+    {
+        return [
+            ':threshold' => number_format((float) Setting::get('free_delivery_threshold', 2000)),
+            ':phone' => Setting::get('phone', '+880 1XXX-XXXXXX'),
+        ];
+    }
+
     /** English is the fallback for a field the admin left blank in Bangla. */
     private function localised(string $field): ?string
     {
         $value = $this->{$field.'_'.app()->getLocale()} ?? null;
+        $value = filled($value) ? $value : ($this->{$field.'_en'} ?: null);
 
-        return filled($value) ? $value : ($this->{$field.'_en'} ?: null);
+        return $value === null ? null : strtr($value, self::placeholders());
     }
 
     public function getTitleAttribute(): ?string

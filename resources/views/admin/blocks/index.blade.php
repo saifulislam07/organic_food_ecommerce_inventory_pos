@@ -26,9 +26,11 @@
         'route' => route('admin.blocks.index', ['group' => $group]),
         'placeholder' => 'Item title',
     ])
+    @can('blocks.create')
     <a href="{{ route('admin.blocks.create', ['group' => $group]) }}" class="btn btn-success flex-shrink-0">
         <i class="bi bi-plus-circle"></i> Add Item
     </a>
+    @endcan
 </div>
 
 <p class="text-muted small">{{ $groups[$group]['hint'] }}</p>
@@ -87,11 +89,15 @@
                     <td>{{ $block->sort_order }}</td>
                     <td>
                         <div class="d-flex gap-1">
+                            @can('blocks.edit')
                             <a href="{{ route('admin.blocks.edit', $block) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            @endcan
+                            @can('blocks.delete')
                             <form action="{{ route('admin.blocks.destroy', $block) }}" method="POST" data-confirm="Delete this item?">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endcan
                         </div>
                     </td>
                 </tr>

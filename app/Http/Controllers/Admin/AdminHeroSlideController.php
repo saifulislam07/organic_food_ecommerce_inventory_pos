@@ -92,8 +92,9 @@ class AdminHeroSlideController extends Controller
         $data = $request->validate([
             'badge_en' => ['nullable', 'string', 'max:120'],
             'badge_bn' => ['nullable', 'string', 'max:120'],
-            // Carries the <br> and <span> the hero headline is styled with.
-            'title_en' => ['required', 'string', 'max:255'],
+            // Optional: a picture-only slide needs no headline. Carries the
+            // <br> and <span> the hero headline is styled with.
+            'title_en' => ['nullable', 'string', 'max:255'],
             'title_bn' => ['nullable', 'string', 'max:255'],
             'subtitle_en' => ['nullable', 'string', 'max:500'],
             'subtitle_bn' => ['nullable', 'string', 'max:500'],

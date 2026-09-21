@@ -16,9 +16,11 @@
     <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 text-dark fw-bold">Units</h5>
         @include('admin.partials.search', ['route' => route('admin.units.index'), 'placeholder' => 'Name or short code'])
+        @can('units.create')
         <a href="{{ route('admin.units.create') }}" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg"></i> Add Unit
         </a>
+        @endcan
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -55,17 +57,23 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ route('admin.units.edit', $unit) }}" class="btn btn-outline-info">
+                                @can('units.edit')
+                                <a href="{{ route('admin.units.edit', $unit) }}" class="btn btn-outline-info" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form action="{{ route('admin.units.destroy', $unit) }}" method="POST" class="d-inline"
-                                      data-confirm="Delete this unit?">
+                                @endcan
+                                @can('units.delete')
+                                {{-- The title sits on the form: a disabled button shows none. --}}
+                                <form action="{{ route('admin.units.destroy', $unit) }}" method="POST"
+                                      data-confirm="Delete this unit?"
+                                      title="{{ $unit->variants_count ? 'Used by '.$unit->variants_count.' variant(s)' : 'Delete' }}">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-outline-danger" @disabled($unit->variants_count)>
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

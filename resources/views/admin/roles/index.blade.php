@@ -68,8 +68,10 @@
                             <td class="text-end pe-4">
                                 <div class="btn-group btn-group-sm">
                                     @can('roles.edit')
-                                        <a href="{{ route('admin.roles.edit', $role) }}"
-                                           class="btn btn-outline-info" @disabled($isSuper)>
+                                        <a href="{{ $isSuper ? '#' : route('admin.roles.edit', $role) }}"
+                                           class="btn btn-outline-info {{ $isSuper ? 'disabled' : '' }}"
+                                           @if($isSuper) tabindex="-1" aria-disabled="true" @endif
+                                           title="{{ $isSuper ? 'Super Admin always has full access and cannot be edited' : 'Edit' }}">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                     @endcan

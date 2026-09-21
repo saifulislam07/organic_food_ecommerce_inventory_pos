@@ -1599,6 +1599,35 @@ body {
 }
 .admin-table__empty i { font-size: 1.9rem; display: block; margin-bottom: 8px; opacity: 0.4; }
 
+/* --- Row action buttons -------------------------------------------------- */
+/* A delete or duplicate action has to be a <form>, so in a .btn-group it sits
+   between the group and its button. Bootstrap's rules only reach a direct .btn
+   child, so that button kept full-size padding and rounded corners beside its
+   btn-sm neighbour. These hand the wrapped button what the group would have
+   given it directly; the radius rules come last so they beat the sizing. */
+.btn-group > form { display: flex; }
+.btn-group > form > .btn { position: relative; flex: 1 1 auto; }
+.btn-group-sm > form > .btn {
+    --bs-btn-padding-y: 0.25rem;
+    --bs-btn-padding-x: 0.5rem;
+    --bs-btn-font-size: 0.875rem;
+    --bs-btn-border-radius: var(--bs-border-radius-sm);
+}
+.btn-group > form:not(:first-child) > .btn {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.btn-group > form:not(:last-child) > .btn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+/* The pressed/hovered button has to rise above the 1px it shares with its
+   neighbour, or its border looks clipped on one side. */
+.btn-group > form > .btn:hover,
+.btn-group > form > .btn:focus,
+.btn-group > form > .btn:active { z-index: 1; }
+
 /* --- Sortable headers ---------------------------------------------------- */
 /* The anchor carries the cell padding so the whole header is a click target. */
 .admin-table > thead > tr > th.admin-th-sort { padding: 0; }

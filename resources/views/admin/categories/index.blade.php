@@ -5,7 +5,9 @@
 <div class="admin-toolbar">
     <h6 class="admin-toolbar__title">Categories <span class="admin-toolbar__count">{{ number_format($categories->total()) }}</span></h6>
     @include('admin.partials.search', ['route' => route('admin.categories.index'), 'placeholder' => 'Category name'])
+    @can('categories.create')
     <a href="{{ route('admin.categories.create') }}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Category</a>
+    @endcan
 </div>
 
 @can('categories.delete')
@@ -49,11 +51,15 @@
                     <td>{{ $category->sort_order }}</td>
                     <td>
                         <div class="d-flex gap-1">
+                            @can('categories.edit')
                             <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            @endcan
+                            @can('categories.delete')
                             <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" data-confirm="Delete this category?">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endcan
                         </div>
                     </td>
                 </tr>

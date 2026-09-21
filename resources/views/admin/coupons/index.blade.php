@@ -9,9 +9,11 @@
 <div class="admin-toolbar">
     <h6 class="admin-toolbar__title">Coupons <span class="admin-toolbar__count">{{ number_format($coupons->total()) }}</span></h6>
     @include('admin.partials.search', ['route' => route('admin.coupons.index'), 'placeholder' => 'Code or label'])
+    @can('coupons.create')
     <a href="{{ route('admin.coupons.create') }}" class="btn btn-success flex-shrink-0">
         <i class="bi bi-plus-circle"></i> Add Coupon
     </a>
+    @endcan
 </div>
 
 @can('coupons.delete')
@@ -92,11 +94,15 @@
                     </td>
                     <td>
                         <div class="d-flex gap-1">
+                            @can('coupons.edit')
                             <a href="{{ route('admin.coupons.edit', $coupon) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            @endcan
+                            @can('coupons.delete')
                             <form action="{{ route('admin.coupons.destroy', $coupon) }}" method="POST" data-confirm="Delete this coupon?">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endcan
                         </div>
                     </td>
                 </tr>

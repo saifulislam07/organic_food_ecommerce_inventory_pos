@@ -149,6 +149,20 @@ class RoleTest extends TestCase
         $this->assertSame(AdminModules::SUPER_ADMIN, $role->fresh()->name);
     }
 
+    /**
+     * The row used to carry @disabled on an <a>, which HTML ignores — so the
+     * pencil looked live and took you straight to the 403 above.
+     */
+    public function test_the_super_admin_row_does_not_link_to_the_edit_it_would_refuse(): void
+    {
+        $role = Role::findByName(AdminModules::SUPER_ADMIN);
+
+        $html = $this->actingAs($this->admin())->get(route('admin.roles.index'))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString(route('admin.roles.edit', $role), $html);
+        $this->assertStringContainsString('cannot be edited', $html);
+    }
+
     public function test_the_super_admin_role_cannot_be_deleted(): void
     {
         $role = Role::findByName(AdminModules::SUPER_ADMIN);

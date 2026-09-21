@@ -168,13 +168,30 @@ class HeroSliderTest extends TestCase
         $this->assertFalse(ImageStore::exists($slide->image));
     }
 
-    public function test_a_slide_needs_an_english_title(): void
+    public function test_a_slide_may_carry_no_title_at_all(): void
     {
-        $this->actingAs($this->admin())
-            ->post(route('admin.sliders.store'), $this->payload(['title_en' => '']))
-            ->assertSessionHasErrors('title_en');
+        Storage::fake('uploads');
 
-        $this->assertDatabaseCount('hero_slides', 0);
+        $this->actingAs($this->admin())
+            ->post(route('admin.sliders.store'), $this->payload([
+                'title_en' => '',
+                'title_bn' => '',
+                'image' => UploadedFile::fake()->image('artwork.jpg'),
+            ]))
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.sliders.index'));
+
+        $this->assertNull(HeroSlide::sole()->title);
+    }
+
+    public function test_a_titleless_slide_renders_without_an_empty_headline(): void
+    {
+        $this->slide(['title_en' => null, 'badge_en' => 'Just a picture']);
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringContainsString('Just a picture', $html);
+        $this->assertStringNotContainsString('pc-slide-title', $html);
     }
 
     public function test_the_admin_screens_render(): void

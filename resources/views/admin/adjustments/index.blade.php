@@ -16,9 +16,11 @@
     <div class="card-header bg-white py-3 admin-toolbar admin-toolbar--flush">
         <h5 class="mb-0 text-dark fw-bold">Adjustment History</h5>
         @include('admin.partials.search', ['route' => route('admin.adjustments.index'), 'placeholder' => 'Product, type or reason'])
+        @can('adjustments.create')
         <a href="{{ route('admin.adjustments.create') }}" class="btn btn-warning btn-sm">
             <i class="bi bi-tools"></i> New Adjustment
         </a>
+        @endcan
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -61,13 +63,18 @@
                         </td>
                         <td><small class="text-muted">{{ Str::limit($adj->reason, 30) }}</small></td>
                         <td class="text-end pe-4">
-                            <form action="{{ route('admin.adjustments.destroy', $adj) }}" method="POST" class="d-inline" onsubmit="return confirm('Revert this adjustment? Stock will be updated.')">
+                            @can('adjustments.delete')
+                            {{-- data-confirm, like every other list: the themed dialog, not the browser's. --}}
+                            <form action="{{ route('admin.adjustments.destroy', $adj) }}" method="POST" class="d-inline"
+                                  data-confirm="Revert this adjustment? Stock will be updated."
+                                  data-confirm-label="Revert">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger">
                                     <i class="bi bi-arrow-counterclockwise"></i> Revert
                                 </button>
                             </form>
+                            @endcan
                         </td>
                     </tr>
                     @empty

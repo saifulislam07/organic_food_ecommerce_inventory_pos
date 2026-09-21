@@ -3,6 +3,8 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Category;
+use App\Models\Order;
+use App\Models\Supplier;
 use App\Models\User;
 use App\Support\AdminModules;
 use Database\Seeders\PermissionSeeder;
@@ -131,6 +133,201 @@ class PermissionTest extends TestCase
     {
         $this->actingAs($this->staff())->get($url)->assertForbidden();
         $this->actingAs($this->staff([$permission]))->get($url)->assertOk();
+    }
+
+    /**
+     * Every admin list, with the module whose permissions govern its buttons.
+     * The lists render with no rows, which is enough: the Add button and the
+     * bulk-delete bar are drawn either way.
+     */
+    public static function listPages(): array
+    {
+        $pages = [
+            'products', 'categories', 'combos', 'units', 'landing-pages',
+            'purchases', 'suppliers', 'adjustments',
+            'expenses', 'investors', 'investments', 'withdrawals',
+            'coupons', 'reviews', 'sliders', 'blocks', 'pages',
+            'users', 'roles',
+        ];
+
+        return array_combine(
+            $pages,
+            array_map(fn (string $module) => [$module], $pages)
+        );
+    }
+
+    /**
+     * A button the route will only answer with a 403 is worse than no button:
+     * the staff member finds out by pressing it. Every list is asked the same
+     * question, so a new one cannot quietly skip its @can.
+     */
+    #[DataProvider('listPages')]
+    public function test_a_list_shows_no_write_button_to_a_viewer(string $module): void
+    {
+        $viewer = $this->staff(['dashboard.view', "{$module}.view"]);
+
+        $html = $this->actingAs($viewer)
+            ->get(route("admin.{$module}.index"))
+            ->assertOk()
+            ->getContent();
+
+        if (in_array(AdminModules::CREATE, AdminModules::abilities($module), true)) {
+            $this->assertStringNotContainsString(
+                route("admin.{$module}.create"),
+                $html,
+                "The {$module} list offers Add to someone who cannot create."
+            );
+        }
+
+        // Every delete control on these pages is a form carrying @method('DELETE'),
+        // the bulk bar included — so a viewer should see not one of them.
+        $this->assertStringNotContainsString(
+            'value="DELETE"',
+            $html,
+            "The {$module} list offers a delete to someone who cannot delete."
+        );
+    }
+
+    #[DataProvider('listPages')]
+    public function test_the_same_list_shows_the_buttons_once_granted(string $module): void
+    {
+        $abilities = AdminModules::abilities($module);
+        $granted = ['dashboard.view'];
+
+        foreach ($abilities as $ability) {
+            $granted[] = "{$module}.{$ability}";
+        }
+
+        $html = $this->actingAs($this->staff($granted))
+            ->get(route("admin.{$module}.index"))
+            ->assertOk()
+            ->getContent();
+
+        if (in_array(AdminModules::CREATE, $abilities, true)) {
+            $this->assertStringContainsString(route("admin.{$module}.create"), $html);
+        }
+
+        if (in_array(AdminModules::DELETE, $abilities, true)) {
+            $this->assertStringContainsString('value="DELETE"', $html);
+        }
+    }
+
+    /**
+     * The pages that are not lists get the same treatment: a detail screen or
+     * a dashboard panel opens on a .view permission, but the buttons on it
+     * still need their own.
+     */
+    public function test_an_order_screen_offers_no_edit_to_a_viewer(): void
+    {
+        $order = Order::create([
+            'customer_name' => 'Rahim',
+            'customer_phone' => '01700000000',
+            'customer_address' => 'Dhaka',
+            'subtotal' => 500,
+            'delivery_charge' => 60,
+            'total' => 560,
+            'status' => 'confirmed',
+            'payment_method' => 'cod',
+            'source' => 'website',
+        ]);
+
+        $viewer = $this->staff(['dashboard.view', 'orders.view']);
+        $html = $this->actingAs($viewer)->get(route('admin.orders.show', $order))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString(route('admin.orders.edit', $order), $html);
+        // The status control posts to updateStatus, which needs orders.edit.
+        $this->assertStringNotContainsString('OrderStatusControl', $html);
+        $this->assertStringNotContainsString(route('admin.orders.settle', $order), $html);
+
+        $editor = $this->staff(['dashboard.view', 'orders.view', 'orders.edit']);
+        $html = $this->actingAs($editor)->get(route('admin.orders.show', $order))->assertOk()->getContent();
+
+        $this->assertStringContainsString(route('admin.orders.edit', $order), $html);
+        $this->assertStringContainsString('OrderStatusControl', $html);
+    }
+
+    public function test_the_dashboard_links_only_where_the_viewer_may_go(): void
+    {
+        $viewer = $this->staff(['dashboard.view', 'investors.view', 'landing-pages.view']);
+
+        $html = $this->actingAs($viewer)->get('/admin')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString(route('admin.investors.create'), $html);
+        $this->assertStringNotContainsString('/admin/landing-pages/', $html);
+    }
+
+    /** Row-level buttons need a row, so one list stands for the shape of them all. */
+    public function test_a_row_offers_no_action_the_route_would_refuse(): void
+    {
+        Supplier::create(['name' => 'Green Valley Farms']);
+
+        $viewer = $this->staff(['dashboard.view', 'suppliers.view']);
+        $html = $this->actingAs($viewer)->get('/admin/suppliers')->assertOk()->getContent();
+
+        $this->assertStringContainsString('Green Valley Farms', $html);
+        $this->assertStringNotContainsString(route('admin.suppliers.create'), $html);
+        $this->assertStringNotContainsString('/edit', $html);
+
+        $full = $this->staff([
+            'dashboard.view', 'suppliers.view', 'suppliers.create',
+            'suppliers.edit', 'suppliers.delete',
+        ]);
+        $html = $this->actingAs($full)->get('/admin/suppliers')->assertOk()->getContent();
+
+        $this->assertStringContainsString(route('admin.suppliers.create'), $html);
+        $this->assertStringContainsString('/edit', $html);
+    }
+
+    /** The delete control for one row of the users list, markup and all. */
+    private function deleteControl(string $html, User $user): string
+    {
+        preg_match(
+            '/<form action="'.preg_quote(route('admin.users.destroy', $user), '/').'".*?<\/form>/s',
+            $html,
+            $found
+        );
+
+        $this->assertNotEmpty($found, "No delete control for {$user->name} in the users list.");
+
+        return $found[0];
+    }
+
+    /**
+     * Deleting refuses your own account and the last super admin. The list has
+     * to refuse them too — otherwise the only way to learn you are the last
+     * super admin is to press Delete and read the error.
+     */
+    public function test_the_users_list_disables_a_delete_the_route_would_refuse(): void
+    {
+        $super = User::factory()->superAdmin()->create(['name' => 'Only Super']);
+        $manager = $this->staff(['dashboard.view', 'users.view', 'users.edit', 'users.delete']);
+
+        $html = $this->actingAs($manager)->get('/admin/users')->assertOk()->getContent();
+
+        $lastSuper = $this->deleteControl($html, $super);
+        $this->assertStringContainsString('disabled', $lastSuper);
+        $this->assertStringContainsString('last super admin', $lastSuper);
+
+        // And the route really does refuse it, so the two agree.
+        $this->actingAs($manager)->delete(route('admin.users.destroy', $super))->assertSessionHasErrors('user');
+        $this->assertModelExists($super);
+
+        $this->assertStringContainsString('disabled', $this->deleteControl($html, $manager));
+    }
+
+    public function test_a_row_that_can_go_keeps_its_delete_button(): void
+    {
+        User::factory()->superAdmin()->create(['name' => 'Only Super']);
+        $spare = User::factory()->superAdmin()->create(['name' => 'Spare Super']);
+        $manager = $this->staff(['dashboard.view', 'users.view', 'users.delete']);
+
+        $html = $this->actingAs($manager)->get('/admin/users')->assertOk()->getContent();
+
+        // Two super admins, so neither is the last one.
+        $this->assertStringNotContainsString('disabled', $this->deleteControl($html, $spare));
+
+        $this->actingAs($manager)->delete(route('admin.users.destroy', $spare))->assertRedirect();
+        $this->assertModelMissing($spare);
     }
 
     /* ---------------------------------------------------------- sidebar */

@@ -50,6 +50,7 @@
                             </div>
                         </div>
                         <div class="form-text mt-2">বাংলা খালি রাখলে ইংরেজিটাই দেখানো হবে।</div>
+                        @include('admin.blocks.placeholders')
                     </div>
 
                     <div class="card bg-light border-0 p-3 mt-4" data-field="subtitle">
@@ -74,6 +75,7 @@
                         <div class="form-text mt-2">
                             সার্ভিস কার্ডে এটি ছোট বিবরণ, প্রোমো কার্ডে উপরের ছোট সোনালি লেখা।
                         </div>
+                        @include('admin.blocks.placeholders')
                     </div>
 
                     <div class="card bg-light border-0 p-3 mt-4" data-field="url">

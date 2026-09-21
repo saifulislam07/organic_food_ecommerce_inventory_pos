@@ -336,6 +336,8 @@
         {{-- Status --}}
         <div class="card admin-card mb-4 p-4">
             <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">Order Status</h5>
+            {{-- Changing the status is an edit, so a viewer gets the badge, not the control. --}}
+            @can('orders.edit')
             <div
                 data-vue="OrderStatusControl"
                 data-props="{{ json_encode([
@@ -345,6 +347,10 @@
                     'settled' => $order->isSettled(),
                 ], JSON_UNESCAPED_UNICODE) }}"
             ></div>
+            @else
+                {!! $order->status_badge !!}
+                <div class="text-muted small mt-2">Updated {{ $order->updated_at->format('d M Y, h:i A') }}</div>
+            @endcan
         </div>
 
         {{-- Courier --}}
@@ -470,9 +476,13 @@
                 <div>
                     <span class="text-muted small d-block">Campaign</span>
                     @if($order->landingPage)
-                        <a href="{{ route('admin.landing-pages.edit', $order->landingPage) }}" class="fw-bold text-decoration-none">
-                            {{ $order->landingPage->internal_name }}
-                        </a>
+                        @can('landing-pages.edit')
+                            <a href="{{ route('admin.landing-pages.edit', $order->landingPage) }}" class="fw-bold text-decoration-none">
+                                {{ $order->landingPage->internal_name }}
+                            </a>
+                        @else
+                            <span class="fw-bold">{{ $order->landingPage->internal_name }}</span>
+                        @endcan
                     @endif
                     <div class="small text-muted">
                         @if($order->utm_campaign)

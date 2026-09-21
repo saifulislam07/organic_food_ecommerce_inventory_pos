@@ -5,7 +5,9 @@
 <div class="admin-toolbar">
     <h6 class="admin-toolbar__title">Products <span class="admin-toolbar__count">{{ number_format($products->total()) }}</span></h6>
     @include('admin.partials.search', ['route' => route('admin.products.index'), 'placeholder' => 'Product name'])
+    @can('products.create')
     <a href="{{ route('admin.products.create') }}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Product</a>
+    @endcan
 </div>
 
 @can('products.delete')
@@ -55,16 +57,23 @@
                     </td>
                     <td>
                         <div class="d-flex gap-1">
-                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            @can('products.edit')
+                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                            @endcan
+                            {{-- The combo builder is its own module, so it asks its own permission. --}}
+                            @can('combos.edit')
                             <a href="{{ route('admin.combos.edit', $product) }}"
                                class="btn btn-sm {{ $product->is_combo ? 'btn-warning' : 'btn-outline-secondary' }}"
                                title="{{ $product->is_combo ? 'Combo contents' : 'Make this a combo' }}">
                                 <i class="bi bi-box2"></i>
                             </a>
+                            @endcan
+                            @can('products.delete')
                             <form action="{{ route('admin.products.destroy', $product) }}" method="POST" data-confirm="Delete this product?">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endcan
                         </div>
                     </td>
                 </tr>

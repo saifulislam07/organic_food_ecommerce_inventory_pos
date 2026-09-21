@@ -101,6 +101,55 @@ class SiteBlockTest extends TestCase
         $this->get('/')->assertOk()->assertSee('On orders over ৳3,500');
     }
 
+    /**
+     * The shipped card used to spell the figure out — "On orders over ৳2,000"
+     * — so raising the threshold in Settings left the front page promising the
+     * old one. It has to arrive already pointing at the setting.
+     */
+    public function test_the_shipped_free_delivery_card_follows_the_setting(): void
+    {
+        Setting::put('free_delivery_threshold', 4200);
+
+        $card = SiteBlock::list('service')->firstWhere('title_en', 'Free Delivery');
+
+        $this->assertNotNull($card, 'The seeded service strip should still carry a Free Delivery card.');
+        $this->assertStringContainsString('4,200', $card->subtitle);
+        $this->assertStringNotContainsString('2,000', $card->subtitle);
+    }
+
+    public function test_the_bengali_card_quotes_the_same_live_figure(): void
+    {
+        Setting::put('free_delivery_threshold', 4200);
+        app()->setLocale('bn');
+
+        $card = SiteBlock::list('service')->firstWhere('title_en', 'Free Delivery');
+
+        $this->assertStringContainsString('4,200', $card->subtitle);
+    }
+
+    public function test_a_promo_title_quotes_the_threshold_too(): void
+    {
+        Setting::put('free_delivery_threshold', 900);
+        SiteBlock::create([
+            'group' => 'promo',
+            'title_en' => 'Free delivery over ৳:threshold',
+            'url' => '/shop',
+        ]);
+
+        $this->get('/')->assertOk()->assertSee('Free delivery over ৳900');
+    }
+
+    public function test_the_block_form_says_the_number_need_not_be_typed(): void
+    {
+        $html = $this->actingAs($this->admin())
+            ->get(route('admin.blocks.edit', SiteBlock::query()->group('service')->first()))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString(':threshold', $html);
+        $this->assertStringContainsString(route('admin.settings.index'), $html);
+    }
+
     public function test_a_bare_path_is_resolved_against_the_site_root(): void
     {
         $block = SiteBlock::create($this->payload(['url' => 'shop']));

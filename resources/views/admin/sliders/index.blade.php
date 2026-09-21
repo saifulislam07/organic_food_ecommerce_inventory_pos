@@ -9,7 +9,9 @@
 <div class="admin-toolbar">
     <h6 class="admin-toolbar__title">Slides <span class="admin-toolbar__count">{{ number_format($slides->total()) }}</span></h6>
     @include('admin.partials.search', ['route' => route('admin.sliders.index'), 'placeholder' => 'Slide title'])
+    @can('sliders.create')
     <a href="{{ route('admin.sliders.create') }}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Slide</a>
+    @endcan
 </div>
 
 @can('sliders.delete')
@@ -43,7 +45,12 @@
                         <img src="{{ $slide->image_url }}" alt="" style="width:80px; height:50px; object-fit:cover; border-radius:8px;">
                     </td>
                     <td>
-                        <strong>{{ strip_tags($slide->title_en) }}</strong>
+                        @if(filled($slide->title_en))
+                            <strong>{{ strip_tags($slide->title_en) }}</strong>
+                        @elseif(blank($slide->title_bn))
+                            {{-- Picture-only slide: say so instead of leaving a blank cell. --}}
+                            <span class="text-muted fst-italic">ছবি-শুধু স্লাইড</span>
+                        @endif
                         @if($slide->title_bn)<div class="text-muted small">{{ strip_tags($slide->title_bn) }}</div>@endif
                     </td>
                     <td class="small text-muted">{{ $slide->button_url ?: 'Shop page' }}</td>
@@ -54,11 +61,15 @@
                     <td>{{ $slide->sort_order }}</td>
                     <td>
                         <div class="d-flex gap-1">
-                            <a href="{{ route('admin.sliders.edit', $slide) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            @can('sliders.edit')
+                            <a href="{{ route('admin.sliders.edit', $slide) }}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                            @endcan
+                            @can('sliders.delete')
                             <form action="{{ route('admin.sliders.destroy', $slide) }}" method="POST" data-confirm="Delete this slide?">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
+                            @endcan
                         </div>
                     </td>
                 </tr>

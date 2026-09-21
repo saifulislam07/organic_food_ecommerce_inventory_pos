@@ -155,12 +155,13 @@
             </a>
         </div>
         @php
-            // A group opens on load when the page you are on lives inside it.
+            // A row's 'active' is the route pattern (or patterns) it lights up
+            // for; the group it sits in opens for the same set. That set is
+            // derived from the rows below, never listed twice.
             $groups = [
                 'sell' => [
                     'label' => 'Sell',
                     'icon' => 'bi-cart3',
-                    'patterns' => ['admin.pos.*', 'admin.orders.*', 'admin.customers.*', 'admin.coupons.*', 'admin.reviews.*'],
                     'items' => [
                         ['route' => 'admin.pos.index', 'active' => 'admin.pos.*', 'label' => 'POS System', 'can' => 'pos.view'],
                         ['route' => 'admin.orders.index', 'active' => 'admin.orders.*', 'label' => 'Orders', 'can' => 'orders.view'],
@@ -172,7 +173,6 @@
                 'catalogue' => [
                     'label' => 'Catalogue',
                     'icon' => 'bi-box-seam',
-                    'patterns' => ['admin.products.*', 'admin.categories.*', 'admin.units.*', 'admin.landing-pages.*'],
                     'items' => [
                         ['route' => 'admin.products.index', 'active' => 'admin.products.*', 'label' => 'Products', 'can' => 'products.view'],
                         ['route' => 'admin.categories.index', 'active' => 'admin.categories.*', 'label' => 'Categories', 'can' => 'categories.view'],
@@ -184,7 +184,6 @@
                 'stock' => [
                     'label' => 'Stock',
                     'icon' => 'bi-clipboard-data',
-                    'patterns' => ['admin.inventory.*', 'admin.purchases.*', 'admin.suppliers.*', 'admin.adjustments.*'],
                     'items' => [
                         ['route' => 'admin.inventory.index', 'active' => 'admin.inventory.*', 'label' => 'Inventory', 'can' => 'inventory.view'],
                         ['route' => 'admin.purchases.index', 'active' => 'admin.purchases.*', 'label' => 'Purchases', 'can' => 'purchases.view'],
@@ -195,10 +194,6 @@
                 'money' => [
                     'label' => 'Money',
                     'icon' => 'bi-cash-coin',
-                    'patterns' => [
-                        'admin.expenses.*', 'admin.investors.*',
-                        'admin.investments.*', 'admin.withdrawals.*',
-                    ],
                     'items' => [
                         ['route' => 'admin.expenses.index', 'active' => 'admin.expenses.*', 'label' => 'Expenses', 'can' => 'expenses.view'],
                         ['route' => 'admin.investments.index', 'active' => 'admin.investments.*', 'label' => 'Investments', 'can' => 'investments.view'],
@@ -209,7 +204,6 @@
                 'settings' => [
                     'label' => 'Settings',
                     'icon' => 'bi-gear',
-                    'patterns' => ['admin.settings.*', 'admin.sliders.*', 'admin.blocks.*'],
                     'items' => [
                         ['route' => 'admin.settings.index', 'active' => 'admin.settings.index', 'label' => 'Site Settings', 'can' => 'settings.view'],
                         ['route' => 'admin.sliders.index', 'active' => 'admin.sliders.*', 'label' => 'Hero Slider', 'can' => 'sliders.view'],
@@ -242,7 +236,12 @@
                         ->values();
                 @endphp
                 @continue($items->isEmpty())
-                @php $open = request()->routeIs(...$group['patterns']); @endphp
+                @php
+                    $matches = fn ($item) => request()->routeIs(...(array) $item['active']);
+                    // Open for exactly the rows it still shows, so a row added
+                    // here can never leave its group shut on its own page.
+                    $open = $items->contains($matches);
+                @endphp
                 <li>
                     <a href="#nav-{{ $key }}" class="nav-parent {{ $open ? 'active' : '' }}"
                        data-bs-toggle="collapse" role="button"
@@ -254,7 +253,7 @@
                         @foreach($items as $item)
                             <li>
                                 <a href="{{ route($item['route']) }}"
-                                   class="{{ request()->routeIs($item['active']) ? 'active' : '' }}">
+                                   class="{{ $matches($item) ? 'active' : '' }}">
                                     {{ $item['label'] }}
                                 </a>
                             </li>
