@@ -2,8 +2,12 @@
 
 @section('title', $product->meta_title ?? $product->name.' – BaburhashiBD')
 @section('meta_description', $product->meta_description ?? $product->short_description ?? $product->name)
+{{-- Without this a shared product link showed the shop's default picture,
+     which is not what the SEO settings screen promises. --}}
+@section('og_image', $product->image_url)
 
 @section('content')
+@include('partials.schema-product', ['product' => $product])
 @php
     $bn = app()->getLocale() == 'bn';
     $stock = $product->variants->sum(fn ($v) => $v->available_stock);

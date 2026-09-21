@@ -55,6 +55,37 @@ class SeoSettings
         Setting::flush();
     }
 
+    /**
+     * The address this page wants to be known by.
+     *
+     * url()->current() drops the query string, which pointed every
+     * ?category= listing at a bare /shop — telling Google to throw away the
+     * very category URLs the sitemap asks it to index. Only the parameters
+     * that genuinely change what is listed survive here, so tracking junk
+     * (fbclid, utm_*) and thin ?search= results still collapse onto the
+     * canonical listing instead of competing with it.
+     */
+    public const CANONICAL_PARAMS = ['category', 'page'];
+
+    public static function canonicalUrl(): string
+    {
+        $params = array_filter(
+            request()->only(self::CANONICAL_PARAMS),
+            fn ($value) => filled($value)
+        );
+
+        // Page one is the listing itself, not a separate address.
+        if (($params['page'] ?? null) == 1) {
+            unset($params['page']);
+        }
+
+        ksort($params);
+
+        return $params === []
+            ? url()->current()
+            : url()->current().'?'.http_build_query($params);
+    }
+
     /** Absolute URL of the default social sharing image, if one is uploaded. */
     public static function ogImageUrl(): ?string
     {
