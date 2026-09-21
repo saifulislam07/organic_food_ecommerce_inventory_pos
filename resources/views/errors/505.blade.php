@@ -2,6 +2,9 @@
 
 @section('title', app()->getLocale() == 'bn' ? 'HTTP সংস্করণ সমর্থিত নয়' : 'HTTP Version Not Supported')
 @section('code', '505')
+@if($image = \App\Models\Setting::get('error_505_image'))
+    @section('image', \App\Support\ImageStore::url($image))
+@endif
 @section('message', app()->getLocale() == 'bn' ? 'প্রোটোকল সমর্থিত নয়' : 'Protocol Not Supported')
 @section('description', app()->getLocale() == 'bn'
     ? 'আপনার রিকোয়েস্টে ব্যবহৃত HTTP প্রোটোকল সংস্করণটি আমাদের সার্ভার সমর্থন করে না। অনুগ্রহ করে ব্রাউজার আপডেট করুন।'

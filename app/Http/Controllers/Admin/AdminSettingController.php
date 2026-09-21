@@ -18,6 +18,9 @@ class AdminSettingController extends Controller
     private const SCHEMA = [
         'site_title' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:255']],
         'logo' => ['type' => 'image', 'rules' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048']],
+        'error_404_image' => ['type' => 'image', 'rules' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048']],
+        'error_500_image' => ['type' => 'image', 'rules' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048']],
+        'error_505_image' => ['type' => 'image', 'rules' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048']],
         'hero_title' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:255']],
         'hero_desc' => ['type' => 'textarea', 'rules' => ['nullable', 'string', 'max:2000']],
         'whatsapp' => ['type' => 'text', 'rules' => ['nullable', 'string', 'max:32']],

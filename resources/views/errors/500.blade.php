@@ -2,7 +2,9 @@
 
 @section('title', app()->getLocale() == 'bn' ? 'সার্ভার সমস্যা' : 'Server Error')
 @section('code', '500')
-@section('image', asset('images/errors/500.png'))
+@section('image', ($image = \App\Models\Setting::get('error_500_image'))
+    ? \App\Support\ImageStore::url($image)
+    : asset('images/errors/500.png'))
 @section('message', app()->getLocale() == 'bn' ? 'বাগানে কিছু একটা সমস্যা হয়েছে!' : 'Something went wrong on our side')
 @section('description', app()->getLocale() == 'bn'
     ? 'আমাদের সার্ভারে সাময়িক কারিগরি সমস্যা দেখা দিয়েছে। আমরা দ্রুত এটি সমাধানের চেষ্টা করছি। কিছুক্ষণ পর আবার চেষ্টা করুন।'

@@ -33,6 +33,44 @@
                 @endif
             </div>
 
+            <!-- Error Pages -->
+            <div class="col-12 mt-5">
+                <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: var(--primary-dark);">
+                    <i class="bi bi-exclamation-triangle"></i> Error Pages
+                </h5>
+                <p class="text-muted small">
+                    Custom illustrations for the 404 and 500 error pages. Leave empty to keep the
+                    default artwork the shop ships with.
+                </p>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">404 — Page Not Found Image</label>
+                <input type="file" name="error_404_image[value_en]" class="form-control">
+                <div class="mt-2 text-center p-2 border rounded bg-light" style="max-width: 150px;">
+                    <img src="{{ \App\Models\Setting::get('error_404_image') ? \App\Support\ImageStore::url(\App\Models\Setting::get('error_404_image')) : asset('images/errors/404.png') }}" alt="404" class="img-fluid" style="max-height: 80px;">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">500 — Server Error Image</label>
+                <input type="file" name="error_500_image[value_en]" class="form-control">
+                <div class="mt-2 text-center p-2 border rounded bg-light" style="max-width: 150px;">
+                    <img src="{{ \App\Models\Setting::get('error_500_image') ? \App\Support\ImageStore::url(\App\Models\Setting::get('error_500_image')) : asset('images/errors/500.png') }}" alt="500" class="img-fluid" style="max-height: 80px;">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">505 — Protocol Not Supported Image</label>
+                <input type="file" name="error_505_image[value_en]" class="form-control">
+                <div class="form-text">No default artwork ships for this one — it stays hidden until you upload something.</div>
+                @if($image = \App\Models\Setting::get('error_505_image'))
+                    <div class="mt-2 text-center p-2 border rounded bg-light" style="max-width: 150px;">
+                        <img src="{{ \App\Support\ImageStore::url($image) }}" alt="505" class="img-fluid" style="max-height: 80px;">
+                    </div>
+                @endif
+            </div>
+
             <!-- Hero Section -->
             <div class="col-12 mt-5">
                 <h5 class="fw-bold border-bottom pb-2 mb-3" style="color: var(--primary-dark);">
