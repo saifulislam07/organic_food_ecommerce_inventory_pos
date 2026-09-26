@@ -168,6 +168,7 @@
                         ['route' => 'admin.customers.index', 'active' => 'admin.customers.*', 'label' => 'Customers', 'can' => 'customers.view'],
                         ['route' => 'admin.coupons.index', 'active' => 'admin.coupons.*', 'label' => 'Coupons', 'can' => 'coupons.view'],
                         ['route' => 'admin.reviews.index', 'active' => 'admin.reviews.*', 'label' => 'Reviews', 'can' => 'reviews.view'],
+                        ['route' => 'admin.contact-messages.index', 'active' => 'admin.contact-messages.*', 'label' => 'Contact Messages', 'can' => 'contact-messages.view'],
                     ],
                 ],
                 'catalogue' => [

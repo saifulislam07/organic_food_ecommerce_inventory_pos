@@ -27,9 +27,9 @@ class HomeController extends Controller
 
         // Ten and five fill the front page's five-across grid without leaving a
         // ragged last row on a wide screen.
-        $bestSellers = Product::active()->bestseller()->withCardData()->take(10)->get();
+        $bestSellers = Product::active()->bestseller()->withCardData()->inRandomOrder()->take(10)->get();
         $featured = Product::active()->featured()->withCardData()->take(10)->get();
-        $trending = Product::active()->trending()->withCardData()->take(5)->get();
+        $trending = Product::active()->trending()->withCardData()->inRandomOrder()->take(5)->get();
 
         // Bundles carry none of the featured / bestseller flags, so without a
         // section of their own they never reach the front page at all.

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAdjustmentController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminChatSettingController;
 use App\Http\Controllers\Admin\AdminComboController;
+use App\Http\Controllers\Admin\AdminContactMessageController;
 use App\Http\Controllers\Admin\AdminCouponController;
 use App\Http\Controllers\Admin\AdminCourierSettingController;
 use App\Http\Controllers\Admin\AdminCustomerController;
@@ -34,6 +35,7 @@ use App\Http\Controllers\Admin\AdminWithdrawalController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Customer\CustomerDashboardController;
 use App\Http\Controllers\Customer\CustomerReviewController;
 use App\Http\Controllers\HomeController;
@@ -51,7 +53,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
 Route::get('/about', fn () => view('pages.about'))->name('about');
-Route::get('/contact', fn () => view('pages.contact'))->name('contact');
+Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 Route::get('/robots.txt', [SitemapController::class, 'robots']);
 
@@ -125,6 +128,7 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::delete('users/bulk', [AdminUserController::class, 'bulkDestroy'])->name('users.bulkDestroy');
     Route::delete('roles/bulk', [AdminRoleController::class, 'bulkDestroy'])->name('roles.bulkDestroy');
     Route::delete('reviews/bulk', [AdminReviewController::class, 'bulkDestroy'])->name('reviews.bulkDestroy');
+    Route::delete('contact-messages/bulk', [AdminContactMessageController::class, 'bulkDestroy'])->name('contact-messages.bulkDestroy');
     Route::resource('products', AdminProductController::class);
     Route::get('combos', [AdminComboController::class, 'index'])->name('combos.index');
     Route::get('combos/create', [AdminComboController::class, 'create'])->name('combos.create');
@@ -214,6 +218,10 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     // Product reviews: customer-submitted (pending approval) plus admin-authored (trusted immediately).
     Route::post('reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('reviews.approve');
     Route::resource('reviews', AdminReviewController::class)->except(['show']);
+
+    // Submissions from the public Contact Us form.
+    Route::post('contact-messages/{contact_message}/read', [AdminContactMessageController::class, 'read'])->name('contact-messages.read');
+    Route::resource('contact-messages', AdminContactMessageController::class)->only(['index', 'destroy']);
 });
 
 Route::middleware('auth')->group(function () {

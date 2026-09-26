@@ -9,7 +9,9 @@
 @endphp
 <div class="product-card fade-up">
     <div class="product-card-image">
-        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" loading="lazy">
+        <a href="{{ route('product.show', $product->slug) }}" title="View Details">
+            <img src="{{ $product->image_url }}" alt="{{ $product->name }}" loading="lazy">
+        </a>
         <div class="product-badge">
             @if($discount > 0)
                 <span class="badge-discount">-{{ $discount }}%</span>
