@@ -3,12 +3,16 @@
  *
  * Its own entry point rather than a slice of storefront.js: these pages carry
  * paid traffic on mobile connections and load no Vue, no cart and no shop
- * chrome. Everything here is decoration — the running total, a countdown, one
- * pixel event. The server recalculates every figure before an order is written,
+ * chrome. Everything here is decoration — the running total and one pixel
+ * event. The server recalculates every figure before an order is written,
  * so nothing below can change what a customer is charged.
  */
 
-const money = (value) => '৳' + Math.round(value).toLocaleString('en-US');
+// The page is read in Bengali, so its figures are written in Bengali numerals —
+// the same ones App\Support\Bangla prints on the server.
+const bengali = (value) => String(value).replace(/\d/g, (digit) => '০১২৩৪৫৬৭৮৯'[digit]);
+
+const money = (value) => '৳' + bengali(Math.round(value).toLocaleString('en-US'));
 
 function readConfig() {
     const el = document.getElementById('lp-config');
@@ -43,8 +47,8 @@ function bindTotals(form, config) {
         }
 
         if (config.mode === 'multi') {
-            return [...form.querySelectorAll('select[data-qty]')].reduce(
-                (sum, select) => sum + Number(select.dataset.price || 0) * Number(select.value || 0),
+            return [...form.querySelectorAll('[data-pick] [data-qty]')].reduce(
+                (sum, input) => sum + Number(input.dataset.price || 0) * Number(input.value || 0),
                 0
             );
         }
@@ -57,10 +61,12 @@ function bindTotals(form, config) {
 
     function deliveryFor(goods) {
         const rule = config.delivery || {};
+        const side = areaSelect?.value === 'dhaka_outside' ? 'outside' : 'inside';
+        const freeOver = Number(rule.freeOver?.[side] || 0);
 
-        if (rule.freeOver > 0 && goods >= rule.freeOver) return 0;
+        if (freeOver > 0 && goods >= freeOver) return 0;
 
-        return areaSelect?.value === 'dhaka_outside' ? Number(rule.outside || 0) : Number(rule.inside || 0);
+        return Number(rule[side] || 0);
     }
 
     /** Keep the headline price in step with the package that is selected. */
@@ -105,44 +111,86 @@ function bindTotals(form, config) {
     redraw();
 }
 
-/* --------------------------------------------------------------- countdown */
+/* ------------------------------------------------------------- pickers */
 
-function bindCountdown() {
-    const box = document.querySelector('[data-countdown]');
+/**
+ * "এটা নিতে চাই", then − n +, for each product on a several-items page.
+ *
+ * The number box under the buttons is the real field and posts as it is; this
+ * only moves its value. Below the product's minimum a step goes to 0 rather
+ * than to a quantity the server would round back up.
+ */
+function bindPickers(form) {
+    const pickers = form.querySelectorAll('[data-pick]');
 
-    if (!box) return;
+    if (!pickers.length) return;
 
-    const target = new Date(box.dataset.countdown).getTime();
-    const parts = {
-        d: box.querySelector('[data-cd="d"]'),
-        h: box.querySelector('[data-cd="h"]'),
-        m: box.querySelector('[data-cd="m"]'),
-        s: box.querySelector('[data-cd="s"]'),
-    };
+    document.documentElement.classList.add('lp-js');
 
-    // The offer's own numbers are in Bengali, so its clock should be too.
-    const bengali = (value) =>
-        String(value).padStart(2, '0').replace(/\d/g, (digit) => '০১২৩৪৫৬৭৮৯'[digit]);
+    const summary = form.querySelector('[data-pick-summary]');
 
-    function tick() {
-        const left = target - Date.now();
+    function summarise() {
+        if (!summary) return;
 
-        if (left <= 0) {
-            box.remove();
-            clearInterval(timer);
-            return;
-        }
+        let count = 0;
+        let total = 0;
 
-        const seconds = Math.floor(left / 1000);
+        form.querySelectorAll('[data-pick] [data-qty]').forEach((input) => {
+            const qty = Number(input.value || 0);
 
-        parts.d.textContent = bengali(Math.floor(seconds / 86400));
-        parts.h.textContent = bengali(Math.floor(seconds / 3600) % 24);
-        parts.m.textContent = bengali(Math.floor(seconds / 60) % 60);
-        parts.s.textContent = bengali(seconds % 60);
+            count += qty;
+            total += qty * Number(input.dataset.price || 0);
+        });
+
+        summary.classList.toggle('is-empty', count === 0);
+        summary.textContent = count
+            ? `${bengali(count)}টি পণ্য বেছে নিয়েছেন — ${money(total)}`
+            : 'এখনো কোনো পণ্য বেছে নেননি';
     }
 
-    const timer = setInterval(tick, 1000);
-    tick();
+    pickers.forEach((pick) => {
+        const box = pick.querySelector('[data-stepper]');
+
+        if (!box) return;
+
+        const input = box.querySelector('[data-qty]');
+        const inc = box.querySelector('[data-inc]');
+        const min = Math.max(1, Number(box.dataset.min) || 1);
+        const max = Math.max(min, Number(box.dataset.max) || min);
+
+        const clamp = (value) => (value <= 0 ? 0 : Math.min(max, Math.max(min, value)));
+
+        function show(value) {
+            input.value = value;
+            pick.classList.toggle('is-picked', value > 0);
+            inc.disabled = value >= max;
+        }
+
+        // Buttons announce the change so the totals redraw; typing into the box
+        // fires its own change, which reaches the form after this tidies it.
+        function set(value) {
+            show(clamp(value));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        box.querySelector('[data-add]').addEventListener('click', () => {
+            set(min);
+            inc.focus();
+        });
+        inc.addEventListener('click', () => set(Number(input.value || 0) + 1));
+        box.querySelector('[data-dec]').addEventListener('click', () => {
+            const next = Number(input.value || 0) - 1;
+
+            set(next < min ? 0 : next);
+
+            if (Number(input.value) === 0) box.querySelector('[data-add]').focus();
+        });
+        input.addEventListener('change', () => show(clamp(Math.floor(Number(input.value) || 0))));
+
+        show(clamp(Number(input.value || 0)));
+    });
+
+    form.addEventListener('change', summarise);
 }
 
 /* ------------------------------------------------------------------ pixel */
@@ -169,9 +217,9 @@ function bindCheckoutEvent(form) {
 function boot() {
     const form = document.getElementById('lp-order');
 
-    bindCountdown();
-
     if (!form) return;
+
+    bindPickers(form);
 
     const config = readConfig();
 

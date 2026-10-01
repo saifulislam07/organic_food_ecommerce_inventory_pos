@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LandingPage;
 use App\Models\Order;
 use App\Services\LandingPageOrder;
+use App\Support\Bangla;
 use App\Support\CampaignTracking;
 use App\Support\OrderNotifier;
 use Illuminate\Http\Request;
@@ -37,10 +38,11 @@ class LandingOrderController extends Controller
             ]);
         }
 
-        // Numbers get typed as 01712-345678 or +8801712345678; validate the
-        // digits rather than the punctuation.
+        // Numbers get typed as 01712-345678, +8801712345678 or, on a Bangla
+        // keyboard, ০১৭১২৩৪৫৬৭৮; validate the digits rather than the script
+        // or the punctuation.
         $request->merge([
-            'customer_phone' => preg_replace('/\D+/', '', (string) $request->input('customer_phone')),
+            'customer_phone' => preg_replace('/\D+/', '', Bangla::latinDigits($request->input('customer_phone'))),
         ]);
 
         $validated = $request->validate($this->rules($page), $this->messages());

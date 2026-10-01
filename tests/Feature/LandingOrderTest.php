@@ -269,6 +269,87 @@ class LandingOrderTest extends TestCase
         $this->assertEquals(0, (float) Order::firstOrFail()->delivery_charge);
     }
 
+    /* ------------------------------------------- free delivery, per page */
+
+    /** Item 900 a piece: one is under a ৳1,000 bar, two are over it. */
+    private function orderOnPage(LandingPage $page, int $quantity, string $area = 'dhaka_outside'): Order
+    {
+        $this->post(route('landing.order', $page->slug), $this->customer([
+            'item_id' => $page->items->first()->id,
+            'quantity' => $quantity,
+            'customer_area' => $area,
+        ]));
+
+        return Order::latest('id')->firstOrFail();
+    }
+
+    public function test_a_pages_own_bar_makes_delivery_free_across_the_country(): void
+    {
+        Setting::put('free_delivery_threshold', 5000);
+
+        $page = $this->page(['delivery_mode' => 'global', 'free_delivery_over' => 1000]);
+
+        $this->assertEquals(0, (float) $this->orderOnPage($page, 2)->delivery_charge);
+        $this->assertEquals(0, (float) $this->orderOnPage($page, 2, 'dhaka_inside')->delivery_charge);
+    }
+
+    public function test_an_order_under_the_pages_bar_still_pays_delivery(): void
+    {
+        Setting::put('shipping_fee_outside', 120);
+
+        $page = $this->page(['delivery_mode' => 'global', 'free_delivery_over' => 1000]);
+
+        $this->assertEquals(120, (float) $this->orderOnPage($page, 1)->delivery_charge);
+    }
+
+    /** The bar is "this much or more", so an order of exactly the bar is free. */
+    public function test_an_order_of_exactly_the_bar_is_free(): void
+    {
+        $page = $this->page(['delivery_mode' => 'global', 'free_delivery_over' => 900]);
+
+        $this->assertEquals(0, (float) $this->orderOnPage($page, 1)->delivery_charge);
+    }
+
+    public function test_a_page_with_its_own_charge_can_have_its_own_bar_too(): void
+    {
+        $page = $this->page(['delivery_mode' => 'custom', 'delivery_outside' => 150, 'free_delivery_over' => 1500]);
+
+        $this->assertEquals(150, (float) $this->orderOnPage($page, 1)->delivery_charge);
+        $this->assertEquals(0, (float) $this->orderOnPage($page, 2)->delivery_charge);
+    }
+
+    /** Each page answers for itself: one page's bar never reaches another. */
+    public function test_two_pages_keep_two_different_bars(): void
+    {
+        Setting::put('free_delivery_threshold', 0);
+
+        $low = $this->page(['slug' => 'low-bar', 'delivery_mode' => 'global', 'free_delivery_over' => 1000]);
+        $high = $this->page(['slug' => 'high-bar', 'delivery_mode' => 'global', 'free_delivery_over' => 5000]);
+
+        $this->assertEquals(0, (float) $this->orderOnPage($low, 2)->delivery_charge);
+        $this->assertGreaterThan(0, (float) $this->orderOnPage($high, 2)->delivery_charge);
+    }
+
+    public function test_zero_switches_free_delivery_off_for_the_page_alone(): void
+    {
+        Setting::put('free_delivery_threshold', 1000);
+        Setting::put('shipping_fee_outside', 120);
+
+        $page = $this->page(['delivery_mode' => 'global', 'free_delivery_over' => 0]);
+
+        $this->assertEquals(120, (float) $this->orderOnPage($page, 5)->delivery_charge);
+    }
+
+    public function test_the_page_tells_the_visitor_its_own_bar(): void
+    {
+        $page = $this->page(['delivery_mode' => 'global', 'free_delivery_over' => 1000]);
+
+        $this->get($page->url())
+            ->assertOk()
+            ->assertSee('৳১,০০০+ অর্ডারে সারা দেশে ফ্রি ডেলিভারি')
+            ->assertSee('"freeOver":{"inside":1000,"outside":1000}', false);
+    }
+
     /* ---------------------------------------------------------- validation */
 
     public function test_the_form_complains_in_bengali_about_a_bad_phone_number(): void
@@ -283,6 +364,19 @@ class LandingOrderTest extends TestCase
             ->assertSessionHasErrors('customer_phone');
 
         $this->assertSame(0, Order::count());
+    }
+
+    /** A Bangla keyboard types Bengali numerals; the order must still go through. */
+    public function test_a_phone_number_typed_in_bengali_digits_is_accepted(): void
+    {
+        $page = $this->page();
+
+        $this->post(route('landing.order', $page->slug), $this->customer([
+            'customer_phone' => '০১৭১২-৩৪৫৬৭৮',
+            'item_id' => $page->items->first()->id,
+        ]))->assertSessionHasNoErrors();
+
+        $this->assertSame('01712345678', Order::firstOrFail()->customer_phone);
     }
 
     public function test_a_phone_number_with_punctuation_is_accepted(): void

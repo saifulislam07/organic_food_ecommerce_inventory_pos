@@ -235,23 +235,10 @@ class AdminLandingPageController extends Controller
 
     private function formData(?LandingPage $page = null): array
     {
-        $categories = Category::sorted()->get([
-            'id', 'name', 'name_en', 'name_bn', 'theme', 'landing_defaults',
-        ]);
-
         return [
             'page' => $page,
             'variantOptions' => $this->variantOptions(),
             'itemRows' => $this->itemRows($page),
-            // Themes hang off the category, so the form needs each one's, to
-            // label the inherit option without a second request.
-            'categories' => $categories,
-            // Every category's starting draft, so the "fill from category"
-            // button can act on the page rather than reload it.
-            'categoryDefaults' => $categories
-                ->filter->hasLandingDefaults()
-                ->mapWithKeys(fn (Category $category) => [$category->id => $category->landingDefaults()])
-                ->all(),
         ];
     }
 
@@ -332,9 +319,6 @@ class AdminLandingPageController extends Controller
                 Rule::unique('landing_pages', 'slug')->ignore($page?->id),
             ],
             'template' => ['nullable', Rule::in(array_keys(LandingPage::TEMPLATES))],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            // Blank means "whatever the category says" and is stored as null.
-            'theme' => ['nullable', Rule::in(array_keys(LandingPage::THEMES))],
 
             'headline' => ['required', 'string', 'max:255'],
             'subheadline' => ['nullable', 'string', 'max:255'],
@@ -379,6 +363,8 @@ class AdminLandingPageController extends Controller
             'delivery_mode' => ['required', Rule::in(['global', 'custom', 'free'])],
             'delivery_inside' => ['nullable', 'numeric', 'min:0', 'max:99999'],
             'delivery_outside' => ['nullable', 'numeric', 'min:0', 'max:99999'],
+            // Blank follows the shop's bar; 0 means never free on this page.
+            'free_delivery_over' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
 
             'payment_mode' => ['required', Rule::in(['cod', 'advance'])],
             'advance_amount' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
@@ -387,9 +373,6 @@ class AdminLandingPageController extends Controller
             'form_fields' => ['nullable', 'array'],
             'form_fields.*' => [Rule::in(LandingPage::OPTIONAL_FIELDS)],
             'cta_text' => ['nullable', 'string', 'max:100'],
-
-            'countdown_ends_at' => ['nullable', 'date'],
-            'stock_note' => ['nullable', 'string', 'max:255'],
 
             'pixel_id' => ['nullable', 'string', 'max:32', 'regex:/^\d{10,20}$/'],
             'thankyou_headline' => ['nullable', 'string', 'max:255'],
@@ -430,11 +413,6 @@ class AdminLandingPageController extends Controller
 
         $data['body'] = RichText::clean($validated['body'] ?? null);
         $data['template'] = $validated['template'] ?? 'classic';
-
-        // An empty select posts '', which would store as a theme named nothing
-        // and silently stop the category from being asked.
-        $data['category_id'] = $validated['category_id'] ?? null;
-        $data['theme'] = filled($validated['theme'] ?? null) ? $validated['theme'] : null;
 
         // Repeaters post blank rows for anything the admin left alone.
         $data['features'] = array_values(array_filter(

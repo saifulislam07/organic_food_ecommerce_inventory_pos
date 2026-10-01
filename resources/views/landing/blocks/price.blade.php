@@ -26,13 +26,13 @@
         <span class="lp-price-label">{{ $label }}</span>
     @endif
 
-    <span class="lp-price-now" data-price-now>৳{{ number_format($now) }}</span>
+    <span class="lp-price-now" data-price-now>{{ \App\Support\Bangla::money($now) }}</span>
 
     <span class="lp-price-was" data-price-was @if(! $was) hidden @endif>
-        ৳{{ number_format($was ?? 0) }}
+        {{ \App\Support\Bangla::money($was ?? 0) }}
     </span>
 
     <span class="lp-save" data-price-save @if(! $was) hidden @endif>
-        ৳{{ number_format(($was ?? 0) - $now) }} সাশ্রয়
+        {{ \App\Support\Bangla::money(($was ?? 0) - $now) }} সাশ্রয়
     </span>
 </div>

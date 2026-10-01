@@ -79,30 +79,6 @@
                         <div class="form-text">JPG, PNG or WebP, up to 2 MB.</div>
                     </div>
 
-                    {{-- The look every landing page in this category inherits.
-                         Set here rather than per campaign so a new promotion is
-                         one dropdown, not a colour decision. --}}
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Landing Page Theme</label>
-                        <select name="theme" class="form-select @error('theme') is-invalid @enderror" data-cat-theme>
-                            <option value="">Brand default</option>
-                            @foreach(\App\Models\LandingPage::THEMES as $key => $label)
-                                @continue($key === 'default')
-                                <option value="{{ $key }}" @selected(old('theme', $category->theme ?? '') === $key)>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('theme') <div class="invalid-feedback">{{ $message }}</div> @enderror
-
-                        <div class="lp-swatch d-flex align-items-center gap-2 border rounded p-2 mt-2" data-cat-swatch>
-                            <span class="lp-swatch-dot" style="background: var(--primary);"></span>
-                            <span class="lp-swatch-dot" style="background: var(--accent);"></span>
-                            <span class="lp-swatch-dot" style="background: var(--cream-dark);"></span>
-                            <span class="small text-muted ms-1">Colours a campaign page in this category will use.</span>
-                        </div>
-                    </div>
-
                     <div class="mb-3">
                         <label class="form-label fw-bold">Sort Order</label>
                         <input type="number" name="sort_order" min="0"
@@ -130,37 +106,3 @@
     </div>
 </div>
 @endsection
-
-@push('styles')
-    <link href="{{ asset('css/landing-themes.css') }}" rel="stylesheet">
-    <style>
-        .lp-swatch-dot {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            border: 1px solid rgba(0, 0, 0, .12);
-            flex: none;
-        }
-    </style>
-@endpush
-
-@push('scripts')
-<script>
-(function () {
-    const select = document.querySelector('[data-cat-theme]');
-    const swatch = document.querySelector('[data-cat-swatch]');
-
-    if (! select || ! swatch) {
-        return;
-    }
-
-    function paint() {
-        swatch.className = swatch.className.replace(/\blp-theme-\S+/g, '').trim()
-            + ' lp-theme-' + (select.value || 'default');
-    }
-
-    select.addEventListener('change', paint);
-    paint();
-})();
-</script>
-@endpush

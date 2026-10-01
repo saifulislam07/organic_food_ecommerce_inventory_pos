@@ -170,7 +170,7 @@ class LandingCategoryDefaultsTest extends TestCase
             ->put('/admin/categories/'.$category->id, [
                 'name_en' => 'Gadgets',
                 'name_bn' => 'গেজেট',
-                'theme' => 'gadget',
+                'theme' => 'kids',
                 'sections' => ['features', 'specs', 'delivery'],
                 'features' => ['১ বছর ওয়ারেন্টি', '', '৭ দিনে রিপ্লেসমেন্ট'],
                 'faqs' => [['q' => 'ওয়ারেন্টি কীভাবে পাব?', 'a' => 'বক্সের কার্ড দিয়ে।']],
@@ -243,92 +243,6 @@ class LandingCategoryDefaultsTest extends TestCase
             ->assertSessionHasErrors('sections.1');
     }
 
-    /* ---------------------------------------------------------- the handoff */
-
-    public function test_the_campaign_form_carries_every_categorys_draft(): void
-    {
-        $this->category([
-            'features' => ['১ বছর ওয়ারেন্টি'],
-            'sections' => ['features', 'specs'],
-        ]);
-
-        $this->actingAs($this->admin())
-            ->get('/admin/landing-pages/create')
-            ->assertOk()
-            ->assertSee('data-lp-apply-defaults', false)
-            ->assertSee('১ বছর ওয়ারেন্টি', false);
-    }
-
-    /**
-     * The three payloads the prefill button depends on must agree.
-     *
-     * The button reads the id list, the island reads the drafts and the CTA
-     * comes from a third map — all three rendered by hand into data attributes,
-     * which is exactly where a typo goes unnoticed until an admin clicks and
-     * nothing happens.
-     */
-    public function test_the_prefill_payloads_agree_with_each_other(): void
-    {
-        $category = $this->category([
-            'sections' => ['features', 'specs'],
-            'features' => ['১ বছর ওয়ারেন্টি'],
-            'specs' => [['label' => 'ব্র্যান্ড', 'value' => '']],
-            'cta_text' => 'এখনই অর্ডার করুন',
-        ]);
-
-        $html = $this->actingAs($this->admin())
-            ->get('/admin/landing-pages/create')
-            ->assertOk()
-            ->getContent();
-
-        $attribute = function (string $pattern, string $what) use ($html) {
-            preg_match($pattern, $html, $matches);
-
-            $this->assertNotEmpty($matches, "No {$what} on the form.");
-
-            return json_decode(html_entity_decode($matches[1], ENT_QUOTES), true, 512, JSON_THROW_ON_ERROR);
-        };
-
-        // The button's list of categories worth offering.
-        $this->assertContains(
-            $category->id,
-            $attribute('/data-has-defaults="([^"]*)"/', 'data-has-defaults attribute')
-        );
-
-        // The CTA, which is a plain input outside the island.
-        $this->assertSame(
-            'এখনই অর্ডার করুন',
-            $attribute('/data-ctas="([^"]*)"/', 'data-ctas attribute')[$category->id]
-        );
-
-        // And the draft the island itself will apply. Scoped to the content
-        // island: the items repeater above it carries a data-props of its own.
-        $draft = $attribute(
-            '/data-vue="LandingContentBlocks"\s+data-props="([^"]*)"/',
-            'content island'
-        )['defaults'][$category->id];
-
-        $this->assertSame(['features', 'specs'], $draft['sections']);
-        $this->assertSame(['১ বছর ওয়ারেন্টি'], $draft['features']);
-        $this->assertSame('ব্র্যান্ড', $draft['specs'][0]['label']);
-    }
-
-    /** A category with nothing filled in must not offer to fill anything in. */
-    public function test_a_category_with_no_draft_is_not_offered(): void
-    {
-        $bare = $this->category();
-
-        $html = $this->actingAs($this->admin())
-            ->get('/admin/landing-pages/create')
-            ->assertOk()
-            ->getContent();
-
-        preg_match('/data-has-defaults="([^"]*)"/', $html, $matches);
-
-        $this->assertNotEmpty($matches, 'The prefill button has no list to work from.');
-        $this->assertStringNotContainsString((string) $bare->id, html_entity_decode($matches[1]));
-    }
-
     /**
      * The point of copying rather than referencing: a campaign that is already
      * running keeps the copy it was published with.
@@ -363,11 +277,6 @@ class LandingCategoryDefaultsTest extends TestCase
     public function test_every_block_the_admin_offers_has_a_view_behind_it(): void
     {
         foreach (array_keys(LandingPage::BLOCKS) as $key) {
-            // The video block renders inline in the hero, not as its own file.
-            if ($key === 'video') {
-                continue;
-            }
-
             $this->assertFileExists(
                 resource_path("views/landing/blocks/{$key}.blade.php"),
                 "Block '{$key}' is offered in the admin but has no view behind it."

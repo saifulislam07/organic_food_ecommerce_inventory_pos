@@ -11,60 +11,94 @@
 
 @if($page->isBundle())
     <div class="lp-card">
-        <div class="lp-h2" style="font-size:1.05rem;">প্যাকেজে যা যা থাকছে</div>
+        <div class="lp-h2"><span aria-hidden="true">🎁</span> প্যাকেজে যা যা থাকছে</div>
         @foreach($items as $item)
-            <div class="lp-pack" style="cursor:default;">
+            <div class="lp-pack lp-pack-static">
                 @if($item->imageUrl())
                     <img src="{{ $item->imageUrl() }}" alt="{{ $item->label() }}" loading="lazy">
                 @endif
                 <div class="lp-pack-body">
                     <div class="lp-pack-name">{{ $item->label() }}</div>
-                    <div style="font-size:.85rem;color:#7a7086;">{{ $item->min_qty }} টি</div>
+                    <div class="lp-pack-meta">{{ \App\Support\Bangla::digits($item->min_qty) }}টি</div>
                 </div>
             </div>
         @endforeach
     </div>
 
 @elseif($page->isMulti())
-    <div class="lp-h2">যা যা নিতে চান বেছে নিন</div>
+    {{--
+        A shopping-app picker rather than a dropdown of numbers: "এটা নিতে চাই"
+        on each product, turning into − 1 + once it is in. Underneath is a
+        plain number box with the same name, so the form still posts with
+        JavaScript off — landing.js only adds the buttons.
+    --}}
+    <div class="lp-h2"><span aria-hidden="true">🧸</span> যা যা নিতে চান বেছে নিন</div>
+    <p class="lp-pick-hint">যেটা নিতে চান তার পাশে <b>এটা নিতে চাই</b> চাপুন — একসাথে একাধিক পণ্য নিতে পারবেন।</p>
+
+    @php $pickedCount = 0; $pickedTotal = 0.0; @endphp
 
     @foreach($items as $item)
-        @php $range = $item->quantityRange(); @endphp
-        <label class="lp-pack {{ $range ? '' : 'is-out' }}" style="cursor:default;">
+        @php
+            $range = $item->quantityRange();
+            $min = $range ? $range[0] : 0;
+            $max = $range ? end($range) : 0;
+            $qty = $range ? (int) old("items.{$item->id}.qty", $item->is_default ? $min : 0) : 0;
+            $qty = $qty > 0 ? max($min, min($qty, $max)) : 0;
+            $pickedCount += $qty;
+            $pickedTotal += $qty * $item->price();
+        @endphp
+        <div class="lp-pack lp-pick {{ $range ? '' : 'is-out' }} {{ $qty > 0 ? 'is-picked' : '' }}" data-pick>
             @if($item->imageUrl())
                 <img src="{{ $item->imageUrl() }}" alt="{{ $item->label() }}" loading="lazy">
             @endif
             <div class="lp-pack-body">
                 <div class="lp-pack-name">{{ $item->label() }}</div>
-                <div>
-                    <span class="lp-pack-price">৳{{ number_format($item->price()) }}</span>
-                    @if($item->comparePrice())
-                        <span class="lp-pack-was">৳{{ number_format($item->comparePrice()) }}</span>
+
+                <div class="lp-pick-row">
+                    <div>
+                        <span class="lp-pack-price">{{ \App\Support\Bangla::money($item->price()) }}</span>
+                        @if($item->comparePrice())
+                            <span class="lp-pack-was">{{ \App\Support\Bangla::money($item->comparePrice()) }}</span>
+                        @endif
+                    </div>
+
+                    @if($range)
+                        <div class="lp-stepper" data-stepper data-min="{{ $min }}" data-max="{{ $max }}">
+                            <button type="button" class="lp-add" data-add>এটা নিতে চাই</button>
+                            <div class="lp-step">
+                                <button type="button" data-dec aria-label="একটি কমান">−</button>
+                                <input type="number" name="items[{{ $item->id }}][qty]" value="{{ $qty }}"
+                                       min="0" max="{{ $max }}" inputmode="numeric"
+                                       aria-label="{{ $item->label() }} — পরিমাণ"
+                                       data-price="{{ $item->price() }}" data-qty>
+                                <button type="button" data-inc aria-label="একটি বাড়ান">+</button>
+                            </div>
+                        </div>
+                    @else
+                        <div class="lp-pack-out">স্টক শেষ</div>
                     @endif
                 </div>
-                @unless($range)
-                    <div style="font-size:.85rem;color:#a52117;">স্টক শেষ</div>
-                @endunless
-            </div>
 
-            @if($range)
-                <select name="items[{{ $item->id }}][qty]" data-price="{{ $item->price() }}" data-qty>
-                    <option value="0">০</option>
-                    @foreach($range as $number)
-                        <option value="{{ $number }}" @selected($item->is_default && $number === $item->min_qty)>
-                            {{ $number }}
-                        </option>
-                    @endforeach
-                </select>
-            @endif
-        </label>
+                @if($min > 1)
+                    <div class="lp-pack-meta">কমপক্ষে {{ \App\Support\Bangla::digits($min) }}টি নিতে হবে</div>
+                @endif
+            </div>
+        </div>
     @endforeach
+
+    <div class="lp-pick-summary {{ $pickedCount ? '' : 'is-empty' }}" data-pick-summary aria-live="polite">
+        @if($pickedCount)
+            {{ \App\Support\Bangla::digits($pickedCount) }}টি পণ্য বেছে নিয়েছেন — {{ \App\Support\Bangla::money($pickedTotal) }}
+        @else
+            এখনো কোনো পণ্য বেছে নেননি
+        @endif
+    </div>
 
 @else
     @php $chosen = $defaultItem; @endphp
 
     @if($items->count() > 1)
-        <div class="lp-h2">প্যাকেজ বেছে নিন</div>
+        <div class="lp-h2"><span aria-hidden="true">🧸</span> প্যাকেজ বেছে নিন</div>
     @endif
 
     @foreach($items as $item)
@@ -90,30 +124,24 @@
             <div class="lp-pack-body">
                 <div class="lp-pack-name">{{ $item->label() }}</div>
                 <div>
-                    <span class="lp-pack-price">৳{{ number_format($item->price()) }}</span>
+                    <span class="lp-pack-price">{{ \App\Support\Bangla::money($item->price()) }}</span>
                     @if($item->comparePrice())
-                        <span class="lp-pack-was">৳{{ number_format($item->comparePrice()) }}</span>
+                        <span class="lp-pack-was">{{ \App\Support\Bangla::money($item->comparePrice()) }}</span>
                     @endif
                 </div>
                 @unless($available)
-                    <div style="font-size:.85rem;color:#a52117;">স্টক শেষ</div>
+                    <div class="lp-pack-out">স্টক শেষ</div>
                 @endunless
             </div>
         </label>
     @endforeach
 
     <div class="lp-qty">
-        <label for="lp-qty" style="font-weight:600;">পরিমাণ</label>
+        <label for="lp-qty">পরিমাণ</label>
         <select id="lp-qty" name="quantity" data-qty>
             @for($number = 1; $number <= $maxQty; $number++)
-                <option value="{{ $number }}" @selected($number === (int) ($chosen?->min_qty ?? 1))>{{ $number }}</option>
+                <option value="{{ $number }}" @selected($number === (int) ($chosen?->min_qty ?? 1))>{{ \App\Support\Bangla::digits($number) }}</option>
             @endfor
         </select>
     </div>
-@endif
-
-@if($page->stock_note)
-    <p style="margin:12px 0 0;color:var(--accent-text,#7a0bb8);font-weight:600;">
-        ⚡ {{ $page->stock_note }}
-    </p>
 @endif

@@ -63,25 +63,22 @@ class LandingPage extends Model
      * a new theme is a block of CSS plus a line here. Which blocks render and
      * in what order stays TEMPLATES' business; conflating the two is how a
      * colour change ends up needing a new Blade file.
+     *
+     * The shop sells kids' items, so there is one skin. Rows still carrying a
+     * retired key (mango, gadget, …) resolve to it through themeKey().
      */
     public const THEMES = [
-        'default' => 'ব্র্যান্ড (গোলাপি)',
-        'mango' => 'আম',
-        'dates' => 'খেজুর ও গুড়',
-        'honey' => 'মধু',
-        'ghee' => 'ঘি ও তেল',
-        'fruits' => 'মৌসুমী ফল',
-        'spice' => 'মশলা',
         'kids' => 'কিডস আইটেম',
-        'gadget' => 'গেজেট আইটেম',
     ];
+
+    public const DEFAULT_THEME = 'kids';
 
     protected $fillable = [
         'slug', 'internal_name', 'category_id', 'template', 'theme',
         'headline', 'subheadline', 'badge_text', 'hero_image', 'video_url', 'body',
         'features', 'faqs', 'reviews', 'specs', 'sections',
         'selection_mode', 'bundle_price',
-        'delivery_mode', 'delivery_inside', 'delivery_outside',
+        'delivery_mode', 'delivery_inside', 'delivery_outside', 'free_delivery_over',
         'payment_mode', 'advance_amount', 'payment_note',
         'form_fields', 'cta_text',
         'countdown_ends_at', 'stock_note',
@@ -100,6 +97,7 @@ class LandingPage extends Model
         'bundle_price' => 'decimal:2',
         'delivery_inside' => 'decimal:2',
         'delivery_outside' => 'decimal:2',
+        'free_delivery_over' => 'decimal:2',
         'advance_amount' => 'decimal:2',
         'noindex' => 'boolean',
         'is_active' => 'boolean',
@@ -144,22 +142,14 @@ class LandingPage extends Model
      * Which skin this page wears.
      *
      * The page's own column wins, the category answers when it is null, and
-     * anything unrecognised — a theme deleted from the CSS, a category nobody
-     * ever themed — lands on the brand rather than on a page with no colours.
+     * anything unrecognised — a retired theme, a category nobody ever themed —
+     * lands on the default rather than on a page with no colours.
      */
     public function themeKey(): string
     {
         $key = filled($this->theme) ? $this->theme : $this->category?->theme;
 
-        return array_key_exists((string) $key, self::THEMES) ? $key : 'default';
-    }
-
-    /** What the theme dropdown should call the inherited option. */
-    public function inheritedThemeLabel(): string
-    {
-        $key = (string) $this->category?->theme;
-
-        return self::THEMES[$key] ?? self::THEMES['default'];
+        return array_key_exists((string) $key, self::THEMES) ? $key : self::DEFAULT_THEME;
     }
 
     /* --------------------------------------------------------------- state */
@@ -326,6 +316,12 @@ class LandingPage extends Model
         return $url;
     }
 
+    /** A Reel or a Short: filmed upright, so it wants an upright frame. */
+    public function videoIsUpright(): bool
+    {
+        return (bool) preg_match('#youtube\.com/shorts/|facebook\.com/reel/|/reels?/#i', (string) $this->video_url);
+    }
+
     /** Every picture behind the items on this page, for the gallery block. */
     public function galleryImages(): array
     {
@@ -376,6 +372,31 @@ class LandingPage extends Model
     }
 
     /**
+     * The order value from which delivery on this page is free; 0 means never.
+     *
+     * The page's own figure wins whatever the delivery mode. Left blank, the
+     * page follows the shop's bar wherever it is charging the shop's fee — on
+     * "global", and on a custom page whose box for this area is empty — and has
+     * no bar at all where it charges its own.
+     */
+    public function freeDeliveryThreshold(?string $area = 'dhaka_inside'): float
+    {
+        if ($this->delivery_mode === 'free') {
+            return 0.0;
+        }
+
+        if ($this->free_delivery_over !== null) {
+            return (float) $this->free_delivery_over;
+        }
+
+        if ($this->delivery_mode === 'custom' && $this->ownChargeFor($area) !== null) {
+            return 0.0;
+        }
+
+        return (float) Setting::get('free_delivery_threshold', 2000);
+    }
+
+    /**
      * Delivery for this page: free, this page's own numbers, or the shop's.
      *
      * An empty custom box falls through to the shop's charge rather than
@@ -387,25 +408,25 @@ class LandingPage extends Model
             return 0.0;
         }
 
-        $outside = $area === 'dhaka_outside';
-
-        if ($this->delivery_mode === 'custom') {
-            $charge = $outside ? $this->delivery_outside : $this->delivery_inside;
-
-            if ($charge !== null) {
-                return (float) $charge;
-            }
-        }
-
-        $threshold = (float) Setting::get('free_delivery_threshold', 2000);
+        $threshold = $this->freeDeliveryThreshold($area);
 
         if ($threshold > 0 && $subtotal >= $threshold) {
             return 0.0;
         }
 
-        return $outside
+        if ($this->delivery_mode === 'custom' && ($charge = $this->ownChargeFor($area)) !== null) {
+            return (float) $charge;
+        }
+
+        return $area === 'dhaka_outside'
             ? (float) Setting::get('shipping_fee_outside', 120)
             : (float) Setting::get('shipping_fee_inside', 60);
+    }
+
+    /** What this page's own box says for the area, or null when it is empty. */
+    private function ownChargeFor(?string $area): mixed
+    {
+        return $area === 'dhaka_outside' ? $this->delivery_outside : $this->delivery_inside;
     }
 
     /** The pixel this page reports to: its own, or the shop's. */

@@ -111,11 +111,10 @@ class LandingImageTest extends TestCase
         $this->assertSame($original, $page->fresh()->hero_image);
     }
 
-    public function test_a_video_takes_the_hero_slot_and_the_picture_stands_in_when_the_block_is_off(): void
+    /** An uploaded hero never disappears behind a video link: both are shown. */
+    public function test_the_picture_leads_and_the_video_gets_its_own_block(): void
     {
-        $admin = $this->admin();
-
-        $this->actingAs($admin)->post(route('admin.landing-pages.store'), $this->payload([
+        $this->actingAs($this->admin())->post(route('admin.landing-pages.store'), $this->payload([
             'hero_image' => UploadedFile::fake()->image('hero.jpg', 1200, 600),
             'video_url' => 'https://www.youtube.com/watch?v=abc123XYZ',
             'sections' => ['video'],
@@ -123,20 +122,49 @@ class LandingImageTest extends TestCase
 
         $page = LandingPage::firstOrFail();
 
-        // The picture is not in the hero slot, but it is still the share image
-        // in og:image — which is why this looks for the <img> rather than the URL.
         $this->get($page->url())
             ->assertOk()
-            ->assertSee('youtube.com/embed/abc123XYZ', false)
-            ->assertDontSee('fetchpriority="high"', false);
+            ->assertSee('fetchpriority="high"', false)
+            ->assertSee('ভিডিওতে দেখুন')
+            ->assertSeeInOrder([$page->heroImageUrl(), 'youtube.com/embed/abc123XYZ'], false)
+            // An order button above the video, straight to the items.
+            ->assertSeeInOrder(['lp-btn lp-btn-jump" href="#lp-buy"', 'ভিডিওতে দেখুন', 'id="lp-buy"'], false);
 
-        // Switch the video block off and the picture takes the slot back.
+        // Switch the video block off and only the picture is left.
         $page->update(['sections' => []]);
 
         $this->get($page->url())
             ->assertOk()
-            ->assertSee($page->heroImageUrl(), false)
-            ->assertSee('fetchpriority="high"', false);
+            ->assertSee('fetchpriority="high"', false)
+            ->assertDontSee('youtube.com/embed', false);
+    }
+
+    /** With no picture to show, the video takes the top of the page. */
+    public function test_without_a_picture_the_video_takes_the_hero_slot(): void
+    {
+        $this->actingAs($this->admin())->post(route('admin.landing-pages.store'), $this->payload([
+            'video_url' => 'https://www.youtube.com/watch?v=abc123XYZ',
+            'sections' => ['video'],
+        ]));
+
+        $this->get(LandingPage::firstOrFail()->url())
+            ->assertOk()
+            ->assertSee('youtube.com/embed/abc123XYZ', false)
+            ->assertDontSee('fetchpriority="high"', false)
+            // Played once, at the top — not again as a block.
+            ->assertDontSee('ভিডিওতে দেখুন');
+    }
+
+    public function test_a_reel_is_framed_upright(): void
+    {
+        $this->actingAs($this->admin())->post(route('admin.landing-pages.store'), $this->payload([
+            'video_url' => 'https://www.facebook.com/reel/1087944020605175',
+            'sections' => ['video'],
+        ]));
+
+        $this->get(LandingPage::firstOrFail()->url())
+            ->assertOk()
+            ->assertSee('lp-hero-media is-upright', false);
     }
 
     public function test_an_image_bigger_than_the_limit_is_reported_rather_than_dropped(): void

@@ -81,7 +81,7 @@ class LandingPageShowTest extends TestCase
         $this->get($page->url())
             ->assertOk()
             ->assertSee('খাঁটি হিমসাগর আম')
-            ->assertSee('৳900')
+            ->assertSee('৳৯০০')
             ->assertSee('অর্ডার করতে নিচের তথ্য দিন');
     }
 
@@ -210,7 +210,7 @@ class LandingPageShowTest extends TestCase
 
     /**
      * One column, one form, one reading order at every width: headline and
-     * price, then what to buy, then the reasons, then the customer's details.
+     * price, then the reasons, then what to buy and the customer's details.
      */
     public function test_the_page_reads_top_to_bottom_in_one_order(): void
     {
@@ -231,9 +231,9 @@ class LandingPageShowTest extends TestCase
         }
 
         $this->assertTrue(
-            $positions['headline'] < $positions['packages']
-                && $positions['packages'] < $positions['features']
-                && $positions['features'] < $positions['submit']
+            $positions['headline'] < $positions['features']
+                && $positions['features'] < $positions['packages']
+                && $positions['packages'] < $positions['submit']
                 && $positions['submit'] < $positions['fields'],
             'The page did not render in its intended order.'
         );
