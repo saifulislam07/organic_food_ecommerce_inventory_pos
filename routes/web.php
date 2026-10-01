@@ -164,6 +164,10 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
 
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+    Route::get('/customers/{customer}/edit', [AdminCustomerController::class, 'edit'])->name('customers.edit');
+    Route::put('/customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
+    // Blocking toggles; a POST outside the named write actions needs customers.edit.
+    Route::post('/customers/{customer}/block', [AdminCustomerController::class, 'toggleBlock'])->name('customers.toggleBlock');
 
     // Catalogue search for the order editor. Before /orders/{order} so
     // "products" is not read as an order id.

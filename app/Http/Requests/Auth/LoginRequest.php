@@ -57,6 +57,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // The password was right, so saying why is not a leak — and it saves
+        // the customer from resetting a password that was never the problem.
+        if (Auth::user()->isBlocked()) {
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages([
+                'login_id' => __('Your account has been blocked. Please contact us.'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

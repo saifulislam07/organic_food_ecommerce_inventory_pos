@@ -33,6 +33,9 @@
                             <a href="{{ route('admin.customers.show', $customer) }}" class="fw-bold text-dark text-decoration-none">
                                 {{ $customer->name }}
                             </a>
+                            @if($customer->isBlocked())
+                                <span class="badge bg-danger-subtle text-danger ms-1">Blocked</span>
+                            @endif
                         </td>
                         <td>
                             @if($customer->mobile)
@@ -50,9 +53,17 @@
                         <td class="text-end fw-bold">৳{{ number_format((float) $customer->orders_total) }}</td>
                         <td class="text-muted small">{{ $customer->created_at->format('d M Y') }}</td>
                         <td class="text-end pe-4">
-                            <a href="{{ route('admin.customers.show', $customer) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i> View
-                            </a>
+                            <div class="d-inline-flex gap-1">
+                                <a href="{{ route('admin.customers.show', $customer) }}" class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                @can('customers.edit')
+                                <a href="{{ route('admin.customers.edit', $customer) }}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @include('admin.customers._block', ['customer' => $customer, 'compact' => true])
+                                @endcan
+                            </div>
                         </td>
                     </tr>
                     @empty

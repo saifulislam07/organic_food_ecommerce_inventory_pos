@@ -12,7 +12,22 @@
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
-                <h5 class="fw-bold mb-3 text-dark">Customer Details</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-dark">Customer Details</h5>
+                    @can('customers.edit')
+                    <a href="{{ route('admin.customers.edit', $customer) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    @endcan
+                </div>
+
+                @if($customer->isBlocked())
+                    <div class="alert alert-danger py-2 small">
+                        <i class="bi bi-slash-circle"></i>
+                        Blocked on {{ $customer->blocked_at->format('d M Y, h:i A') }} — cannot sign in.
+                    </div>
+                @endif
+
                 <div class="d-flex flex-column gap-3">
                     <div>
                         <span class="text-muted small d-block">Name</span>
@@ -39,6 +54,12 @@
                         <span>{{ $customer->created_at->format('d M Y, h:i A') }}</span>
                     </div>
                 </div>
+
+                @can('customers.edit')
+                <div class="mt-4 pt-3 border-top">
+                    @include('admin.customers._block', ['customer' => $customer, 'compact' => false])
+                </div>
+                @endcan
             </div>
         </div>
 
