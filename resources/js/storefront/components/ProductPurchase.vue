@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { addToCart, notify } from '../cart';
+import { route } from '../config';
 import { money } from '../../shared/format';
 import PreorderDialog from './PreorderDialog.vue';
 
@@ -86,14 +87,25 @@ function setQty(value) {
     quantity.value = Number.isFinite(next) ? Math.min(Math.max(next, 1), props.maxQuantity) : 1;
 }
 
+/** Set by Buy Now, so the line lands in the cart and the shopper goes on to checkout. */
+const goToCheckout = ref(false);
+
 async function send() {
     busy.value = true;
-    await addToCart(props.productId, selectedId.value, quantity.value);
+    const added = await addToCart(props.productId, selectedId.value, quantity.value);
+
+    if (added && goToCheckout.value && route('checkout')) {
+        window.location.href = route('checkout');
+        return;
+    }
+
     busy.value = false;
     askingTerms.value = false;
 }
 
-function submit() {
+function submit(checkout = false) {
+    goToCheckout.value = checkout;
+
     if (!selectedId.value) {
         notify(label('selectOption', 'Please select an option'), 'warning');
         return;
@@ -164,11 +176,22 @@ function submit() {
                 class="btn-primary-custom"
                 :class="{ 'is-preorder': isPreorder }"
                 :disabled="!canBuy || busy"
-                @click="submit"
+                @click="submit(false)"
             >
-                <span v-if="busy" class="spinner-border spinner-border-sm me-1"></span>
+                <span v-if="busy && !goToCheckout" class="spinner-border spinner-border-sm me-1"></span>
                 <i v-else class="bi" :class="buyIcon"></i>
                 {{ buyLabel }}
+            </button>
+            <button
+                v-if="inStock"
+                type="button"
+                class="btn-buy-now"
+                :disabled="busy"
+                @click="submit(true)"
+            >
+                <span v-if="busy && goToCheckout" class="spinner-border spinner-border-sm me-1"></span>
+                <i v-else class="bi bi-lightning-charge-fill"></i>
+                {{ label('buyNow', 'Buy Now') }}
             </button>
             <a :href="whatsappHref" class="btn-whatsapp" target="_blank" rel="noopener">
                 <i class="bi bi-whatsapp"></i> {{ label('whatsapp', 'Order via WhatsApp') }}

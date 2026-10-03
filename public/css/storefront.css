@@ -849,6 +849,38 @@ h3 { font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 600; color: var(--dark)
 /* Keeps app.css's filled green button, pilled and sized down for the tighter card. */
 .btn-add-cart { border-radius: 999px; font-size: 0.8rem; padding: 9px 12px; }
 
+/* Add to Cart and Buy Now stacked: the card is too narrow to share a row. */
+.product-card-actions { display: grid; gap: 6px; }
+
+/* Buy Now — the accent tone, so it reads apart from the green Add to Cart. */
+.btn-buy-now {
+    background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.btn-buy-now:hover {
+    background: linear-gradient(135deg, var(--accent-text), var(--accent-dark));
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.3);
+}
+.btn-buy-now:disabled { opacity: 0.7; cursor: wait; transform: none; box-shadow: none; }
+.btn-add-cart.btn-buy-now { border-radius: 999px; font-size: 0.8rem; padding: 9px 12px; width: 100%; }
+
+@media (max-width: 767.98px) {
+    .product-detail-info .btn-buy-now { flex: 1 1 100%; }
+}
+
 @media (max-width: 575.98px) {
     .product-card-body { padding: 10px 10px 4px; }
     .product-card-footer { padding: 0 10px 10px; }

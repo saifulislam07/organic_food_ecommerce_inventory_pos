@@ -22,14 +22,14 @@ class OrderNotifier
     public function placed(Order $order): void
     {
         $this->quietly(function () use ($order) {
-            $this->customerFor($order)->notify(new OrderPlaced($order));
+            $this->customerFor($order)->notifyNow(new OrderPlaced($order));
         }, 'order placed (customer)');
 
         $this->quietly(function () use ($order) {
             $admins = User::where('role', 'admin')->get();
 
             if ($admins->isNotEmpty()) {
-                Notification::send($admins, new NewOrderReceived($order));
+                Notification::sendNow($admins, new NewOrderReceived($order));
             }
         }, 'order placed (admin)');
 
@@ -42,7 +42,7 @@ class OrderNotifier
 
         if (filled($extra)) {
             $this->quietly(function () use ($order, $extra) {
-                Notification::route('mail', $extra)->notify(new OrderPlaced($order));
+                Notification::route('mail', $extra)->notifyNow(new OrderPlaced($order));
             }, 'order placed (admin notify email)');
         }
     }
@@ -54,7 +54,7 @@ class OrderNotifier
         }
 
         $this->quietly(function () use ($order, $previousStatus) {
-            $this->customerFor($order)->notify(new OrderStatusChanged($order, $previousStatus));
+            $this->customerFor($order)->notifyNow(new OrderStatusChanged($order, $previousStatus));
         }, 'order status changed');
     }
 
@@ -68,12 +68,22 @@ class OrderNotifier
             ->route('sms', $order->customer_phone);
     }
 
+    /**
+     * Sent after the response rather than through the queue: shared hosting
+     * rarely runs a queue worker, and without one every order email sat in the
+     * jobs table and never left. Deferring keeps the SMTP round trip off the
+     * shopper's checkout.
+     */
     private function quietly(callable $callback, string $context): void
     {
-        try {
-            $callback();
-        } catch (\Throwable $e) {
-            Log::warning("Notification failed: {$context}", ['error' => $e->getMessage()]);
-        }
+        // always: the order is already saved, so it is owed its email even
+        // when the page that follows answers with an error.
+        defer(function () use ($callback, $context) {
+            try {
+                $callback();
+            } catch (\Throwable $e) {
+                Log::warning("Notification failed: {$context}", ['error' => $e->getMessage()]);
+            }
+        }, always: true);
     }
 }

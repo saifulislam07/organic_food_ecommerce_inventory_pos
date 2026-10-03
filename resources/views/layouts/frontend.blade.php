@@ -103,7 +103,8 @@
                 'count' => route('cart.count'),
                 'mini' => route('cart.mini'),
                 'couponApply' => route('cart.coupon.apply'),
-                'couponRemove' => route('cart.coupon.remove')
+                'couponRemove' => route('cart.coupon.remove'),
+                'checkout' => route('checkout')
             ],
             'locale' => app()->getLocale(),
             'freeDeliveryThreshold' => (float) \App\Models\Setting::get('free_delivery_threshold', 2000),

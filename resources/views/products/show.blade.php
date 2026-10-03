@@ -102,6 +102,7 @@ Please provide delivery info.";
                                 'selectLabel' => $bn ? 'অপশন সিলেক্ট করুন' : 'Select option',
                                 'quantityLabel' => $bn ? 'পরিমান' : 'Quantity',
                                 'addToCart' => $bn ? 'কার্টে যোগ করুন' : 'Add to Cart',
+                                'buyNow' => $bn ? 'এখনই কিনুন' : 'Buy Now',
                                 'outOfStock' => $bn ? 'স্টক শেষ' : 'Out of Stock',
                                 'whatsapp' => $bn ? 'WhatsApp এ অর্ডার' : 'Order via WhatsApp',
                                 'selectOption' => $bn ? 'একটি অপশন সিলেক্ট করুন' : 'Please select an option',

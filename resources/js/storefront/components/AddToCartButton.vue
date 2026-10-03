@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { addToCart } from '../cart';
+import { route } from '../config';
 import PreorderDialog from './PreorderDialog.vue';
 
 const props = defineProps({
@@ -10,6 +11,8 @@ const props = defineProps({
     icon: { type: String, default: 'bi-cart-plus' },
     buttonClass: { type: String, default: 'btn-add-cart' },
     quantity: { type: Number, default: 1 },
+    /** Buy Now: once the line is in, go straight on to checkout. */
+    checkout: { type: Boolean, default: false },
     /** Sold out, but the admin allows it to be taken as a pre-order. */
     preorder: { type: Boolean, default: false },
     preorderNote: { type: String, default: '' },
@@ -21,7 +24,13 @@ const askingTerms = ref(false);
 
 async function send() {
     busy.value = true;
-    await addToCart(props.productId, props.variantId, props.quantity);
+    const added = await addToCart(props.productId, props.variantId, props.quantity);
+
+    if (added && props.checkout && route('checkout')) {
+        window.location.href = route('checkout');
+        return;
+    }
+
     busy.value = false;
     askingTerms.value = false;
 }

@@ -58,14 +58,27 @@
                 <i class="bi bi-eye"></i> {{ app()->getLocale() == 'bn' ? 'বিস্তারিত দেখুন' : 'View Options' }}
             </a>
         @elseif($firstVariant && $product->is_in_stock)
-            <div
-                data-vue="AddToCartButton"
-                data-props="{{ json_encode([
-                    'productId' => $product->id,
-                    'variantId' => $firstVariant->id,
-                    'label' => app()->getLocale() == 'bn' ? 'কার্টে যোগ করুন' : 'Add to Cart',
-                ], JSON_UNESCAPED_UNICODE) }}"
-            ></div>
+            <div class="product-card-actions">
+                <div
+                    data-vue="AddToCartButton"
+                    data-props="{{ json_encode([
+                        'productId' => $product->id,
+                        'variantId' => $firstVariant->id,
+                        'label' => app()->getLocale() == 'bn' ? 'কার্টে যোগ করুন' : 'Add to Cart',
+                    ], JSON_UNESCAPED_UNICODE) }}"
+                ></div>
+                <div
+                    data-vue="AddToCartButton"
+                    data-props="{{ json_encode([
+                        'productId' => $product->id,
+                        'variantId' => $firstVariant->id,
+                        'label' => app()->getLocale() == 'bn' ? 'এখনই কিনুন' : 'Buy Now',
+                        'icon' => 'bi-lightning-charge-fill',
+                        'buttonClass' => 'btn-add-cart btn-buy-now',
+                        'checkout' => true,
+                    ], JSON_UNESCAPED_UNICODE) }}"
+                ></div>
+            </div>
         @elseif($firstVariant && $product->allowsPreorderOf($firstVariant))
             {{-- Same button, but it stops for the terms before adding. --}}
             <div

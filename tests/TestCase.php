@@ -16,5 +16,9 @@ abstract class TestCase extends BaseTestCase
         // in a test run is every test. Start each one with an empty slate.
         Setting::flush();
         SiteBlock::flush();
+
+        // Order emails go out after the response; run them inline so a test
+        // can see what was sent.
+        $this->withoutDefer();
     }
 }

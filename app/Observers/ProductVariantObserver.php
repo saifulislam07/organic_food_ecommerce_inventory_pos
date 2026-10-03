@@ -56,7 +56,8 @@ class ProductVariantObserver
                 continue;
             }
 
-            Notification::send($admins, new PreorderStockArrived($item->order, $item->variant));
+            // Now, not queued: nothing runs a queue worker on the live host.
+            Notification::sendNow($admins, new PreorderStockArrived($item->order, $item->variant));
         }
     }
 
