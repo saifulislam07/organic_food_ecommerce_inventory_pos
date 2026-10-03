@@ -34,7 +34,8 @@
     the customer's details — follow together at the end.
 --}}
 <main class="lp-shell">
-    <form id="lp-order" method="POST" action="{{ route('landing.order', $page->slug) }}" novalidate>
+    <form id="lp-order" method="POST" action="{{ route('landing.order', $page->slug) }}" novalidate
+          @if($takingOrders) data-capture-url="{{ route('landing.capture', $page->slug) }}" @endif>
         @csrf
 
         @foreach(\App\Support\CampaignTracking::FIELDS as $field)

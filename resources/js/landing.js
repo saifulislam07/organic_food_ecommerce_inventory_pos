@@ -8,6 +8,8 @@
  * so nothing below can change what a customer is charged.
  */
 
+import { createLeadCapture } from './shared/leadCapture';
+
 // The page is read in Bengali, so its figures are written in Bengali numerals —
 // the same ones App\Support\Bangla prints on the server.
 const bengali = (value) => String(value).replace(/\d/g, (digit) => '০১২৩৪৫৬৭৮৯'[digit]);
@@ -212,6 +214,26 @@ function bindCheckoutEvent(form) {
     form.addEventListener('input', fire, { once: false });
 }
 
+/* ---------------------------------------------------------- lead capture */
+
+/**
+ * Saves the form while it is filled in, so a visitor who leaves without
+ * ordering can still be called. The whole form posts, as the order would —
+ * the server works out the products and prices from it.
+ */
+function bindLeadCapture(form) {
+    const url = form.dataset.captureUrl;
+
+    if (!url) return null;
+
+    const capture = createLeadCapture(url, () => new FormData(form));
+
+    form.addEventListener('input', () => capture.schedule());
+    form.addEventListener('change', () => capture.schedule());
+
+    return capture;
+}
+
 /* ------------------------------------------------------------------- boot */
 
 function boot() {
@@ -227,8 +249,12 @@ function boot() {
 
     bindCheckoutEvent(form);
 
+    const capture = bindLeadCapture(form);
+
     // Double submits are how one customer becomes two orders.
     form.addEventListener('submit', () => {
+        capture?.cancel();
+
         const button = form.querySelector('button[type="submit"]');
 
         if (button) {

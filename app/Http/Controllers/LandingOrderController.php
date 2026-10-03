@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LandingPage;
 use App\Models\Order;
+use App\Services\IncompleteOrderTracker;
 use App\Services\LandingPageOrder;
 use App\Support\Bangla;
 use App\Support\CampaignTracking;
@@ -61,11 +62,31 @@ class LandingOrderController extends Controller
             return back()->withInput()->withErrors(['order' => $e->getMessage()]);
         }
 
+        app(IncompleteOrderTracker::class)->markConverted($order);
+
         // Same notifications a website order sends — a landing order is not a
         // lesser kind of order.
         app(OrderNotifier::class)->placed($order->fresh('items'));
 
         return redirect()->route('landing.thankyou', [$page->slug, $order->order_number]);
+    }
+
+    /**
+     * Saves the form as it is being filled in, so a visitor who gives up can
+     * still be called. Quiet by design: it never tells the page anything.
+     */
+    public function capture(Request $request, string $slug, IncompleteOrderTracker $tracker)
+    {
+        $page = LandingPage::with(['items.product', 'items.variant'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        // Bots fill the hidden box; their "leads" would only waste calls.
+        if ($page->isRunning() && blank($request->input('website'))) {
+            $tracker->captureLanding($request, $page);
+        }
+
+        return response()->noContent();
     }
 
     public function thankYou(string $slug, string $orderNumber)

@@ -1,6 +1,7 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { money } from '../../shared/format';
+import { createLeadCapture } from '../../shared/leadCapture';
 
 const props = defineProps({
     items: { type: Array, default: () => [] },
@@ -20,6 +21,8 @@ const props = defineProps({
     /** Distinct pre-order terms covering the lines still to come in. */
     preorderNotes: { type: Array, default: () => [] },
     labels: { type: Object, default: () => ({}) },
+    /** Where the half-filled form is saved, so an abandoned checkout can be followed up. */
+    captureUrl: { type: String, default: '' },
 });
 
 const defaultAddress = computed(
@@ -80,6 +83,34 @@ function useNewAddress() {
     saveAddress.value = true;
 }
 
+/*
+ | Save the form as it is filled in. The server re-reads the cart itself, so
+ | only the customer's own details travel from here.
+ */
+const root = ref(null);
+
+if (props.captureUrl) {
+    const capture = createLeadCapture(props.captureUrl, () => ({
+        customer_name: name.value,
+        customer_phone: phone.value,
+        customer_email: email.value,
+        customer_area: area.value,
+        customer_address: address.value,
+        delivery_type: deliveryType.value,
+        pickup_point: pickupPoint.value,
+        notes: notes.value,
+    }));
+
+    watch([name, phone, email, area, address, deliveryType, pickupPoint, notes], () => capture.schedule());
+
+    onMounted(() => {
+        root.value?.closest('form')?.addEventListener('submit', () => capture.cancel());
+
+        // A returning logged-in customer arrives with everything filled in.
+        capture.schedule();
+    });
+}
+
 function label(key, fallback) {
     return props.labels[key] ?? fallback;
 }
@@ -92,7 +123,7 @@ function error(field) {
 </script>
 
 <template>
-    <div class="row g-4">
+    <div ref="root" class="row g-4">
         <div class="col-lg-7">
             <div class="card admin-card p-4">
                 <h4 class="mb-4" style="color: var(--primary-dark);">
@@ -316,6 +347,9 @@ function error(field) {
                 >
                     <i class="bi bi-check-circle"></i> {{ label('placeOrder', 'Place Order') }}
                 </button>
+                <p v-if="captureUrl" class="small text-muted text-center mt-2 mb-0">
+                    {{ label('captureNote', 'We may call you on this number to help complete your order.') }}
+                </p>
             </div>
         </div>
     </div>

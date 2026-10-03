@@ -139,6 +139,7 @@
                     'old' => (object) old(),
                     'errors' => $errors->toArray(),
                     'preorderNotes' => $preorderNotes,
+                    'captureUrl' => route('checkout.capture'),
                     'labels' => [
                         'preorderTitle' => app()->getLocale() == 'bn' ? 'প্রি-অর্ডারের শর্ত' : 'Pre-order conditions',
                         'preorderLead' => app()->getLocale() == 'bn'
@@ -174,6 +175,9 @@
                         'total' => app()->getLocale() == 'bn' ? 'সর্বমোট' : 'Total',
                         'free' => app()->getLocale() == 'bn' ? 'ফ্রি' : 'FREE',
                         'placeOrder' => app()->getLocale() == 'bn' ? 'অর্ডার প্লেস করুন' : 'Place Order',
+                        'captureNote' => app()->getLocale() == 'bn'
+                            ? 'অর্ডার সম্পন্ন করতে সাহায্যের জন্য আমরা এই নম্বরে আপনাকে ফোন করতে পারি।'
+                            : 'We may call you on this number to help complete your order.',
                     ],
                 ], JSON_UNESCAPED_UNICODE) }}"
             ></div>

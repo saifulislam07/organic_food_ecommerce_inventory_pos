@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\ProductVariant;
 use App\Models\Setting;
 use App\Services\CartService;
+use App\Services\IncompleteOrderTracker;
 use App\Services\InventoryService;
 use App\Support\OrderNotifier;
 use Illuminate\Http\Request;
@@ -110,6 +111,8 @@ class CheckoutController extends Controller
 
         $this->cart->clear();
 
+        app(IncompleteOrderTracker::class)->markConverted($order);
+
         app(OrderNotifier::class)->placed($order->fresh('items'));
 
         return redirect()->route('checkout.success', $order->order_number);
@@ -194,6 +197,17 @@ class CheckoutController extends Controller
         }
 
         return $order;
+    }
+
+    /**
+     * Saves the form as it is being filled in, so a customer who gives up can
+     * still be called. Quiet by design: it never tells the page anything.
+     */
+    public function capture(Request $request, IncompleteOrderTracker $tracker)
+    {
+        $tracker->captureCart($request, $this->cart);
+
+        return response()->noContent();
     }
 
     public function success(string $orderNumber)

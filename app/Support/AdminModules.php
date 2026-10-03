@@ -31,6 +31,7 @@ class AdminModules
         'dashboard' => ['Dashboard', [self::VIEW]],
         'pos' => ['POS System', [self::VIEW, self::CREATE]],
         'orders' => ['Orders', [self::VIEW, self::EDIT, self::DELETE]],
+        'incomplete-orders' => ['Incomplete Orders', [self::VIEW, self::EDIT, self::DELETE]],
         'customers' => ['Customers', [self::VIEW, self::EDIT]],
         'reviews' => ['Reviews', [self::VIEW, self::CREATE, self::EDIT, self::DELETE]],
         'contact-messages' => ['Contact Messages', [self::VIEW, self::DELETE]],

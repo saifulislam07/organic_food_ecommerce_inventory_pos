@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdminCourierSettingController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminExpenseController;
 use App\Http\Controllers\Admin\AdminHeroSlideController;
+use App\Http\Controllers\Admin\AdminIncompleteOrderController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminInvestmentController;
 use App\Http\Controllers\Admin\AdminInvestorController;
@@ -73,6 +74,10 @@ Route::prefix('cart')->name('cart.')->group(function () {
 // Checkout Routes
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+// Saves a half-filled checkout so the shop can call; hit on every pause in typing.
+Route::post('/checkout/capture', [CheckoutController::class, 'capture'])
+    ->middleware('throttle:30,1')
+    ->name('checkout.capture');
 Route::get('/order-success/{orderNumber}', [CheckoutController::class, 'success'])->name('checkout.success');
 
 /*
@@ -90,6 +95,10 @@ Route::prefix(config('landing.prefix', 'lp'))->name('landing.')->group(function 
     Route::post('{slug}/order', [LandingOrderController::class, 'store'])
         ->middleware('throttle:'.config('landing.order_rate_limit', 8).',1')
         ->name('order');
+
+    Route::post('{slug}/capture', [LandingOrderController::class, 'capture'])
+        ->middleware('throttle:30,1')
+        ->name('capture');
 
     Route::get('{slug}/thank-you/{orderNumber}', [LandingOrderController::class, 'thankYou'])
         ->name('thankyou');
@@ -128,6 +137,7 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     Route::delete('users/bulk', [AdminUserController::class, 'bulkDestroy'])->name('users.bulkDestroy');
     Route::delete('roles/bulk', [AdminRoleController::class, 'bulkDestroy'])->name('roles.bulkDestroy');
     Route::delete('reviews/bulk', [AdminReviewController::class, 'bulkDestroy'])->name('reviews.bulkDestroy');
+    Route::delete('incomplete-orders/bulk', [AdminIncompleteOrderController::class, 'bulkDestroy'])->name('incomplete-orders.bulkDestroy');
     Route::delete('contact-messages/bulk', [AdminContactMessageController::class, 'bulkDestroy'])->name('contact-messages.bulkDestroy');
     Route::resource('products', AdminProductController::class);
     Route::get('combos', [AdminComboController::class, 'index'])->name('combos.index');
@@ -227,6 +237,9 @@ Route::middleware(['auth', 'is_admin', 'admin_can'])->prefix('admin')->name('adm
     // Submissions from the public Contact Us form.
     Route::post('contact-messages/{contact_message}/read', [AdminContactMessageController::class, 'read'])->name('contact-messages.read');
     Route::resource('contact-messages', AdminContactMessageController::class)->only(['index', 'destroy']);
+
+    Route::post('incomplete-orders/{incomplete_order}/convert', [AdminIncompleteOrderController::class, 'convert'])->name('incomplete-orders.convert');
+    Route::resource('incomplete-orders', AdminIncompleteOrderController::class)->only(['index', 'update', 'destroy']);
 });
 
 Route::middleware('auth')->group(function () {

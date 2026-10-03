@@ -22,3 +22,11 @@ Schedule::command('couriers:sync')
     ->hourly()
     ->withoutOverlapping()
     ->runInBackground();
+
+/*
+ | Drop abandoned-checkout leads nobody followed up on after 90 days
+ | (IncompleteOrder::KEEP_DAYS). Converted ones are kept as the record of a
+ | sale the call saved.
+ */
+Schedule::command('model:prune', ['--model' => [\App\Models\IncompleteOrder::class]])
+    ->daily();

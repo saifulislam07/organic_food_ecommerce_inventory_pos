@@ -165,6 +165,7 @@
                     'items' => [
                         ['route' => 'admin.pos.index', 'active' => 'admin.pos.*', 'label' => 'POS System', 'can' => 'pos.view'],
                         ['route' => 'admin.orders.index', 'active' => 'admin.orders.*', 'label' => 'Orders', 'can' => 'orders.view'],
+                        ['route' => 'admin.incomplete-orders.index', 'active' => 'admin.incomplete-orders.*', 'label' => 'Incomplete Orders', 'can' => 'incomplete-orders.view'],
                         ['route' => 'admin.customers.index', 'active' => 'admin.customers.*', 'label' => 'Customers', 'can' => 'customers.view'],
                         ['route' => 'admin.coupons.index', 'active' => 'admin.coupons.*', 'label' => 'Coupons', 'can' => 'coupons.view'],
                         ['route' => 'admin.reviews.index', 'active' => 'admin.reviews.*', 'label' => 'Reviews', 'can' => 'reviews.view'],
