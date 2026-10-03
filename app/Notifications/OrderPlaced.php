@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Order;
+use App\Support\InvoicePdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -24,13 +25,11 @@ class OrderPlaced extends Notification implements ShouldQueue
     {
         $this->order->loadMissing('items');
 
-        $invoiceHtml = view('emails.orders.invoice', ['order' => $this->order])->render();
-
         return (new MailMessage)
             ->subject("Order {$this->order->order_number} received")
             ->markdown('emails.orders.placed', ['order' => $this->order])
-            ->attachData($invoiceHtml, "invoice-{$this->order->order_number}.html", [
-                'mime' => 'text/html',
+            ->attachData(InvoicePdf::render($this->order), "invoice-{$this->order->order_number}.pdf", [
+                'mime' => 'application/pdf',
             ]);
     }
 

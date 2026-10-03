@@ -113,6 +113,28 @@ class OrderNotificationTest extends TestCase
         Notification::assertSentTo(new AnonymousNotifiable, OrderPlaced::class);
     }
 
+    public function test_the_receipt_carries_the_invoice_as_a_pdf(): void
+    {
+        $order = $this->order();
+        $order->items()->create([
+            'product_id' => $this->catalog()->product_id,
+            'product_name' => 'হিমসাগর আম',
+            'variant_name' => '3 কেজি',
+            'unit_price' => 1200,
+            'quantity' => 1,
+            'total' => 1200,
+        ]);
+
+        $mail = (new OrderPlaced($order))->toMail(new AnonymousNotifiable);
+
+        $this->assertCount(1, $mail->rawAttachments);
+        $attachment = $mail->rawAttachments[0];
+
+        $this->assertSame("invoice-{$order->order_number}.pdf", $attachment['name']);
+        $this->assertSame('application/pdf', $attachment['options']['mime']);
+        $this->assertStringStartsWith('%PDF-', $attachment['data']);
+    }
+
     public function test_the_admin_alert_uses_the_database_channel_so_it_works_with_nothing_configured(): void
     {
         $admin = User::factory()->superAdmin()->create();
