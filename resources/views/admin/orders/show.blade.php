@@ -74,6 +74,15 @@
                    class="btn btn-outline-success btn-sm">
                     <i class="bi bi-whatsapp"></i> WhatsApp
                 </a>
+                @can('orders.delete')
+                <form action="{{ route('admin.orders.destroy', $order) }}" method="POST"
+                      data-confirm="Delete order {{ $order->order_number }}? This cannot be undone.">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </form>
+                @endcan
             </div>
         </div>
 

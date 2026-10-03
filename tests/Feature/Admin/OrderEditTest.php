@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Category;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -411,5 +412,76 @@ class OrderEditTest extends TestCase
             ->getJson(route('admin.orders.products', ['q' => 'H']))
             ->assertOk()
             ->assertExactJson([]);
+    }
+
+    /* ------------------------------------------------------------- delete */
+
+    public function test_deleting_an_order_puts_its_stock_back(): void
+    {
+        $order = $this->order();
+        $this->assertSame(45, $this->mango->fresh()->stock);
+
+        $this->actingAs($this->admin())
+            ->delete(route('admin.orders.destroy', $order))
+            ->assertRedirect(route('admin.orders.index'));
+
+        $this->assertDatabaseMissing('orders', ['id' => $order->id]);
+        $this->assertDatabaseMissing('order_items', ['order_id' => $order->id]);
+        $this->assertSame(50, $this->mango->fresh()->stock);
+    }
+
+    public function test_a_delivered_order_keeps_its_stock_out(): void
+    {
+        $order = $this->order(['status' => 'delivered']);
+
+        $this->actingAs($this->admin())->delete(route('admin.orders.destroy', $order));
+
+        $this->assertDatabaseMissing('orders', ['id' => $order->id]);
+        $this->assertSame(45, $this->mango->fresh()->stock);
+    }
+
+    public function test_a_pre_ordered_line_gives_back_nothing_it_never_took(): void
+    {
+        $order = $this->order();
+        $order->items()->update(['is_preorder' => true]);
+        $this->mango->increment('stock', 5);
+
+        $this->actingAs($this->admin())->delete(route('admin.orders.destroy', $order));
+
+        $this->assertSame(50, $this->mango->fresh()->stock);
+    }
+
+    public function test_deleting_an_order_returns_its_coupon_use(): void
+    {
+        $coupon = Coupon::create(['code' => 'EID10', 'type' => 'percent', 'value' => 10, 'used_count' => 3]);
+        $order = $this->order(['coupon_id' => $coupon->id, 'coupon_code' => 'EID10']);
+
+        $this->actingAs($this->admin())->delete(route('admin.orders.destroy', $order));
+
+        $this->assertSame(2, $coupon->fresh()->used_count);
+    }
+
+    public function test_deleting_an_order_needs_the_delete_permission(): void
+    {
+        $this->seed(PermissionSeeder::class);
+        $order = $this->order();
+
+        $staff = User::factory()->admin()->create();
+        $staff->syncPermissions(['orders.view', 'orders.edit']);
+
+        $this->actingAs($staff->fresh())
+            ->delete(route('admin.orders.destroy', $order))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('orders', ['id' => $order->id]);
+        $this->assertSame(45, $this->mango->fresh()->stock);
+
+        $staff->givePermissionTo('orders.delete');
+
+        $this->actingAs($staff->fresh())
+            ->delete(route('admin.orders.destroy', $order))
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('orders', ['id' => $order->id]);
     }
 }

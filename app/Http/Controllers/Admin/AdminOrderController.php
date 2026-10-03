@@ -198,6 +198,39 @@ class AdminOrderController extends Controller
             ->with('success', 'Order '.$order->order_number.' updated.');
     }
 
+    /**
+     * Remove an order for good — a test order, a duplicate, a prank.
+     *
+     * What it was holding goes back on the shelf, or the stock count would be
+     * short by an order that no longer exists. Two exceptions: a delivered
+     * order's goods really did leave, and a pre-ordered line never took any
+     * stock in the first place. A coupon it used gets its use back too.
+     */
+    public function destroy(Order $order)
+    {
+        DB::transaction(function () use ($order) {
+            $inventory = app(InventoryService::class);
+
+            if ($order->status !== 'delivered') {
+                $order->load('items.variant.comboItems.component');
+
+                foreach ($order->items as $item) {
+                    if (! $item->is_preorder && $item->variant) {
+                        $inventory->restore($item->variant, (int) $item->quantity);
+                    }
+                }
+            }
+
+            $order->coupon()->where('used_count', '>', 0)->decrement('used_count');
+
+            $order->delete();
+        });
+
+        return redirect()
+            ->route('admin.orders.index')
+            ->with('success', 'Order '.$order->order_number.' deleted.');
+    }
+
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate(['status' => ['required', Rule::in(array_keys(Order::STATUSES))]]);

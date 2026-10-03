@@ -173,6 +173,13 @@
                             <i class="bi bi-pencil"></i>
                         </a>
                         @endcan
+                        @can('orders.delete')
+                        <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" class="d-inline"
+                              data-confirm="Delete order {{ $order->order_number }}? This cannot be undone.">
+                            @csrf @method('DELETE')
+                            <button class="btn btn-sm btn-outline-danger" title="Delete this order"><i class="bi bi-trash"></i></button>
+                        </form>
+                        @endcan
                     </td>
                 </tr>
                 @empty
