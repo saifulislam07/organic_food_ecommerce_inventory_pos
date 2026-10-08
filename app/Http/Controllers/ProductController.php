@@ -22,6 +22,14 @@ class ProductController extends Controller
             ->take(4)
             ->get();
 
-        return view('products.show', compact('product', 'related'));
+        // Approved only, the same as the home page. The page shows these and
+        // the schema marks up exactly these, so Google never reads a rating a
+        // visitor cannot see.
+        $approved = $product->reviews()->approved();
+        $reviewCount = (clone $approved)->count();
+        $reviewAverage = $reviewCount ? round((float) (clone $approved)->avg('rating'), 1) : null;
+        $reviews = $approved->latest()->take(10)->get();
+
+        return view('products.show', compact('product', 'related', 'reviews', 'reviewCount', 'reviewAverage'));
     }
 }

@@ -1139,6 +1139,16 @@ body {
 .product-prose img { border-radius: var(--radius-sm); }
 .product-prose table { width: 100%; }
 
+/* Reviews on the product page. Shown in full, not clamped like the home
+   carousel: Google reads the markup against what is visible here. */
+.product-review-summary { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.product-review-summary .pc-review-stars { margin-bottom: 2px; }
+.product-review-average { font-size: 2.2rem; font-weight: 800; line-height: 1; color: var(--dark); }
+.product-review-count { font-size: 0.85rem; color: var(--gray-500); }
+.product-review-list { list-style: none; margin: 0; padding: 0; max-width: 72ch; }
+.product-review { padding: 18px 0; border-top: 1px solid var(--gray-200); }
+.product-review-body { color: #555; font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; white-space: pre-line; }
+
 /* A quieter heading than the home page's centred banners — this is a footnote
    to the product above it, not a section of its own. */
 .product-related { margin-top: 64px; }

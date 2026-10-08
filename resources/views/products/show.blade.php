@@ -7,7 +7,7 @@
 @section('og_image', $product->og_image_url)
 
 @section('content')
-@include('partials.schema-product', ['product' => $product])
+@include('partials.schema-product', compact('product', 'reviews', 'reviewCount', 'reviewAverage'))
 @php
     $bn = app()->getLocale() == 'bn';
     $stock = $product->variants->sum(fn ($v) => $v->available_stock);
@@ -149,6 +149,44 @@ Please provide delivery info.";
             <div class="product-panel">
                 <h2 class="product-panel-title">{{ $bn ? 'পণ্যের বিবরণ' : 'Product Description' }}</h2>
                 <div class="product-prose">{!! \App\Support\RichText::display($product->description) !!}</div>
+            </div>
+        @endif
+
+        {{-- Approved reviews only (Admin > Reviews). The schema marks up these
+             same reviews, so this section must stay visible whenever it has any. --}}
+        @if($reviewCount)
+            <div class="product-panel" id="reviews">
+                <h2 class="product-panel-title">{{ $bn ? 'কাস্টমার রিভিউ' : 'Customer Reviews' }}</h2>
+
+                <div class="product-review-summary">
+                    <span class="product-review-average">{{ number_format($reviewAverage, 1) }}</span>
+                    <div>
+                        <div class="pc-review-stars" aria-hidden="true">{{ str_repeat('★', (int) round($reviewAverage)).str_repeat('☆', 5 - (int) round($reviewAverage)) }}</div>
+                        <div class="product-review-count">
+                            {{ $bn ? $reviewCount.'টি রিভিউ' : $reviewCount.' '.\Illuminate\Support\Str::plural('review', $reviewCount) }}
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="product-review-list">
+                    @foreach($reviews as $review)
+                        <li class="product-review">
+                            <div class="pc-review-stars" aria-label="{{ $review->rating }}/5">{{ $review->stars }}</div>
+                            @if($review->title)<div class="pc-review-title">{{ $review->title }}</div>@endif
+                            @if($review->body)<p class="product-review-body">{{ $review->body }}</p>@endif
+                            <div class="pc-review-meta">
+                                <div class="pc-review-avatar">{{ mb_substr($review->customer_name, 0, 1) }}</div>
+                                <div>
+                                    <div class="pc-review-name">
+                                        {{ $review->customer_name }}
+                                        @if($review->order_id)<i class="bi bi-patch-check-fill pc-review-verified" title="{{ $bn ? 'যাচাইকৃত ক্রয়' : 'Verified purchase' }}"></i>@endif
+                                    </div>
+                                    <div class="pc-review-product">{{ $review->created_at->format('d M Y') }}</div>
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
